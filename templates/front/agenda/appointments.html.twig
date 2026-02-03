@@ -1,0 +1,666 @@
+{# BioSync Agenda Module - Appointments
+# Front Office - Appointment Management
+#}
+
+{% extends 'front/base.html.twig' %}
+
+{% block title %}Rendez-vous - BioSync{% endblock %}
+
+{% block content %}
+<div class="container py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 font-heading mb-2">
+                    Mes Rendez-vous
+                </h1>
+                <p class="text-gray-600">
+                    Gérez vos consultations et suivis avec nos professionnels
+                </p>
+            </div>
+            <div class="mt-4 md:mt-0 flex gap-3">
+                {% include 'components/_button.html.twig' with {
+                    'text': 'Prendre RDV',
+                    'variant': 'primary',
+                    'icon': 'fas fa-plus',
+                    'onclick': 'openModal_bookingModal()'
+                } %}
+                {% include 'components/_button.html.twig' with {
+                    'text': 'Calendrier',
+                    'variant': 'outline',
+                    'icon': 'fas fa-calendar'
+                } %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Upcoming Appointments -->
+    {% include 'components/_card.html.twig' with {
+        'title': 'Rendez-vous à Venir',
+        'subtitle': 'Prochains rendez-vous programmés'
+    } %}
+    {% block card_body %}
+        <div class="space-y-4">
+            <!-- Today's Appointment -->
+            <div class="border-l-4 border-blue-500 bg-blue-50 rounded-lg p-4">
+                <div class="flex items-start justify-between">
+                    <div class="flex items-start">
+                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-user-md text-blue-500"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-lg">Dr. Marie Laurent</h4>
+                            <p class="text-gray-600">Nutritionniste - Consultation de suivi</p>
+                            <div class="flex items-center gap-4 mt-2 text-sm text-gray-500">
+                                <span><i class="fas fa-calendar mr-1"></i> Aujourd'hui</span>
+                                <span><i class="fas fa-clock mr-1"></i> 14:30 - 15:30</span>
+                                <span><i class="fas fa-video mr-1"></i> Visioconférence</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="badge badge-info">Aujourd'hui</span>
+                        <button class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="mt-4 flex gap-2">
+                    {% include 'components/_button.html.twig' with {
+                        'text': 'Rejoindre la visio',
+                        'variant': 'primary',
+                        'size': 'sm',
+                        'icon': 'fas fa-video'
+                    } %}
+                    {% include 'components/_button.html.twig' with {
+                        'text': 'Reporter',
+                        'variant': 'outline',
+                        'size': 'sm',
+                        'icon': 'fas fa-calendar-alt'
+                    } %}
+                    {% include 'components/_button.html.twig' with {
+                        'text': 'Annuler',
+                        'variant': 'soft',
+                        'size': 'sm',
+                        'icon': 'fas fa-times'
+                    } %}
+                </div>
+            </div>
+            
+            <!-- Tomorrow's Appointment -->
+            <div class="border-l-4 border-green-500 bg-green-50 rounded-lg p-4">
+                <div class="flex items-start justify-between">
+                    <div class="flex items-start">
+                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-dumbbell text-green-500"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-lg">Thomas Bernard</h4>
+                            <p class="text-gray-600">Coach sportif - Évaluation physique</p>
+                            <div class="flex items-center gap-4 mt-2 text-sm text-gray-500">
+                                <span><i class="fas fa-calendar mr-1"></i> Demain</span>
+                                <span><i class="fas fa-clock mr-1"></i> 10:00 - 11:00</span>
+                                <span><i class="fas fa-map-marker-alt mr-1"></i> Cabinet</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="badge badge-success">Confirmé</span>
+                        <button class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="mt-4 flex gap-2">
+                    {% include 'components/_button.html.twig' with {
+                        'text': 'Voir les détails',
+                        'variant': 'outline',
+                        'size': 'sm',
+                        'icon': 'fas fa-info-circle'
+                    } %}
+                    {% include 'components/_button.html.twig' with {
+                        'text': 'Reporter',
+                        'variant': 'outline',
+                        'size': 'sm',
+                        'icon': 'fas fa-calendar-alt'
+                    } %}
+                    {% include 'components/_button.html.twig' with {
+                        'text': 'Annuler',
+                        'variant': 'soft',
+                        'size': 'sm',
+                        'icon': 'fas fa-times'
+                    } %}
+                </div>
+            </div>
+            
+            <!-- Next Week -->
+            <div class="border-l-4 border-purple-500 bg-purple-50 rounded-lg p-4">
+                <div class="flex items-start justify-between">
+                    <div class="flex items-start">
+                        <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-brain text-purple-500"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-lg">Dr. Sophie Martin</h4>
+                            <p class="text-gray-600">Psychologue - Thérapie comportementale</p>
+                            <div class="flex items-center gap-4 mt-2 text-sm text-gray-500">
+                                <span><i class="fas fa-calendar mr-1"></i> Lundi 15 Janvier</span>
+                                <span><i class="fas fa-clock mr-1"></i> 16:00 - 17:00</span>
+                                <span><i class="fas fa-video mr-1"></i> Visioconférence</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="badge badge-warning">En attente</span>
+                        <button class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="mt-4 flex gap-2">
+                    {% include 'components/_button.html.twig' with {
+                        'text': 'Confirmer',
+                        'variant': 'primary',
+                        'size': 'sm',
+                        'icon': 'fas fa-check'
+                    } %}
+                    {% include 'components/_button.html.twig' with {
+                        'text': 'Modifier',
+                        'variant': 'outline',
+                        'size': 'sm',
+                        'icon': 'fas fa-edit'
+                    } %}
+                    {% include 'components/_button.html.twig' with {
+                        'text': 'Annuler',
+                        'variant': 'soft',
+                        'size': 'sm',
+                        'icon': 'fas fa-times'
+                    } %}
+                </div>
+            </div>
+        </div>
+    {% endblock %}
+    {% endinclude %}
+
+    <!-- Calendar View -->
+    {% include 'components/_card.html.twig' with {
+        'title': 'Calendrier',
+        'subtitle': 'Vue mensuelle de vos rendez-vous'
+    } %}
+    {% block card_body %}
+        <div class="calendar-view">
+            <!-- Calendar Navigation -->
+            <div class="flex items-center justify-between mb-4">
+                <button class="btn btn-soft btn-sm" onclick="previousMonth()">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <h3 class="text-lg font-semibold">Janvier 2024</h3>
+                <button class="btn btn-soft btn-sm" onclick="nextMonth()">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+            
+            <!-- Calendar Grid -->
+            <div class="grid grid-cols-7 gap-1 text-center">
+                <!-- Days of week -->
+                <div class="text-xs font-medium text-gray-500 py-2">Lun</div>
+                <div class="text-xs font-medium text-gray-500 py-2">Mar</div>
+                <div class="text-xs font-medium text-gray-500 py-2">Mer</div>
+                <div class="text-xs font-medium text-gray-500 py-2">Jeu</div>
+                <div class="text-xs font-medium text-gray-500 py-2">Ven</div>
+                <div class="text-xs font-medium text-gray-500 py-2">Sam</div>
+                <div class="text-xs font-medium text-gray-500 py-2">Dim</div>
+                
+                <!-- Calendar days (simplified) -->
+                {% for day in 1..31 %}
+                    <div class="border border-gray-200 rounded p-2 min-h-[60px] cursor-pointer hover:bg-gray-50
+                         {% if day == 10 %}bg-blue-50 border-blue-300{% endif %}
+                         {% if day == 11 %}bg-green-50 border-green-300{% endif %}
+                         {% if day == 15 %}bg-purple-50 border-purple-300{% endif %}">
+                        <div class="text-sm font-medium">{{ day }}</div>
+                        {% if day == 10 %}
+                            <div class="text-xs text-blue-600 mt-1">
+                                <i class="fas fa-circle text-xs"></i> Dr. Laurent
+                            </div>
+                        {% endif %}
+                        {% if day == 11 %}
+                            <div class="text-xs text-green-600 mt-1">
+                                <i class="fas fa-circle text-xs"></i> T. Bernard
+                            </div>
+                        {% endif %}
+                        {% if day == 15 %}
+                            <div class="text-xs text-purple-600 mt-1">
+                                <i class="fas fa-circle text-xs"></i> Dr. Martin
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endblock %}
+    {% endinclude %}
+
+    <!-- Past Appointments -->
+    {% include 'components/_card.html.twig' with {
+        'title': 'Rendez-vous Passés',
+        'subtitle': 'Historique de vos consultations'
+    } %}
+    {% block card_body %}
+        <div class="space-y-4">
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-user-md text-gray-500"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-medium">Dr. Marie Laurent</h4>
+                        <p class="text-sm text-gray-600">Nutritionniste - Premier bilan</p>
+                        <div class="text-xs text-gray-500 mt-1">
+                            28 Décembre 2023 • 14:30 - 15:30
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="badge badge-success">Terminé</span>
+                    {% include 'components/_button.html.twig' with {
+                        'text': 'Voir compte-rendu',
+                        'variant': 'outline',
+                        'size': 'sm',
+                        'icon': 'fas fa-file-medical'
+                    } %}
+                </div>
+            </div>
+            
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-dumbbell text-gray-500"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-medium">Thomas Bernard</h4>
+                        <p class="text-sm text-gray-600">Coach sportif - Programme personnalisé</p>
+                        <div class="text-xs text-gray-500 mt-1">
+                            20 Décembre 2023 • 10:00 - 11:00
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="badge badge-success">Terminé</span>
+                    {% include 'components/_button.html.twig' with {
+                        'text': 'Voir compte-rendu',
+                        'variant': 'outline',
+                        'size': 'sm',
+                        'icon': 'fas fa-file-medical'
+                    } %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-4 text-center">
+            {% include 'components/_button.html.twig' with {
+                'text': 'Voir tout l\'historique',
+                'variant': 'outline',
+                'icon': 'fas fa-history'
+            } %}
+        </div>
+    {% endblock %}
+    {% endinclude %}
+
+    <!-- Statistics -->
+    {% include 'components/_card.html.twig' with {
+        'title': 'Statistiques',
+        'subtitle': 'Vos rendez-vous ce mois'
+    } %}
+    {% block card_body %}
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="text-center">
+                <div class="text-2xl font-bold text-blue-600">4</div>
+                <div class="text-sm text-gray-600">Total RDV</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-green-600">2</div>
+                <div class="text-sm text-gray-600">Terminés</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-purple-600">1</div>
+                <div class="text-sm text-gray-600">À venir</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-yellow-600">1</div>
+                <div class="text-sm text-gray-600">En attente</div>
+            </div>
+        </div>
+    {% endblock %}
+    {% endinclude %}
+</div>
+
+<!-- Booking Modal -->
+{% include 'components/_modal.html.twig' with {
+    'id': 'bookingModal',
+    'title': 'Prendre un Rendez-vous',
+    'size': 'lg'
+} %}
+{% block modal_content %}
+    <div class="space-y-6">
+        <!-- Step 1: Choose Professional -->
+        <div id="step1">
+            <h4 class="font-semibold mb-3">1. Choisissez un professionnel</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <label class="border border-gray-200 rounded-lg p-3 cursor-pointer hover:bg-gray-50">
+                    <input type="radio" name="professional" value="nutritionist" class="mr-3">
+                    <div>
+                        <div class="font-medium">Nutritionniste</div>
+                        <div class="text-sm text-gray-600">Dr. Marie Laurent</div>
+                    </div>
+                </label>
+                
+                <label class="border border-gray-200 rounded-lg p-3 cursor-pointer hover:bg-gray-50">
+                    <input type="radio" name="professional" value="coach" class="mr-3">
+                    <div>
+                        <div class="font-medium">Coach sportif</div>
+                        <div class="text-sm text-gray-600">Thomas Bernard</div>
+                    </div>
+                </label>
+                
+                <label class="border border-gray-200 rounded-lg p-3 cursor-pointer hover:bg-gray-50">
+                    <input type="radio" name="professional" value="psychologist" class="mr-3">
+                    <div>
+                        <div class="font-medium">Psychologue</div>
+                        <div class="text-sm text-gray-600">Dr. Sophie Martin</div>
+                    </div>
+                </label>
+                
+                <label class="border border-gray-200 rounded-lg p-3 cursor-pointer hover:bg-gray-50">
+                    <input type="radio" name="professional" value="osteopath" class="mr-3">
+                    <div>
+                        <div class="font-medium">Ostéopathe</div>
+                        <div class="text-sm text-gray-600">Dr. Pierre Dubois</div>
+                    </div>
+                </label>
+            </div>
+        </div>
+        
+        <!-- Step 2: Choose Date -->
+        <div id="step2">
+            <h4 class="font-semibold mb-3">2. Choisissez une date</h4>
+            <div class="grid grid-cols-7 gap-2">
+                <!-- Next 7 days -->
+                {% for i in 0..6 %}
+                    <label class="border border-gray-200 rounded-lg p-2 text-center cursor-pointer hover:bg-gray-50">
+                        <input type="radio" name="date" value="{{ "now"|date_modify("+"~i~" days")|date("Y-m-d") }}" class="sr-only">
+                        <div class="text-xs text-gray-500">
+                            {{ "now"|date_modify("+"~i~" days")|date("D") }}
+                        </div>
+                        <div class="font-medium">
+                            {{ "now"|date_modify("+"~i~" days")|date("d") }}
+                        </div>
+                    </label>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Step 3: Choose Time -->
+        <div id="step3">
+            <h4 class="font-semibold mb-3">3. Choisissez un créneau horaire</h4>
+            <div class="grid grid-cols-4 gap-2">
+                {% for time in ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00", "18:00"] %}
+                    <label class="border border-gray-200 rounded-lg p-2 text-center cursor-pointer hover:bg-gray-50">
+                        <input type="radio" name="time" value="{{ time }}" class="sr-only">
+                        <div class="text-sm">{{ time }}</div>
+                    </label>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Step 4: Consultation Type -->
+        <div id="step4">
+            <h4 class="font-semibold mb-3">4. Type de consultation</h4>
+            <div class="grid grid-cols-2 gap-3">
+                <label class="border border-gray-200 rounded-lg p-3 cursor-pointer hover:bg-gray-50">
+                    <input type="radio" name="type" value="video" class="mr-3">
+                    <div class="flex items-center">
+                        <i class="fas fa-video text-blue-500 mr-2"></i>
+                        <div>
+                            <div class="font-medium">Visioconférence</div>
+                            <div class="text-sm text-gray-600">En ligne</div>
+                        </div>
+                    </div>
+                </label>
+                
+                <label class="border border-gray-200 rounded-lg p-3 cursor-pointer hover:bg-gray-50">
+                    <input type="radio" name="type" value="cabinet" class="mr-3">
+                    <div class="flex items-center">
+                        <i class="fas fa-map-marker-alt text-green-500 mr-2"></i>
+                        <div>
+                            <div class="font-medium">Au cabinet</div>
+                            <div class="text-sm text-gray-600">Présentiel</div>
+                        </div>
+                    </div>
+                </label>
+            </div>
+        </div>
+        
+        <!-- Step 5: Notes -->
+        <div id="step5">
+            <h4 class="font-semibold mb-3">5. Notes (optionnel)</h4>
+            <textarea class="form-input" rows="3" placeholder="Précisez le motif de votre consultation, vos attentes..."></textarea>
+        </div>
+    </div>
+{% endblock %}
+
+{% block modal_footer %}
+    <div class="flex justify-between">
+        {% include 'components/_button.html.twig' with {
+            'text': 'Annuler',
+            'variant': 'outline',
+            'onclick': 'closeModal_bookingModal()'
+        } %}
+        {% include 'components/_button.html.twig' with {
+            'text': 'Confirmer le RDV',
+            'variant': 'primary',
+            'icon': 'fas fa-check',
+            'onclick': 'confirmBooking()'
+        } %}
+    </div>
+{% endblock %}
+{% endmodal_content %}
+{% endinclude %}
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize calendar interactions
+    initializeCalendar();
+    
+    // Initialize appointment actions
+    initializeAppointmentActions();
+    
+    // Initialize booking modal
+    initializeBookingModal();
+});
+
+function initializeCalendar() {
+    // Calendar navigation
+    window.previousMonth = function() {
+        console.log('Previous month');
+        // This would load previous month data
+    };
+    
+    window.nextMonth = function() {
+        console.log('Next month');
+        // This would load next month data
+    };
+    
+    // Day click handlers
+    document.querySelectorAll('.calendar-view .cursor-pointer').forEach(day => {
+        day.addEventListener('click', function() {
+            const dayNumber = this.querySelector('.font-medium').textContent;
+            console.log('Clicked day:', dayNumber);
+            // This would show appointments for that day
+        });
+    });
+}
+
+function initializeAppointmentActions() {
+    // Appointment menu actions
+    document.querySelectorAll('.fa-ellipsis-v').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.stopPropagation();
+            showAppointmentContextMenu(this);
+        });
+    });
+    
+    // Join video call
+    document.querySelectorAll('.btn-primary').forEach(button => {
+        if (button.textContent.includes('Rejoindre')) {
+            button.addEventListener('click', function() {
+                showAlert('Redirection vers la visioconférence...', 'info');
+                setTimeout(() => {
+                    window.open('https://zoom.us/join', '_blank');
+                }, 1000);
+            });
+        }
+    });
+}
+
+function showAppointmentContextMenu(button) {
+    const menu = document.createElement('div');
+    menu.className = 'absolute bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-50';
+    menu.innerHTML = `
+        <button class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
+            <i class="fas fa-edit mr-2"></i> Modifier
+        </button>
+        <button class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
+            <i class="fas fa-calendar-alt mr-2"></i> Reporter
+        </button>
+        <button class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
+            <i class="fas fa-bell mr-2"></i> Rappel
+        </button>
+        <button class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+            <i class="fas fa-times mr-2"></i> Annuler
+        </button>
+    `;
+    
+    const rect = button.getBoundingClientRect();
+    menu.style.top = rect.bottom + 'px';
+    menu.style.left = rect.left + 'px';
+    
+    document.body.appendChild(menu);
+    
+    setTimeout(() => {
+        document.addEventListener('click', function closeMenu() {
+            menu.remove();
+            document.removeEventListener('click', closeMenu);
+        });
+    }, 100);
+}
+
+function initializeBookingModal() {
+    // Step navigation
+    const steps = ['step1', 'step2', 'step3', 'step4', 'step5'];
+    let currentStep = 0;
+    
+    // Auto-advance steps when selections are made
+    document.querySelectorAll('input[name="professional"]').forEach(input => {
+        input.addEventListener('change', function() {
+            if (this.checked) {
+                setTimeout(() => showStep(1), 300);
+            }
+        });
+    });
+    
+    document.querySelectorAll('input[name="date"]').forEach(input => {
+        input.addEventListener('change', function() {
+            if (this.checked) {
+                setTimeout(() => showStep(2), 300);
+            }
+        });
+    });
+    
+    document.querySelectorAll('input[name="time"]').forEach(input => {
+        input.addEventListener('change', function() {
+            if (this.checked) {
+                setTimeout(() => showStep(3), 300);
+            }
+        });
+    });
+    
+    document.querySelectorAll('input[name="type"]').forEach(input => {
+        input.addEventListener('change', function() {
+            if (this.checked) {
+                setTimeout(() => showStep(4), 300);
+            }
+        });
+    });
+    
+    function showStep(stepIndex) {
+        steps.forEach((step, index) => {
+            const element = document.getElementById(step);
+            if (index <= stepIndex) {
+                element.style.display = 'block';
+            } else {
+                element.style.display = 'none';
+            }
+        });
+        currentStep = stepIndex;
+    }
+}
+
+function confirmBooking() {
+    // Collect form data
+    const professional = document.querySelector('input[name="professional"]:checked')?.value;
+    const date = document.querySelector('input[name="date"]:checked')?.value;
+    const time = document.querySelector('input[name="time"]:checked')?.value;
+    const type = document.querySelector('input[name="type"]:checked')?.value;
+    
+    if (!professional || !date || !time || !type) {
+        showAlert('Veuillez remplir toutes les étapes', 'error');
+        return;
+    }
+    
+    // Simulate booking
+    showAlert('Recherche des créneaux disponibles...', 'info');
+    
+    setTimeout(() => {
+        showAlert('Rendez-vous confirmé !', 'success');
+        closeModal_bookingModal();
+        
+        // This would refresh the appointments list
+        setTimeout(() => {
+            location.reload();
+        }, 2000);
+    }, 1500);
+}
+
+// Reminder notifications
+function checkUpcomingAppointments() {
+    const now = new Date();
+    const upcomingAppointments = [
+        {
+            time: '14:30',
+            date: now.toDateString(),
+            title: 'Dr. Marie Laurent - Nutritionniste'
+        }
+    ];
+    
+    upcomingAppointments.forEach(appointment => {
+        const appointmentTime = new Date(`${appointment.date} ${appointment.time}`);
+        const timeDiff = appointmentTime - now;
+        
+        // Show reminder 15 minutes before
+        if (timeDiff > 0 && timeDiff <= 15 * 60 * 1000) {
+            showAlert(`Rappel: RDV avec ${appointment.title} dans 15 minutes!`, 'info');
+        }
+    });
+}
+
+// Check for reminders every minute
+setInterval(checkUpcomingAppointments, 60000);
+</script>
+{% endblock %}

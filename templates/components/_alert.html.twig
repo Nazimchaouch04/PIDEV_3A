@@ -1,0 +1,8 @@
+<div class="alert alert-{{ type|default('info') }}{% if dismissible|default(false) %} alert-dismissible{% endif %}" role="alert">
+    {{ message|default('') }}
+    {% if dismissible|default(false) %}
+        <button type="button" class="btn-close" onclick="this.parentElement.remove()" aria-label="Close">
+            <i class="fas fa-times"></i>
+        </button>
+    {% endif %}
+</div>

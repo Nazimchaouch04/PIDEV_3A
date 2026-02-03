@@ -1,0 +1,746 @@
+{% extends 'front/base.html.twig' %}
+
+{% block title %}BioSync - Votre plateforme de bien-être holistique{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+/* Typography */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+    color: #1a202c;
+}
+
+.font-heading {
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 700;
+}
+
+/* Icon styling */
+.icon-large {
+    font-size: 2.5rem;
+}
+
+.icon-medium {
+    font-size: 1.5rem;
+}
+
+.icon-small {
+    font-size: 1rem;
+}
+
+/* Custom animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+}
+
+.animate-fade-in {
+    animation: fadeInUp 0.8s ease-out;
+}
+
+.animate-float {
+    animation: float 6s ease-in-out infinite;
+}
+
+/* Hero section gradient */
+.hero-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-pattern {
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Card hover effects */
+.feature-card {
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    border-color: #667eea;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+
+/* Stats counter */
+.stat-counter {
+    transition: all 0.5s ease;
+}
+
+/* Testimonial cards */
+.testimonial-card {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+/* CTA section */
+.cta-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* Improved typography */
+.hero-title {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+}
+
+.hero-subtitle {
+    font-size: clamp(1.125rem, 2.5vw, 1.5rem);
+    font-weight: 400;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    opacity: 0.95;
+}
+
+.section-title {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+    letter-spacing: -0.01em;
+}
+
+.section-subtitle {
+    font-size: clamp(1.125rem, 2vw, 1.25rem);
+    font-weight: 400;
+    line-height: 1.6;
+    margin-bottom: 3rem;
+    color: #4a5568;
+}
+
+.feature-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.3;
+    margin-bottom: 1rem;
+}
+
+.feature-description {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #4a5568;
+    margin-bottom: 1.5rem;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #4a5568;
+}
+
+/* Better spacing */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* Improved button styling */
+.btn {
+    font-weight: 600;
+    letter-spacing: 0.025em;
+    transition: all 0.2s ease;
+}
+
+/* Better card spacing */
+.feature-card {
+    padding: 2.5rem;
+}
+
+/* Improved testimonial cards */
+.testimonial-card {
+    padding: 2rem;
+}
+
+.testimonial-author {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.testimonial-text {
+    font-style: italic;
+    line-height: 1.6;
+    color: #2d3748;
+}
+
+/* Better responsive design */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.125rem;
+    }
+    
+    .section-title {
+        font-size: 2rem;
+    }
+    
+    .feature-card {
+        padding: 2rem;
+    }
+}
+
+/* Footer horizontal layout */
+.footer-horizontal {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2rem;
+}
+
+.footer-section {
+    flex: 1;
+    min-width: 200px;
+}
+
+.footer-links {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.footer-links ul {
+    display: flex;
+    gap: 1rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.footer-links a {
+    color: #9ca3af;
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: color 0.2s;
+}
+
+.footer-links a:hover {
+    color: white;
+}
+
+.footer-social {
+    display: flex;
+    gap: 1rem;
+}
+
+.footer-social a {
+    color: #9ca3af;
+    font-size: 1.25rem;
+    transition: color 0.2s;
+}
+
+.footer-social a:hover {
+    color: white;
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: 2rem;
+    margin-top: 2rem;
+    border-top: 1px solid #374151;
+    color: #9ca3af;
+    font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+    .footer-horizontal {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .footer-links {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .footer-links ul {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-gradient hero-pattern text-white py-20 lg:py-32 relative">
+    <div class="container mx-auto px-4 relative z-10">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div class="animate-fade-in">
+                <div class="inline-flex items-center bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
+                    <span class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
+                    <span class="text-sm font-medium">Nouveau : Analyse chronobiologique avancée</span>
+                </div>
+                
+                <h1 class="hero-title font-heading">
+                    BioSync<br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-200 to-purple-200">
+                        Votre bien-être intelligent
+                    </span>
+                </h1>
+                
+                <p class="hero-subtitle">
+                    La plateforme qui synchronise votre nutrition, sport et santé mentale 
+                    grâce à l'intelligence artificielle et la chronobiologie.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row gap-4 mb-8">
+                    {% include 'components/_button.html.twig' with {
+                        'text': 'Commencer Gratuitement',
+                        'variant': 'primary',
+                        'href': path('app_register'),
+                        'size': 'lg',
+                        'class': 'px-8 py-4 text-lg bg-white text-purple-700 hover:bg-gray-100 font-semibold'
+                    } %}
+                    {% include 'components/_button.html.twig' with {
+                        'text': 'Voir la démo',
+                        'variant': 'outline',
+                        'href': '#features',
+                        'size': 'lg',
+                        'class': 'px-8 py-4 text-lg border-white text-white hover:bg-white hover:text-purple-700 font-semibold'
+                    } %}
+                </div>
+            </div>
+            
+            <div class="relative animate-float">
+                <div class="relative z-10">
+                    <img src="https://images.unsplash.com/photo-1571019613454-1cb2f08b8d9a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" 
+                         alt="Dashboard BioSync" 
+                         class="rounded-lg shadow-2xl">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Trust Badges Section -->
+<section class="py-12 bg-white border-b border-gray-100">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 items-center">
+            <!-- Trust Badges -->
+            <div class="text-center">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-shield-alt text-green-600 text-xl"></i>
+                </div>
+                <h4 class="font-semibold text-gray-900 mb-1">Aucune carte bancaire</h4>
+                <p class="text-sm text-gray-600">Essai gratuit sans engagement</p>
+            </div>
+            
+            <div class="text-center">
+                <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-clock text-blue-600 text-xl"></i>
+                </div>
+                <h4 class="font-semibold text-gray-900 mb-1">Essai 14 jours</h4>
+                <p class="text-sm text-gray-600">Testez toutes les fonctionnalités</p>
+            </div>
+            
+            <div class="text-center">
+                <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-times-circle text-purple-600 text-xl"></i>
+                </div>
+                <h4 class="font-semibold text-gray-900 mb-1">Annulation simple</h4>
+                <p class="text-sm text-gray-600">Arrêtez quand vous voulez</p>
+            </div>
+            
+            <!-- Live Preview Card -->
+            <div class="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-4 border border-blue-200">
+                <div class="flex items-center mb-3">
+                    <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-chart-line text-white text-sm"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-gray-900 text-sm">Dashboard BioSync</h4>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-600">Score santé</span>
+                        <span class="text-xs font-bold text-green-600">85/100</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-1.5">
+                        <div class="bg-green-500 h-1.5 rounded-full" style="width: 85%"></div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-600">Objectif</span>
+                        <span class="text-xs font-bold text-blue-600">7 jours</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-1.5">
+                        <div class="bg-blue-500 h-1.5 rounded-full" style="width: 70%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-16 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="text-center stat-counter">
+                <div class="stat-number text-purple-600">50K+</div>
+                <div class="stat-label">Utilisateurs actifs</div>
+            </div>
+            <div class="text-center stat-counter">
+                <div class="stat-number text-blue-600">4.8★</div>
+                <div class="stat-label">Note moyenne</div>
+            </div>
+            <div class="text-center stat-counter">
+                <div class="stat-number text-green-600">95%</div>
+                <div class="stat-label">Satisfaction</div>
+            </div>
+            <div class="text-center stat-counter">
+                <div class="stat-number text-orange-600">24/7</div>
+                <div class="stat-label">Support IA</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="py-20 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-16">
+            <h2 class="section-title font-heading">
+                Une approche <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600">360°</span> de votre bien-être
+            </h2>
+            <p class="section-subtitle">
+                BioSync intègre nutrition, sport et santé mentale dans une plateforme unifiée 
+                propulsée par l'IA et la chronobiologie.
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Nutrition Card -->
+            <div class="feature-card bg-white rounded-xl p-8 shadow-lg">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-6">
+                    <i class="fas fa-apple-alt text-green-600 icon-large"></i>
+                </div>
+                <h3 class="feature-title font-heading">Nutrition Intelligente</h3>
+                <p class="feature-description">
+                    Plans alimentaires personnalisés basés sur vos objectifs, chronotype et préférences. 
+                    Scan alimentaire IA et suivi automatique.
+                </p>
+                <ul class="space-y-3 mb-6">
+                    <li class="flex items-center text-sm text-gray-600">
+                        <i class="fas fa-check text-green-500 mr-3"></i>
+                        5000+ recettes personnalisées
+                    </li>
+                    <li class="flex items-center text-sm text-gray-600">
+                        <i class="fas fa-check text-green-500 mr-3"></i>
+                        Analyse nutritionnelle IA
+                    </li>
+                    <li class="flex items-center text-sm text-gray-600">
+                        <i class="fas fa-check text-green-500 mr-3"></i>
+                        Adaptation chronobiologique
+                    </li>
+                </ul>
+                {% include 'components/_button.html.twig' with {
+                    'text': 'Explorer la nutrition',
+                    'variant': 'outline',
+                    'href': path('app_dashboard'),
+                    'class': 'w-full'
+                } %}
+            </div>
+
+            <!-- Sport Card -->
+            <div class="feature-card bg-white rounded-xl p-8 shadow-lg">
+                <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6">
+                    <i class="fas fa-running text-blue-600 icon-large"></i>
+                </div>
+                <h3 class="feature-title font-heading">Sport Optimisé</h3>
+                <p class="feature-description">
+                    Programmes d'entraînement adaptés à votre énergie circadienne. 
+                    Suivi performance et récupération intelligente.
+                </p>
+                <ul class="space-y-3 mb-6">
+                    <li class="flex items-center text-sm text-gray-600">
+                        <i class="fas fa-check text-blue-500 mr-3"></i>
+                        100+ programmes experts
+                    </li>
+                    <li class="flex items-center text-sm text-gray-600">
+                        <i class="fas fa-check text-blue-500 mr-3"></i>
+                        Timing circadien optimal
+                    </li>
+                    <li class="flex items-center text-sm text-gray-600">
+                        <i class="fas fa-check text-blue-500 mr-3"></i>
+                        Récupération IA guidée
+                    </li>
+                </ul>
+                {% include 'components/_button.html.twig' with {
+                    'text': 'Découvrir le sport',
+                    'variant': 'outline',
+                    'href': path('app_dashboard'),
+                    'class': 'w-full'
+                } %}
+            </div>
+
+            <!-- Mental Card -->
+            <div class="feature-card bg-white rounded-xl p-8 shadow-lg">
+                <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-6">
+                    <i class="fas fa-brain text-purple-600 icon-large"></i>
+                </div>
+                <h3 class="feature-title font-heading">Santé Mentale</h3>
+                <p class="feature-description">
+                    Évaluations psychologiques professionnelles, méditation guidée 
+                    et suivi de l'humeur avec intelligence émotionnelle.
+                </p>
+                <ul class="space-y-3 mb-6">
+                    <li class="flex items-center text-sm text-gray-600">
+                        <i class="fas fa-check text-purple-500 mr-3"></i>
+                        Tests psychologiques validés
+                    </li>
+                    <li class="flex items-center text-sm text-gray-600">
+                        <i class="fas fa-check text-purple-500 mr-3"></i>
+                        Méditations personnalisées
+                    </li>
+                    <li class="flex items-center text-sm text-gray-600">
+                        <i class="fas fa-check text-purple-500 mr-3"></i>
+                        Analyse émotionnelle IA
+                    </li>
+                </ul>
+                {% include 'components/_button.html.twig' with {
+                    'text': 'Commencer le bien-être',
+                    'variant': 'outline',
+                    'href': path('app_dashboard'),
+                    'class': 'w-full'
+                } %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="py-20 bg-white">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-16">
+            <h2 class="section-title font-heading">Comment ça marche ?</h2>
+            <p class="section-subtitle">3 étapes simples pour transformer votre bien-être</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="text-center">
+                <div class="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <span class="text-3xl font-bold text-purple-600">1</span>
+                </div>
+                <h3 class="feature-title font-heading">Évaluation Initiale</h3>
+                <p class="feature-description">
+                    Questionnaire complet sur votre santé, objectifs et chronotype 
+                    pour créer votre profil personnalisé.
+                </p>
+            </div>
+            
+            <div class="text-center">
+                <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <span class="text-3xl font-bold text-blue-600">2</span>
+                </div>
+                <h3 class="feature-title font-heading">Plan Personnalisé</h3>
+                <p class="feature-description">
+                    L'IA génère votre programme sur mesure intégrant nutrition, 
+                    sport et santé mentale selon votre rythme biologique.
+                </p>
+            </div>
+            
+            <div class="text-center">
+                <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <span class="text-3xl font-bold text-green-600">3</span>
+                </div>
+                <h3 class="feature-title font-heading">Suivi & Optimisation</h3>
+                <p class="feature-description">
+                    Suivi quotidien avec ajustements automatiques basés sur 
+                    vos progrès et feedbacks.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="py-20 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-16">
+            <h2 class="section-title font-heading">Ils nous font confiance</h2>
+            <p class="section-subtitle">Découvrez les témoignages de nos utilisateurs</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="testimonial-card rounded-xl p-6 shadow-lg">
+                <div class="flex items-center mb-4">
+                    <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=100&q=80" 
+                         alt="Sarah M." 
+                         class="w-12 h-12 rounded-full mr-4">
+                    <div>
+                        <h4 class="testimonial-author">Sarah M.</h4>
+                        <div class="flex text-yellow-400">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                </div>
+                <p class="testimonial-text">
+                    "BioSync a transformé ma routine. Les recommandations chronobiologiques 
+                    m'ont permis de perdre 8kg en 3 mois sans me priver."
+                </p>
+            </div>
+            
+            <div class="testimonial-card rounded-xl p-6 shadow-lg">
+                <div class="flex items-center mb-4">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=100&q=80" 
+                         alt="Thomas L." 
+                         class="w-12 h-12 rounded-full mr-4">
+                    <div>
+                        <h4 class="testimonial-author">Thomas L.</h4>
+                        <div class="flex text-yellow-400">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                </div>
+                <p class="testimonial-text">
+                    "L'approche holistique est incroyable. Je suis mon stress, 
+                    mon alimentation et mon sport dans une seule application."
+                </p>
+            </div>
+            
+            <div class="testimonial-card rounded-xl p-6 shadow-lg">
+                <div class="flex items-center mb-4">
+                    <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=100&q=80" 
+                         alt="Marie D." 
+                         class="w-12 h-12 rounded-full mr-4">
+                    <div>
+                        <h4 class="testimonial-author">Marie D.</h4>
+                        <div class="flex text-yellow-400">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                </div>
+                <p class="testimonial-text">
+                    "Les quiz mentaux m'ont aidée à mieux me comprendre. 
+                    L'IA propose des conseils vraiment pertinents."
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-gradient text-white py-20">
+    <div class="container mx-auto px-4 text-center">
+        <h2 class="section-title font-heading text-white">Prêt à transformer votre bien-être ?</h2>
+        <p class="hero-subtitle">
+            Rejoignez les 50 000 utilisateurs qui ont déjà amélioré leur qualité de vie avec BioSync.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            {% include 'components/_button.html.twig' with {
+                'text': 'Commencer gratuitement',
+                'variant': 'primary',
+                'href': path('app_register'),
+                'size': 'lg',
+                'class': 'px-8 py-4 text-lg bg-white text-purple-700 hover:bg-gray-100 font-semibold'
+            } %}
+            {% include 'components/_button.html.twig' with {
+                'text': 'Prendre un RDV démo',
+                'variant': 'outline',
+                'href': '#',
+                'size': 'lg',
+                'class': 'px-8 py-4 text-lg border-white text-white hover:bg-white hover:text-purple-700 font-semibold'
+            } %}
+        </div>
+        
+        <div class="mt-12 flex justify-center gap-8 text-sm">
+            <div class="flex items-center">
+                <i class="fas fa-shield-alt mr-2"></i>
+                <span>Données sécurisées</span>
+            </div>
+            <div class="flex items-center">
+                <i class="fas fa-lock mr-2"></i>
+                <span>Confidentialité garantie</span>
+            </div>
+            <div class="flex items-center">
+                <i class="fas fa-certificate mr-2"></i>
+                <span>Certifié RGPD</span>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate stats on scroll
+    const observerOptions = {
+        threshold: 0.5,
+        rootMargin: '0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+    
+    // Observe feature cards
+    document.querySelectorAll('.feature-card').forEach(card => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(30px)';
+        card.style.transition = 'all 0.6s ease';
+        observer.observe(card);
+    });
+    
+    // Observe stat counters
+    document.querySelectorAll('.stat-counter').forEach((stat, index) => {
+        stat.style.opacity = '0';
+        stat.style.transform = 'translateY(20px)';
+        stat.style.transition = `all 0.5s ease ${index * 0.1}s`;
+        observer.observe(stat);
+    });
+});
+</script>
+{% endblock %}

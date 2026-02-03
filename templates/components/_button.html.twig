@@ -1,0 +1,68 @@
+{# BioSync Button Component
+# Variables:
+# - text: string (button text)
+# - variant: 'primary' | 'success' | 'outline' | 'soft' (default: 'primary')
+# - size: 'sm' | 'md' | 'lg' (default: 'md')
+# - icon: string (optional icon class)
+# - icon_position: 'left' | 'right' (default: 'left')
+# - disabled: boolean (default: false)
+# - loading: boolean (default: false)
+# - type: 'button' | 'submit' | 'reset' (default: 'button')
+# - href: string (optional, converts to link)
+# - onclick: string (optional)
+# - class: string (optional additional classes)
+# - id: string (optional)
+#}
+
+{% set variant = variant|default('primary') %}
+{% set size = size|default('md') %}
+{% set icon_position = icon_position|default('left') %}
+{% set disabled = disabled|default(false) %}
+{% set loading = loading|default(false) %}
+{% set id = id|default(null) %}
+{% set onclick = onclick|default(null) %}
+{% set icon = icon|default(null) %}
+{% set href = href|default(null) %}
+{% set button_classes = [
+    'btn',
+    'btn-' ~ variant,
+    size == 'sm' ? 'btn-sm' : '',
+    size == 'lg' ? 'btn-lg' : '',
+    disabled ? 'disabled' : '',
+    loading ? 'loading' : '',
+    class|default('')
+]|join(' ')|trim %}
+
+{% if href %}
+    <a href="{{ href }}" class="{{ button_classes }}" {% if id %}id="{{ id }}"{% endif %} {% if onclick %}onclick="{{ onclick }}"{% endif %}>
+        {% if icon and icon_position == 'left' %}
+            <i class="{{ icon }}"></i>
+        {% endif %}
+        
+        {% if loading %}
+            <i class="fas fa-spinner fa-spin"></i>
+        {% endif %}
+        
+        {{ text }}
+        
+        {% if icon and icon_position == 'right' %}
+            <i class="{{ icon }}"></i>
+        {% endif %}
+    </a>
+{% else %}
+    <button type="{{ type|default('button') }}" class="{{ button_classes }}" {% if id %}id="{{ id }}"{% endif %} {% if onclick %}onclick="{{ onclick }}"{% endif %} {% if disabled %}disabled{% endif %}>
+        {% if icon and icon_position == 'left' %}
+            <i class="{{ icon }}"></i>
+        {% endif %}
+        
+        {% if loading %}
+            <i class="fas fa-spinner fa-spin"></i>
+        {% endif %}
+        
+        {{ text }}
+        
+        {% if icon and icon_position == 'right' %}
+            <i class="{{ icon }}"></i>
+        {% endif %}
+    </button>
+{% endif %}

@@ -1,0 +1,572 @@
+{# BioSync Back Office Dashboard
+# Admin Dashboard - Main Overview
+#}
+
+{% extends 'back/base.html.twig' %}
+
+{% block title %}Tableau de bord - Administration{% endblock %}
+{% block page_title %}Tableau de bord{% endblock %}
+
+{% block content %}
+<!-- Statistics Overview -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    {% include 'components/_kpi_card.html.twig' with {
+        'value': '2,847',
+        'label': 'Utilisateurs totaux',
+        'trend': {
+            'value': '+12%',
+            'direction': 'up',
+            'color': 'success'
+        },
+        'icon': 'fas fa-users',
+        'variant': 'default'
+    } %}
+    
+    {% include 'components/_kpi_card.html.twig' with {
+        'value': '156',
+        'label': 'Professionnels certifiés',
+        'trend': {
+            'value': '+8%',
+            'direction': 'up',
+            'color': 'success'
+        },
+        'icon': 'fas fa-user-md',
+        'variant': 'default'
+    } %}
+    
+    {% include 'components/_kpi_card.html.twig' with {
+        'value': '23',
+        'label': 'RDV aujourd\'hui',
+        'trend': {
+            'value': '+5',
+            'direction': 'up',
+            'color': 'info'
+        },
+        'icon': 'fas fa-calendar-check',
+        'variant': 'default'
+    } %}
+    
+    {% include 'components/_kpi_card.html.twig' with {
+        'value': '8',
+        'label': 'Alertes en attente',
+        'trend': {
+            'value': '-3',
+            'direction': 'down',
+            'color': 'success'
+        },
+        'icon': 'fas fa-exclamation-triangle',
+        'variant': 'default'
+    } %}
+</div>
+
+<!-- Quick Actions & Alerts -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    <!-- Pending Professional Requests -->
+    {% include 'components/_card.html.twig' with {
+        'title': 'Demandes Professionnelles',
+        'subtitle': 'Certifications en attente'
+    } %}
+    {% block card_body %}
+        <div class="space-y-3">
+            <div class="flex items-center justify-between p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-user-md text-yellow-600"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-medium">Dr. Sophie Bernard</h4>
+                        <p class="text-sm text-gray-600">Nutritionniste • Il y a 2 jours</p>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    {% include 'components/_button.html.twig' with {
+                        'text': 'Voir',
+                        'variant': 'outline',
+                        'size': 'sm'
+                    } %}
+                    {% include 'components/_button.html.twig' with {
+                        'text': 'Approuver',
+                        'variant': 'success',
+                        'size': 'sm'
+                    } %}
+                </div>
+            </div>
+            
+            <div class="flex items-center justify-between p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-dumbbell text-yellow-600"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-medium">Thomas Martin</h4>
+                        <p class="text-sm text-gray-600">Coach sportif • Il y a 3 jours</p>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    {% include 'components/_button.html.twig' with {
+                        'text': 'Voir',
+                        'variant': 'outline',
+                        'size': 'sm'
+                    } %}
+                    {% include 'components/_button.html.twig' with {
+                        'text': 'Approuver',
+                        'variant': 'success',
+                        'size': 'sm'
+                    } %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            {% include 'components/_button.html.twig' with {
+                'text': 'Voir toutes les demandes',
+                'variant': 'outline',
+                'icon': 'fas fa-arrow-right',
+                'class': 'w-full'
+            } %}
+        </div>
+    {% endblock %}
+
+    <!-- System Alerts -->
+    {% include 'components/_card.html.twig' with {
+        'title': 'Alertes Système',
+        'subtitle': 'Notifications importantes'
+    } %}
+    {% block card_body %}
+        <div class="space-y-3">
+            <div class="flex items-start p-3 bg-red-50 rounded-lg border border-red-200">
+                <i class="fas fa-exclamation-circle text-red-500 mt-1 mr-3"></i>
+                <div class="flex-1">
+                    <h4 class="font-medium text-red-800">Espace disque faible</h4>
+                    <p class="text-sm text-red-600">Le serveur de fichiers n'a plus que 15% d'espace disponible</p>
+                </div>
+            </div>
+            
+            <div class="flex items-start p-3 bg-orange-50 rounded-lg border border-orange-200">
+                <i class="fas fa-exclamation-triangle text-orange-500 mt-1 mr-3"></i>
+                <div class="flex-1">
+                    <h4 class="font-medium text-orange-800">Performance base de données</h4>
+                    <p class="text-sm text-orange-600">Temps de réponse lent sur les requêtes complexes</p>
+                </div>
+            </div>
+            
+            <div class="flex items-start p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <i class="fas fa-info-circle text-blue-500 mt-1 mr-3"></i>
+                <div class="flex-1">
+                    <h4 class="font-medium text-blue-800">Mise à jour disponible</h4>
+                    <p class="text-sm text-blue-600">Version 2.1.0 prête pour déploiement</p>
+                </div>
+            </div>
+        </div>
+    {% endblock %}
+
+    <!-- Quick Stats -->
+    {% include 'components/_card.html.twig' with {
+        'title': 'Activité Récente',
+        'subtitle': 'Dernières 24 heures'
+    } %}
+    {% block card_body %}
+        <div class="space-y-4">
+            <div class="flex justify-between items-center">
+                <span class="text-gray-600">Nouveaux utilisateurs</span>
+                <span class="font-semibold text-green-600">+24</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-gray-600">Quiz complétés</span>
+                <span class="font-semibold text-blue-600">156</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-gray-600">Repas enregistrés</span>
+                <span class="font-semibold text-purple-600">892</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-gray-600">Séances sportives</span>
+                <span class="font-semibold text-orange-600">67</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-gray-600">Rendez-vous</span>
+                <span class="font-semibold text-indigo-600">23</span>
+            </div>
+        </div>
+    {% endblock %}
+</div>
+
+<!-- Charts Section -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <!-- User Growth Chart -->
+    {% include 'components/_card.html.twig' with {
+        'title': 'Croissance des Utilisateurs',
+        'subtitle': 'Derniers 6 mois'
+    } %}
+    {% block card_body %}
+        <div class="chart-placeholder" style="height: 300px;">
+            <div class="text-center">
+                <i class="fas fa-chart-line text-4xl text-blue-400 mb-3"></i>
+                <p>Graphique de croissance des utilisateurs</p>
+                <div class="mt-4 text-sm text-gray-500">
+                    <div>+15% ce mois • Tendance positive</div>
+                </div>
+            </div>
+        </div>
+    {% endblock %}
+
+    <!-- Module Usage Chart -->
+    {% include 'components/_card.html.twig' with {
+        'title': 'Utilisation des Modules',
+        'subtitle': 'Activité par module'
+    } %}
+    {% block card_body %}
+        <div class="chart-placeholder" style="height: 300px;">
+            <div class="text-center">
+                <i class="fas fa-chart-pie text-4xl text-green-400 mb-3"></i>
+                <p>Graphique d'utilisation des modules</p>
+                <div class="mt-4 text-sm text-gray-500">
+                    <div>Nutrition: 45% • Sport: 30% • Mental: 25%</div>
+                </div>
+            </div>
+        </div>
+    {% endblock %}
+</div>
+
+<!-- Recent Activity Table -->
+{% include 'components/_card.html.twig' with {
+    'title': 'Activité Récente',
+    'subtitle': 'Dernières actions sur la plateforme'
+} %}
+{% block card_body %}
+    <div class="overflow-x-auto">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Date & Heure</th>
+                    <th>Utilisateur</th>
+                    <th>Action</th>
+                    <th>Module</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <div class="text-sm">10:23</div>
+                        <div class="text-xs text-gray-500">Aujourd'hui</div>
+                    </td>
+                    <td>
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-medium mr-2">
+                                JD
+                            </div>
+                            <div>
+                                <div class="font-medium">Jean Dupont</div>
+                                <div class="text-xs text-gray-500">jean.dupont@email.com</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>Quiz complété</td>
+                    <td><span class="badge badge-info">Mental</span></td>
+                    <td><span class="badge badge-success">Succès</span></td>
+                    <td>
+                        <button class="text-blue-600 hover:text-blue-800">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td>
+                        <div class="text-sm">09:45</div>
+                        <div class="text-xs text-gray-500">Aujourd'hui</div>
+                    </td>
+                    <td>
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-medium mr-2">
+                                MC
+                            </div>
+                            <div>
+                                <div class="font-medium">Marie Curie</div>
+                                <div class="text-xs text-gray-500">marie.curie@email.com</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>Repas enregistré</td>
+                    <td><span class="badge badge-success">Nutrition</span></td>
+                    <td><span class="badge badge-success">Succès</span></td>
+                    <td>
+                        <button class="text-blue-600 hover:text-blue-800">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td>
+                        <div class="text-sm">08:30</div>
+                        <div class="text-xs text-gray-500">Aujourd'hui</div>
+                    </td>
+                    <td>
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white text-xs font-medium mr-2">
+                                AB
+                            </div>
+                            <div>
+                                <div class="font-medium">Albert Bernard</div>
+                                <div class="text-xs text-gray-500">albert.bernard@email.com</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>Séance sportive</td>
+                    <td><span class="badge badge-warning">Sport</span></td>
+                    <td><span class="badge badge-success">Succès</span></td>
+                    <td>
+                        <button class="text-blue-600 hover:text-blue-800">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td>
+                        <div class="text-sm">23:15</div>
+                        <div class="text-xs text-gray-500">Hier</div>
+                    </td>
+                    <td>
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs font-medium mr-2">
+                                KL
+                            </div>
+                            <div>
+                                <div class="font-medium">Karine Leroy</div>
+                                <div class="text-xs text-gray-500">karine.leroy@email.com</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>Inscription</td>
+                    <td><span class="badge badge-info">Système</span></td>
+                    <td><span class="badge badge-success">Succès</span></td>
+                    <td>
+                        <button class="text-blue-600 hover:text-blue-800">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="mt-4 text-center">
+        {% include 'components/_button.html.twig' with {
+            'text': 'Voir toute l\'activité',
+            'variant': 'outline',
+            'icon': 'fas fa-arrow-right'
+        } %}
+    </div>
+{% endblock %}
+{% endinclude %}
+
+<!-- System Status -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Server Status -->
+    {% include 'components/_card.html.twig' with {
+        'title': 'État du Serveur',
+        'variant': 'default'
+    } %}
+    {% block card_body %}
+        <div class="space-y-3">
+            <div class="flex justify-between items-center">
+                <span class="text-gray-600">CPU</span>
+                <div class="flex items-center">
+                    <div class="w-24 bg-gray-200 rounded-full h-2 mr-2">
+                        <div class="bg-green-500 h-2 rounded-full" style="width: 35%"></div>
+                    </div>
+                    <span class="text-sm font-medium">35%</span>
+                </div>
+            </div>
+            
+            <div class="flex justify-between items-center">
+                <span class="text-gray-600">Mémoire</span>
+                <div class="flex items-center">
+                    <div class="w-24 bg-gray-200 rounded-full h-2 mr-2">
+                        <div class="bg-yellow-500 h-2 rounded-full" style="width: 68%"></div>
+                    </div>
+                    <span class="text-sm font-medium">68%</span>
+                </div>
+            </div>
+            
+            <div class="flex justify-between items-center">
+                <span class="text-gray-600">Disque</span>
+                <div class="flex items-center">
+                    <div class="w-24 bg-gray-200 rounded-full h-2 mr-2">
+                        <div class="bg-red-500 h-2 rounded-full" style="width: 85%"></div>
+                    </div>
+                    <span class="text-sm font-medium">85%</span>
+                </div>
+            </div>
+            
+            <div class="flex justify-between items-center">
+                <span class="text-gray-600">Uptime</span>
+                <span class="text-sm font-medium text-green-600">99.9%</span>
+            </div>
+        </div>
+    {% endblock %}
+
+    <!-- Database Status -->
+    {% include 'components/_card.html.twig' with {
+        'title': 'Base de Données',
+        'variant': 'default'
+    } %}
+    {% block card_body %}
+        <div class="space-y-3">
+            <div class="flex justify-between items-center">
+                <span class="text-gray-600">Connexions actives</span>
+                <span class="text-sm font-medium">24/100</span>
+            </div>
+            
+            <div class="flex justify-between items-center">
+                <span class="text-gray-600">Temps de réponse moyen</span>
+                <span class="text-sm font-medium text-green-600">45ms</span>
+            </div>
+            
+            <div class="flex justify-between items-center">
+                <span class="text-gray-600">Requêtes/seconde</span>
+                <span class="text-sm font-medium">156</span>
+            </div>
+            
+            <div class="flex justify-between items-center">
+                <span class="text-gray-600">Dernière sauvegarde</span>
+                <span class="text-sm font-medium">Il y a 2h</span>
+            </div>
+        </div>
+    {% endblock %}
+
+    <!-- API Status -->
+    {% include 'components/_card.html.twig' with {
+        'title': 'API Services',
+        'variant': 'default'
+    } %}
+    {% block card_body %}
+        <div class="space-y-3">
+            <div class="flex justify-between items-center">
+                <span class="text-gray-600">Authentification</span>
+                <span class="badge badge-success">OK</span>
+            </div>
+            
+            <div class="flex justify-between items-center">
+                <span class="text-gray-600">Notifications</span>
+                <span class="badge badge-success">OK</span>
+            </div>
+            
+            <div class="flex justify-between items-center">
+                <span class="text-gray-600">Email</span>
+                <span class="badge badge-warning">Lent</span>
+            </div>
+            
+            <div class="flex justify-between items-center">
+                <span class="text-gray-600">Stockage fichiers</span>
+                <span class="badge badge-success">OK</span>
+            </div>
+        </div>
+    {% endblock %}
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-refresh dashboard data
+    setInterval(refreshDashboardData, 30000); // Refresh every 30 seconds
+    
+    // Initialize real-time updates
+    initializeRealTimeUpdates();
+    
+    // Initialize charts (mock)
+    initializeCharts();
+});
+
+function refreshDashboardData() {
+    // This would fetch fresh data from API
+    console.log('Refreshing dashboard data...');
+    
+    // Update KPI cards with animation
+    const kpiValues = document.querySelectorAll('.kpi-value');
+    kpiValues.forEach(kpi => {
+        kpi.style.opacity = '0.5';
+        setTimeout(() => {
+            kpi.style.opacity = '1';
+        }, 500);
+    });
+}
+
+function initializeRealTimeUpdates() {
+    // Simulate real-time notifications
+    setTimeout(() => {
+        const notifications = [
+            'Nouvel utilisateur inscrit',
+            'Quiz complété par Marie Curie',
+            'Demande de certification reçue'
+        ];
+        
+        const randomNotification = notifications[Math.floor(Math.random() * notifications.length)];
+        console.log('New notification:', randomNotification);
+    }, 10000);
+}
+
+function initializeCharts() {
+    // Mock chart initialization
+    console.log('Initializing charts...');
+    
+    // Animate chart placeholders
+    const chartPlaceholders = document.querySelectorAll('.chart-placeholder');
+    chartPlaceholders.forEach(placeholder => {
+        placeholder.style.opacity = '0';
+        setTimeout(() => {
+            placeholder.style.transition = 'opacity 1s ease-in-out';
+            placeholder.style.opacity = '1';
+        }, 500);
+    });
+}
+
+// Quick action handlers
+document.addEventListener('click', function(e) {
+    // Handle approve professional request
+    if (e.target.textContent.includes('Approuver')) {
+        e.preventDefault();
+        const requestCard = e.target.closest('.bg-yellow-50');
+        if (confirm('Approuver cette demande de certification ?')) {
+            requestCard.style.opacity = '0.5';
+            setTimeout(() => {
+                requestCard.remove();
+                showAlert('Demande approuvée avec succès', 'success');
+            }, 500);
+        }
+    }
+    
+    // Handle view request
+    if (e.target.textContent.includes('Voir') && e.target.closest('.bg-yellow-50')) {
+        e.preventDefault();
+        showAlert('Redirection vers les détails de la demande...', 'info');
+    }
+});
+
+// System status monitoring
+function checkSystemHealth() {
+    const indicators = document.querySelectorAll('.bg-green-500, .bg-yellow-500, .bg-red-500');
+    indicators.forEach(indicator => {
+        // Simulate status changes
+        if (Math.random() > 0.9) {
+            const currentColor = indicator.className.match(/bg-(green|yellow|red)-500/)[1];
+            const colors = ['green', 'yellow', 'red'];
+            const newColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            if (currentColor !== newColor) {
+                indicator.className = indicator.className.replace(`bg-${currentColor}-500`, `bg-${newColor}-500`);
+            }
+        }
+    });
+}
+
+// Check system health every 10 seconds
+setInterval(checkSystemHealth, 10000);
+</script>
+{% endblock %}

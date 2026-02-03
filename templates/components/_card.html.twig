@@ -1,0 +1,66 @@
+{# BioSync Card Component
+# Variables:
+# - title: string (optional)
+# - subtitle: string (optional)
+# - variant: 'default' | 'soft' (default: 'default')
+# - padding: 'sm' | 'md' | 'lg' (default: 'md')
+# - shadow: 'sm' | 'md' | 'lg' (default: 'md')
+# - hover: boolean (default: true)
+# - class: string (optional additional classes)
+# - id: string (optional)
+#}
+
+{% set variant = variant|default('default') %}
+{% set hover = hover|default(true) %}
+{% set id = id|default(null) %}
+{% set title = title|default(null) %}
+{% set subtitle = subtitle|default(null) %}
+{% set card_classes = [
+    variant == 'soft' ? 'card-soft' : 'card',
+    hover ? 'card-hover' : '',
+    class|default('')
+]|join(' ')|trim %}
+
+{% set padding_map = {
+    'sm': 'p-4',
+    'md': 'p-6', 
+    'lg': 'p-8'
+} %}
+
+{% set shadow_map = {
+    'sm': 'shadow-sm',
+    'md': 'shadow-md',
+    'lg': 'shadow-lg'
+} %}
+
+<div class="{{ card_classes }} {{ padding_map[padding|default('md')] }} {{ shadow_map[shadow|default('md')] }}" {% if id %}id="{{ id }}"{% endif %}>
+    {% if title or subtitle %}
+        <div class="card-header">
+            <div>
+                {% if title %}
+                    <h3 class="card-title">{{ title }}</h3>
+                {% endif %}
+                {% if subtitle %}
+                    <p class="text-gray-600 text-sm mt-1">{{ subtitle }}</p>
+                {% endif %}
+            </div>
+            {% if block('header_actions') is defined and block('header_actions')|trim %}
+                <div class="header-actions">
+                    {{ block('header_actions') }}
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+    
+    {% if block('card_body') is defined and block('card_body')|trim %}
+        <div class="card-body">
+            {{ block('card_body') }}
+        </div>
+    {% endif %}
+    
+    {% if block('card_footer') is defined and block('card_footer')|trim %}
+        <div class="card-footer mt-4 pt-4 border-t border-gray-200">
+            {{ block('card_footer') }}
+        </div>
+    {% endif %}
+</div>

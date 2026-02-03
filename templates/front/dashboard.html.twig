@@ -1,0 +1,296 @@
+{# BioSync User Dashboard
+# Front Office - Main User Dashboard
+#}
+
+{% extends 'front/base.html.twig' %}
+
+{% block title %}Tableau de bord - BioSync{% endblock %}
+
+{% block content %}
+<div class="container py-8">
+    <!-- Welcome Header -->
+    <div class="mb-8">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 font-heading mb-2">
+                    Bonjour {% if app.user %}{{ app.user.firstName }}{% else %}Utilisateur{% endif %} ! 👋
+                </h1>
+                <p class="text-gray-600">
+                    Voici votre synthèse bien-être du {{ "now"|date("d/m/Y") }}
+                </p>
+            </div>
+            <div class="mt-4 md:mt-0">
+                {% include 'components/_button.html.twig' with {
+                    'text': 'Nouvelle évaluation',
+                    'variant': 'primary',
+                    'icon': 'fas fa-plus-circle'
+                } %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Score Section -->
+    <div class="mb-8">
+        {% include 'components/_card.html.twig' with {
+            'title': 'Score Global de Bien-être',
+            'variant': 'default'
+        } %}
+        {% block card_body %}
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Main Score -->
+                <div class="text-center md:col-span-1">
+                    <div class="relative inline-flex items-center justify-center">
+                        <svg class="w-32 h-32 transform -rotate-90">
+                            <circle cx="64" cy="64" r="56" stroke="#E6F4FA" stroke-width="12" fill="none"></circle>
+                            <circle cx="64" cy="64" r="56" stroke="#367CFE" stroke-width="12" fill="none"
+                                    stroke-dasharray="351.86" stroke-dashoffset="88" stroke-linecap="round"></circle>
+                        </svg>
+                        <div class="absolute">
+                            <div class="text-3xl font-bold text-blue-600">75</div>
+                            <div class="text-sm text-gray-500">/100</div>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <span class="badge badge-success">Excellent</span>
+                    </div>
+                </div>
+                
+                <!-- Score Details -->
+                <div class="md:col-span-2">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <i class="fas fa-utensils text-green-500 mr-3"></i>
+                                <span class="font-medium">Nutrition</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-32 bg-gray-200 rounded-full h-2 mr-3">
+                                    <div class="bg-green-500 h-2 rounded-full" style="width: 85%"></div>
+                                </div>
+                                <span class="font-bold text-green-600">85/100</span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <i class="fas fa-running text-blue-500 mr-3"></i>
+                                <span class="font-medium">Sport</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-32 bg-gray-200 rounded-full h-2 mr-3">
+                                    <div class="bg-blue-500 h-2 rounded-full" style="width: 70%"></div>
+                                </div>
+                                <span class="font-bold text-blue-600">70/100</span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <i class="fas fa-brain text-purple-500 mr-3"></i>
+                                <span class="font-medium">Mental</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-32 bg-gray-200 rounded-full h-2 mr-3">
+                                    <div class="bg-purple-500 h-2 rounded-full" style="width: 68%"></div>
+                                </div>
+                                <span class="font-bold text-purple-600">68/100</span>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <i class="fas fa-bed text-indigo-500 mr-3"></i>
+                                <span class="font-medium">Sommeil</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-32 bg-gray-200 rounded-full h-2 mr-3">
+                                    <div class="bg-indigo-500 h-2 rounded-full" style="width: 78%"></div>
+                                </div>
+                                <span class="font-bold text-indigo-600">78/100</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endblock %}
+    </div>
+
+    <!-- Achievements & Medals -->
+    <div class="mb-8">
+        <div class="card p-6">
+            <h3 class="text-xl font-semibold mb-2">Vos Réalisations</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="text-center">
+                    <div class="mx-auto w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-trophy text-yellow-500 text-2xl"></i>
+                    </div>
+                    <h4 class="font-medium text-sm">Champion</h4>
+                    <p class="text-xs text-gray-500">7 jours consécutifs</p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-medal text-blue-500 text-2xl"></i>
+                    </div>
+                    <h4 class="font-medium text-sm">Débutant</h4>
+                    <p class="text-xs text-gray-500">Premier quiz complété</p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-star text-green-500 text-2xl"></i>
+                    </div>
+                    <h4 class="font-medium text-sm">Étoile</h4>
+                    <p class="text-xs text-gray-500">Score parfait</p>
+                </div>
+                
+                <div class="text-center opacity-50">
+                    <div class="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-2">
+                        <i class="fas fa-lock text-gray-400 text-2xl"></i>
+                    </div>
+                    <h4 class="font-medium text-sm">Mystère</h4>
+                    <p class="text-xs text-gray-500">???</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Summary -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <!-- Nutrition Summary -->
+        <div class="card p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <div class="text-2xl font-bold text-gray-900">1,850</div>
+                    <div class="text-sm text-gray-600">Calories consommées</div>
+                </div>
+                <div class="flex items-center text-green-600">
+                    <i class="fas fa-arrow-down mr-1"></i>
+                    <span class="text-sm">-5%</span>
+                </div>
+            </div>
+            <div class="flex items-center text-green-600">
+                <i class="fas fa-utensils mr-2"></i>
+                <span class="text-sm">Objectif atteint</span>
+            </div>
+        </div>
+        
+        <!-- Sport Summary -->
+        <div class="card p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <div class="text-2xl font-bold text-gray-900">45</div>
+                    <div class="text-sm text-gray-600">Minutes d'activité</div>
+                </div>
+                <div class="flex items-center text-green-600">
+                    <i class="fas fa-arrow-up mr-1"></i>
+                    <span class="text-sm">+15%</span>
+                </div>
+            </div>
+            <div class="flex items-center text-blue-600">
+                <i class="fas fa-running mr-2"></i>
+                <span class="text-sm">Bon rythme</span>
+            </div>
+        </div>
+        
+        <!-- Mental Summary -->
+        <div class="card p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <div class="text-2xl font-bold text-gray-900">8.2</div>
+                    <div class="text-sm text-gray-600">Score mental /10</div>
+                </div>
+                <div class="flex items-center text-green-600">
+                    <i class="fas fa-arrow-up mr-1"></i>
+                    <span class="text-sm">+0.5</span>
+                </div>
+            </div>
+            <div class="flex items-center text-purple-600">
+                <i class="fas fa-brain mr-2"></i>
+                <span class="text-sm">En progression</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions & Recommendations -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Quick Actions -->
+        <div class="card p-6">
+            <h3 class="text-xl font-semibold mb-4">Actions Rapides</h3>
+            <div class="grid grid-cols-2 gap-3">
+                {% include 'components/_button.html.twig' with {
+                    'text': 'Ajouter un repas',
+                    'variant': 'soft',
+                    'icon': 'fas fa-plus',
+                    'class': 'w-full justify-center'
+                } %}
+                
+                {% include 'components/_button.html.twig' with {
+                    'text': 'Enregistrer une séance',
+                    'variant': 'soft',
+                    'icon': 'fas fa-dumbbell',
+                    'class': 'w-full justify-center'
+                } %}
+                
+                {% include 'components/_button.html.twig' with {
+                    'text': 'Quiz rapide',
+                    'variant': 'soft',
+                    'icon': 'fas fa-question-circle',
+                    'class': 'w-full justify-center'
+                } %}
+                
+                {% include 'components/_button.html.twig' with {
+                    'text': 'Prendre RDV',
+                    'variant': 'soft',
+                    'icon': 'fas fa-calendar',
+                    'class': 'w-full justify-center'
+                } %}
+            </div>
+        </div>
+            
+        <!-- AI Recommendations -->
+        <div class="card p-6 bg-blue-50">
+            <h3 class="text-xl font-semibold mb-2">Recommandations IA</h3>
+            <p class="text-sm text-gray-600 mb-4">Basées sur vos données chronobiologiques</p>
+            <div class="space-y-3">
+                <div class="flex items-start">
+                    <i class="fas fa-lightbulb text-yellow-500 mt-1 mr-3"></i>
+                    <div>
+                        <h4 class="font-medium text-sm">Optimisez votre matin</h4>
+                        <p class="text-xs text-gray-600">Essayez un petit-déjeuner riche en protéines entre 7h-8h pour plus d'énergie.</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start">
+                    <i class="fas fa-water text-blue-500 mt-1 mr-3"></i>
+                    <div>
+                        <h4 class="font-medium text-sm">Hydratation</h4>
+                        <p class="text-xs text-gray-600">Augmentez votre consommation d'eau de 20% aujourd'hui.</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start">
+                    <i class="fas fa-walking text-green-500 mt-1 mr-3"></i>
+                    <div>
+                        <h4 class="font-medium text-sm">Activité légère</h4>
+                        <p class="text-xs text-gray-600">Une marche de 15min après le repas améliorera votre digestion.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate score circles on load
+    const circles = document.querySelectorAll('circle[stroke-dasharray]');
+    circles.forEach(circle => {
+        circle.style.transition = 'stroke-dashoffset 1s ease-in-out';
+    });
+});
+</script>
+{% endblock %}

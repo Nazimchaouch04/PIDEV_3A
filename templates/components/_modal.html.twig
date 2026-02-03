@@ -1,0 +1,98 @@
+{# BioSync Modal Component
+# Variables:
+# - id: string (required)
+# - title: string (optional)
+# - size: 'sm' | 'md' | 'lg' | 'xl' (default: 'md')
+# - show_close: boolean (default: true)
+# - backdrop_close: boolean (default: true)
+# - class: string (optional additional classes)
+# - footer_content: boolean (default: true)
+#}
+
+{% set size = size|default('md') %}
+{% set show_close = show_close|default(true) %}
+{% set backdrop_close = backdrop_close|default(true) %}
+{% set footer_content = footer_content|default(true) %}
+{% set modal_classes = [
+    'modal-overlay',
+    class|default('')
+]|join(' ')|trim %}
+
+{% set size_classes = {
+    'sm': 'max-w-md',
+    'md': 'max-w-lg',
+    'lg': 'max-w-2xl',
+    'xl': 'max-w-4xl'
+} %}
+
+<div id="{{ id }}" class="{{ modal_classes }}" {% if not backdrop_close %}data-backdrop="static"{% endif %}>
+    <div class="modal-content {{ size_classes[size|default('md')] }}">
+        {% if title or show_close|default(true) %}
+            <div class="modal-header">
+                {% if title %}
+                    <h3 class="modal-title">{{ title }}</h3>
+                {% endif %}
+                {% if show_close|default(true) %}
+                    <button type="button" class="modal-close" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                {% endif %}
+            </div>
+        {% endif %}
+        
+        <div class="modal-body">
+            {% block modal_content %}{% endblock %}
+        </div>
+        
+        {% if footer_content|default(true) %}
+            <div class="modal-footer">
+                {% block modal_footer %}{% endblock %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// Modal functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('{{ id }}');
+    const closeBtn = modal?.querySelector('.modal-close');
+    const backdropClose = {{ backdrop_close|default(true) ? 'true' : 'false' }};
+    
+    // Close modal functions
+    function closeModal() {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+    
+    function openModal() {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+    
+    // Close button
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeModal);
+    }
+    
+    // Backdrop click
+    if (backdropClose) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+    }
+    
+    // Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal.style.display === 'flex') {
+            closeModal();
+        }
+    });
+    
+    // Global functions
+    window['openModal_{{ id }}'] = openModal;
+    window['closeModal_{{ id }}'] = closeModal;
+});
+</script>

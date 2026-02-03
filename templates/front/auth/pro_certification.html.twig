@@ -1,0 +1,369 @@
+{# BioSync Professional Certification Page
+# Front Office Authentication - Professional Registration
+#}
+
+{% extends 'front/base.html.twig' %}
+
+{% block title %}Certification Professionnelle - BioSync{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-10">
+            <div class="mx-auto h-20 w-20 bg-gradient-primary rounded-full flex items-center justify-center mb-6">
+                <i class="fas fa-user-md text-white text-3xl"></i>
+            </div>
+            <h1 class="text-4xl font-bold text-gray-900 font-heading">
+                Espace Professionnel
+            </h1>
+            <p class="mt-4 text-lg text-gray-600">
+                Rejoignez notre réseau de professionnels de santé certifiés
+            </p>
+        </div>
+
+        <!-- Certification Process Steps -->
+        <div class="mb-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="text-center">
+                    <div class="mx-auto h-12 w-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold mb-3">
+                        1
+                    </div>
+                    <h3 class="font-medium text-gray-900">Inscription</h3>
+                    <p class="text-sm text-gray-600 mt-1">Créez votre compte professionnel</p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="mx-auto h-12 w-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold mb-3">
+                        2
+                    </div>
+                    <h3 class="font-medium text-gray-900">Vérification</h3>
+                    <p class="text-sm text-gray-600 mt-1">Téléchargez vos diplômes</p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="mx-auto h-12 w-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold mb-3">
+                        3
+                    </div>
+                    <h3 class="font-medium text-gray-900">Validation</h3>
+                    <p class="text-sm text-gray-600 mt-1">Examen par notre équipe</p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="mx-auto h-12 w-12 bg-green-600 text-white rounded-full flex items-center justify-center font-bold mb-3">
+                        4
+                    </div>
+                    <h3 class="font-medium text-gray-900">Accès</h3>
+                    <p class="text-sm text-gray-600 mt-1">Accès complet à la plateforme</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Professional Registration Form -->
+        {% include 'components/_card.html.twig' with {
+            'title': 'Formulaire de Certification',
+            'subtitle': 'Tous les champs marqués d\'un astérisque sont obligatoires',
+            'variant': 'default',
+            'padding': 'lg'
+        } %}
+        {% block card_body %}
+            {% include 'components/_form.html.twig' with {
+                'action': path('app_pro_certification'),
+                'method': 'POST',
+                'enctype': 'multipart/form-data',
+                'fields': [
+                    {
+                        'name': 'professional_title',
+                        'type': 'select',
+                        'label': 'Titre professionnel *',
+                        'required': true,
+                        'options': [
+                            {'value': 'doctor', 'label': 'Médecin'},
+                            {'value': 'nutritionist', 'label': 'Nutritionniste'},
+                            {'value': 'psychologist', 'label': 'Psychologue'},
+                            {'value': 'coach', 'label': 'Coach sportif'},
+                            {'value': 'osteopath', 'label': 'Ostéopathe'},
+                            {'value': 'physiotherapist', 'label': 'Kinésithérapeute'},
+                            {'value': 'other', 'label': 'Autre'}
+                        ]
+                    },
+                    {
+                        'name': 'specialization',
+                        'type': 'text',
+                        'label': 'Spécialisation',
+                        'placeholder': 'Ex: Nutrition sportive, Chronobiologie...',
+                        'help': 'Précisez votre domaine d\'expertise'
+                    },
+                    {
+                        'name': 'rpps_number',
+                        'type': 'text',
+                        'label': 'Numéro RPPS *',
+                        'placeholder': 'Numéro d\'inscription au Répertoire Partagé des Professionnels de Santé',
+                        'required': true
+                    },
+                    {
+                        'name': 'diploma',
+                        'type': 'file',
+                        'label': 'Diplôme principal *',
+                        'required': true,
+                        'help': 'Format PDF, PNG ou JPG. Taille max: 5MB'
+                    },
+                    {
+                        'name': 'additional_diplomas',
+                        'type': 'file',
+                        'label': 'Diplômes supplémentaires',
+                        'help': 'Vous pouvez télécharger plusieurs fichiers'
+                    },
+                    {
+                        'name': 'experience_years',
+                        'type': 'select',
+                        'label': 'Années d\'expérience *',
+                        'required': true,
+                        'options': [
+                            {'value': '0-2', 'label': '0-2 ans'},
+                            {'value': '3-5', 'label': '3-5 ans'},
+                            {'value': '6-10', 'label': '6-10 ans'},
+                            {'value': '11-15', 'label': '11-15 ans'},
+                            {'value': '15+', 'label': 'Plus de 15 ans'}
+                        ]
+                    },
+                    {
+                        'name': 'practice_address',
+                        'type': 'textarea',
+                        'label': 'Adresse de pratique *',
+                        'placeholder': 'Adresse complète de votre cabinet ou lieu d\'exercice',
+                        'required': true
+                    },
+                    {
+                        'name': 'website',
+                        'type': 'text',
+                        'label': 'Site web (optionnel)',
+                        'placeholder': 'https://www.votresite.fr'
+                    },
+                    {
+                        'name': 'description',
+                        'type': 'textarea',
+                        'label': 'Présentation professionnelle',
+                        'placeholder': 'Décrivez votre approche, votre philosophie de soin...',
+                        'help': 'Cette description sera visible par les patients'
+                    },
+                    {
+                        'name': 'accept_terms',
+                        'type': 'checkbox',
+                        'label': 'Je certifie l\'authenticité des documents fournis et m\'engage à respecter la charte éthique de BioSync *',
+                        'required': true
+                    }
+                ],
+                'submit_text': 'Soumettre ma demande de certification',
+                'submit_variant': 'primary',
+                'cancel_url': path('app_login')
+            } %}
+        {% endblock %}
+        {% endinclude %}
+
+        <!-- Information Section -->
+        <div class="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
+            {% include 'components/_card.html.twig' with {
+                'title': 'Pourquoi devenir certifié ?',
+                'variant': 'soft'
+            } %}
+            {% block card_body %}
+                <ul class="space-y-3">
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                        <span class="text-gray-700">Accès à l'interface de gestion de patients</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                        <span class="text-gray-700">Outils d'analyse chronobiologique avancés</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                        <span class="text-gray-700">Visibilité accrue sur la plateforme</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                        <span class="text-gray-700">Formation continue et ressources exclusives</span>
+                    </li>
+                </ul>
+            {% endblock %}
+            {% endinclude %}
+            
+            {% include 'components/_card.html.twig' with {
+                'title': 'Documents requis',
+                'variant': 'soft'
+            } %}
+            {% block card_body %}
+                <ul class="space-y-3">
+                    <li class="flex items-start">
+                        <i class="fas fa-file-medical text-blue-500 mt-1 mr-3"></i>
+                        <span class="text-gray-700">Diplôme de formation principale</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-id-card text-blue-500 mt-1 mr-3"></i>
+                        <span class="text-gray-700">Carte professionnelle ou RPPS</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-certificate text-blue-500 mt-1 mr-3"></i>
+                        <span class="text-gray-700">Certificats de spécialisation (si applicable)</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fas fa-file-contract text-blue-500 mt-1 mr-3"></i>
+                        <span class="text-gray-700">Assurance responsabilité professionnelle</span>
+                    </li>
+                </ul>
+            {% endblock %}
+            {% endinclude %}
+        </div>
+
+        <!-- Support Contact -->
+        <div class="mt-12 text-center">
+            <p class="text-gray-600 mb-4">
+                Une question sur la certification ?
+            </p>
+            {% include 'components/_button.html.twig' with {
+                'text': 'Contacter le support',
+                'variant': 'outline',
+                'icon': 'fas fa-envelope'
+            } %}
+        </div>
+    </div>
+</div>
+
+<!-- Alert Messages -->
+{% if error %}
+    {% include 'components/_alert.html.twig' with {
+        'type': 'error',
+        'message': error,
+        'dismissible': true
+    } %}
+{% endif %}
+
+{% if success %}
+    {% include 'components/_alert.html.twig' with {
+        'type': 'success',
+        'message': success,
+        'dismissible': true
+    } %}
+{% endif %}
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const fileInputs = document.querySelectorAll('input[type="file"]');
+    const rppsInput = document.querySelector('input[name="rpps_number"]');
+    
+    // File upload validation
+    fileInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            validateFile(this);
+        });
+    });
+    
+    // RPPS validation (French healthcare professional number)
+    rppsInput?.addEventListener('blur', function() {
+        const rppsRegex = /^\d{11}$/;
+        if (this.value && !rppsRegex.test(this.value)) {
+            this.classList.add('border-red-500');
+            showError(this, 'Le numéro RPPS doit contenir 11 chiffres');
+        } else {
+            this.classList.remove('border-red-500');
+            hideError(this);
+        }
+    });
+    
+    // Form submission
+    form?.addEventListener('submit', function(e) {
+        if (!validateCertificationForm()) {
+            e.preventDefault();
+            showAlert('Veuillez corriger les erreurs dans le formulaire', 'error');
+        }
+    });
+    
+    // Dynamic specialization field
+    const titleSelect = document.querySelector('select[name="professional_title"]');
+    const specializationInput = document.querySelector('input[name="specialization"]');
+    
+    titleSelect?.addEventListener('change', function() {
+        if (this.value === 'other') {
+            specializationInput.setAttribute('required', 'required');
+            specializationInput.placeholder = 'Précisez votre profession';
+        } else {
+            specializationInput.removeAttribute('required');
+            specializationInput.placeholder = 'Ex: Nutrition sportive, Chronobiologie...';
+        }
+    });
+});
+
+function validateFile(input) {
+    const file = input.files[0];
+    if (!file) return;
+    
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+    
+    if (file.size > maxSize) {
+        input.classList.add('border-red-500');
+        showError(input, 'Le fichier ne doit pas dépasser 5MB');
+        input.value = '';
+        return;
+    }
+    
+    if (!allowedTypes.includes(file.type)) {
+        input.classList.add('border-red-500');
+        showError(input, 'Formats acceptés: PDF, JPG, PNG');
+        input.value = '';
+        return;
+    }
+    
+    input.classList.remove('border-red-500');
+    hideError(input);
+    
+    // Show file info
+    const fileInfo = document.createElement('div');
+    fileInfo.className = 'text-sm text-green-600 mt-1';
+    fileInfo.innerHTML = `<i class="fas fa-check-circle"></i> ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+    
+    const existingInfo = input.parentNode.querySelector('.file-info');
+    if (existingInfo) existingInfo.remove();
+    
+    fileInfo.className = 'file-info text-sm text-green-600 mt-1';
+    input.parentNode.appendChild(fileInfo);
+}
+
+function validateCertificationForm() {
+    const requiredFields = document.querySelectorAll('input[required], select[required], textarea[required]');
+    let isValid = true;
+    
+    requiredFields.forEach(field => {
+        if (!field.value || (field.type === 'checkbox' && !field.checked)) {
+            field.classList.add('border-red-500');
+            isValid = false;
+        } else {
+            field.classList.remove('border-red-500');
+        }
+    });
+    
+    // Check if at least one diploma is uploaded
+    const diplomaInput = document.querySelector('input[name="diploma"]');
+    if (!diplomaInput.files[0]) {
+        diplomaInput.classList.add('border-red-500');
+        showError(diplomaInput, 'Le téléchargement du diplôme est obligatoire');
+        isValid = false;
+    }
+    
+    return isValid;
+}
+
+// Progress indicator for file upload
+function uploadProgress() {
+    const progressBar = document.createElement('div');
+    progressBar.className = 'w-full bg-gray-200 rounded-full h-2 mt-2';
+    progressBar.innerHTML = '<div class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>';
+    return progressBar;
+}
+</script>
+{% endblock %}

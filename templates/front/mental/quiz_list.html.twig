@@ -1,0 +1,279 @@
+{# BioSync Mental & Quiz Module - Quiz List
+# Front Office - Mental Health Assessment
+#}
+
+{% extends 'front/base.html.twig' %}
+
+{% block title %}Quiz & Évaluations - BioSync{% endblock %}
+
+{% block content %}
+<div class="container py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 font-heading mb-2">
+                    Quiz & Évaluations
+                </h1>
+                <p class="text-gray-600">
+                    Évaluez votre bien-être mental et suivez votre progression
+                </p>
+            </div>
+            <div class="mt-4 md:mt-0">
+                {% include 'components/_button.html.twig' with {
+                    'text': 'Nouveau Quiz',
+                    'variant': 'primary',
+                    'icon': 'fas fa-plus'
+                } %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Mental Health Score Overview -->
+    {% include 'components/_card.html.twig' with {
+        'title': 'Score de Bien-être Mental',
+        'subtitle': 'Basé sur vos évaluations récentes',
+        'variant': 'soft'
+    } %}
+    {% block card_body %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="text-center">
+                <div class="relative inline-flex items-center justify-center">
+                    <svg class="w-32 h-32 transform -rotate-90">
+                        <circle cx="64" cy="64" r="56" stroke="#E6F4FA" stroke-width="12" fill="none"></circle>
+                        <circle cx="64" cy="64" r="56" stroke="#6EC5A6" stroke-width="12" fill="none"
+                                stroke-dasharray="351.86" stroke-dashoffset="70" stroke-linecap="round"></circle>
+                    </svg>
+                    <div class="absolute">
+                        <div class="text-3xl font-bold text-green-600">8.2</div>
+                        <div class="text-sm text-gray-500">/10</div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <span class="badge badge-success">Excellent</span>
+                </div>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <i class="fas fa-smile text-green-500 mr-3"></i>
+                        <span class="font-medium">Humeur</span>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-24 bg-gray-200 rounded-full h-2 mr-3">
+                            <div class="bg-green-500 h-2 rounded-full" style="width: 85%"></div>
+                        </div>
+                        <span class="font-bold text-green-600">8.5/10</span>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <i class="fas fa-brain text-purple-500 mr-3"></i>
+                        <span class="font-medium">Stress</span>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-24 bg-gray-200 rounded-full h-2 mr-3">
+                            <div class="bg-purple-500 h-2 rounded-full" style="width: 30%"></div>
+                        </div>
+                        <span class="font-bold text-purple-600">3/10</span>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <i class="fas fa-bed text-blue-500 mr-3"></i>
+                        <span class="font-medium">Sommeil</span>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-24 bg-gray-200 rounded-full h-2 mr-3">
+                            <div class="bg-blue-500 h-2 rounded-full" style="width: 78%"></div>
+                        </div>
+                        <span class="font-bold text-blue-600">7.8/10</span>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <i class="fas fa-battery-full text-yellow-500 mr-3"></i>
+                        <span class="font-medium">Énergie</span>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-24 bg-gray-200 rounded-full h-2 mr-3">
+                            <div class="bg-yellow-500 h-2 rounded-full" style="width: 75%"></div>
+                        </div>
+                        <span class="font-bold text-yellow-600">7.5/10</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endblock %}
+
+    <!-- Recommended Quizzes -->
+    <div class="card p-6 mt-8">
+        <h3 class="text-xl font-semibold mb-2">Quiz Recommandés</h3>
+        <p class="text-gray-600 mb-4">Basés sur votre profil et vos objectifs</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer" 
+                 onclick="startQuiz('stress')">
+                <div class="flex items-center mb-3">
+                    <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-brain text-purple-500"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-medium">Évaluation du Stress</h4>
+                        <p class="text-sm text-gray-600">5-10 min</p>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-600 mb-3">
+                    Évaluez votre niveau de stress et recevez des conseils personnalisés.
+                </p>
+                <div class="flex items-center justify-between">
+                    <span class="badge badge-purple">Recommandé</span>
+                    <span class="text-sm text-blue-600">Commencer →</span>
+                </div>
+            </div>
+            
+            <div class="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer" 
+                 onclick="startQuiz('sleep')">
+                <div class="flex items-center mb-3">
+                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-moon text-blue-500"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-medium">Qualité du Sommeil</h4>
+                        <p class="text-sm text-gray-600">8-12 min</p>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-600 mb-3">
+                    Analysez vos habitudes de sommeil et améliorez votre repos.
+                </p>
+                <div class="flex items-center justify-between">
+                    <span class="badge badge-warning">À faire</span>
+                    <span class="text-sm text-blue-600">Commencer →</span>
+                </div>
+            </div>
+            
+            <div class="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer" 
+                 onclick="startQuiz('mood')">
+                <div class="flex items-center mb-3">
+                    <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-smile text-green-500"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-medium">Humeur et Émotions</h4>
+                        <p class="text-sm text-gray-600">10-15 min</p>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-600 mb-3">
+                    Comprenez mieux vos émotions et votre état mental général.
+                </p>
+                <div class="flex items-center justify-between">
+                    <span class="badge badge-success">Nouveau</span>
+                    <span class="text-sm text-blue-600">Commencer →</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Overview -->
+    <div class="card p-6 mt-8">
+        <h3 class="text-xl font-semibold mb-2">Votre Progression</h3>
+        <p class="text-gray-600 mb-4">Statistiques des quiz complétés</p>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="text-center">
+                <div class="text-2xl font-bold text-blue-600">12</div>
+                <div class="text-sm text-gray-600">Quiz complétés</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-green-600">8.2</div>
+                <div class="text-sm text-gray-600">Score moyen</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-purple-600">3</div>
+                <div class="text-sm text-gray-600">Ce mois-ci</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-yellow-600">15</div>
+                <div class="text-sm text-gray-600">Jours de suite</div>
+            </div>
+        </div>
+        
+        <div class="mt-6">
+            <div class="flex justify-between items-center mb-2">
+                <span class="font-medium">Objectif mensuel</span>
+                <span class="text-sm text-gray-600">8 / 10 quiz</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+                <div class="bg-blue-500 h-2 rounded-full" style="width: 80%"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize quiz filtering
+    initializeQuizFiltering();
+    
+    // Initialize progress animations
+    initializeProgressAnimations();
+});
+
+function initializeQuizFiltering() {
+    const filterButtons = document.querySelectorAll('[onclick^="filterQuizzes"]');
+    const quizCards = document.querySelectorAll('.quiz-card');
+    
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const filter = this.getAttribute('onclick').match(/'([^']+)'/)[1];
+            
+            // Update active state
+            filterButtons.forEach(btn => btn.classList.remove('btn-primary'));
+            this.classList.add('btn-primary');
+            
+            // Filter cards
+            quizCards.forEach(card => {
+                const status = card.getAttribute('data-status');
+                if (filter === 'all' || status === filter) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    });
+}
+
+function initializeProgressAnimations() {
+    // Animate progress circles when they come into view
+    const progressCircles = document.querySelectorAll('svg circle[stroke-dasharray]');
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const circle = entry.target;
+                circle.style.transition = 'stroke-dashoffset 1s ease-in-out';
+                observer.unobserve(circle);
+            }
+        });
+    });
+    
+    progressCircles.forEach(circle => observer.observe(circle));
+}
+
+function startQuiz(quizType) {
+    // Redirect to quiz player with type
+    window.location.href = `/mental/quizzes/play?type=${quizType}`;
+}
+
+function filterQuizzes(filter) {
+    // This function is called by inline onclick handlers
+    console.log('Filtering quizzes:', filter);
+}
+</script>
+{% endblock %}

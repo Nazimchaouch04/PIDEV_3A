@@ -1,0 +1,93 @@
+{# BioSync KPI Card Component
+# Variables:
+# - value: string or number (required)
+# - label: string (required)
+# - trend: object (optional)
+#   - value: string (e.g., '+12%')
+#   - direction: 'up' | 'down' | 'neutral'
+#   - color: 'success' | 'error' | 'warning' | 'info' (optional, auto-detected from direction)
+# - icon: string (optional icon class)
+# - variant: 'default' | 'gradient' (default: 'default')
+# - size: 'sm' | 'md' | 'lg' (default: 'md')
+# - loading: boolean (default: false)
+# - class: string (optional additional classes)
+# - id: string (optional)
+#}
+
+{% set kpi_classes = [
+    'kpi-card',
+    variant == 'gradient' ? 'kpi-gradient' : '',
+    size == 'sm' ? 'kpi-sm' : '',
+    size == 'lg' ? 'kpi-lg' : '',
+    loading ? 'loading' : '',
+    class|default('')
+]|join(' ')|trim %}
+
+{% set size_classes = {
+    'sm': {
+        'value': 'text-2xl',
+        'label': 'text-xs',
+        'icon': 'text-lg'
+    },
+    'md': {
+        'value': 'text-3xl',
+        'label': 'text-sm',
+        'icon': 'text-xl'
+    },
+    'lg': {
+        'value': 'text-4xl',
+        'label': 'text-base',
+        'icon': 'text-2xl'
+    }
+} %}
+
+{% set current_size = size_classes[size|default('md')] %}
+
+{% if trend %}
+    {% set trend_color = trend.color|default(
+        trend.direction == 'up' ? 'success' : 
+        trend.direction == 'down' ? 'error' : 
+        'info'
+    ) %}
+    
+    {% set trend_icon = trend.direction == 'up' ? 'fa-arrow-up' : 
+                        trend.direction == 'down' ? 'fa-arrow-down' : 
+                        'fa-minus' %}
+{% endif %}
+
+<div class="{{ kpi_classes }}" {% if id %}id="{{ id }}"{% endif %}>
+    {% if icon or trend %}
+        <div class="kpi-header flex justify-between items-start mb-2">
+            {% if icon %}
+                <div class="kpi-icon {{ current_size.icon }} text-blue-500">
+                    <i class="{{ icon }}"></i>
+                </div>
+            {% endif %}
+            
+            {% if trend %}
+                <div class="kpi-trend {{ trend_color }} flex items-center gap-1 {{ current_size.label }}">
+                    <i class="fas {{ trend_icon }}"></i>
+                    <span>{{ trend.value }}</span>
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+    
+    <div class="kpi-value {{ current_size.value }} text-blue-600 font-bold">
+        {% if loading %}
+            <div class="loading-skeleton h-8 w-24 rounded"></div>
+        {% else %}
+            {{ value }}
+        {% endif %}
+    </div>
+    
+    <div class="kpi-label {{ current_size.label }} text-gray-600 font-medium">
+        {% if loading %}
+            <div class="loading-skeleton h-4 w-32 rounded mt-2"></div>
+        {% else %}
+            {{ label }}
+        {% endif %}
+    </div>
+    
+    {% block kpi_extra %}{% endblock %}
+</div>

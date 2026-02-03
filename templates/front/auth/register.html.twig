@@ -1,0 +1,299 @@
+{# BioSync Register Page
+# Front Office Authentication
+#}
+
+{% extends 'front/base.html.twig' %}
+
+{% block title %}Inscription - BioSync{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-2xl w-full space-y-8">
+        <!-- Header -->
+        <div class="text-center">
+            <div class="mx-auto h-16 w-16 bg-gradient-primary rounded-full flex items-center justify-center mb-6">
+                <i class="fas fa-user-plus text-white text-2xl"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-900 font-heading">
+                Rejoignez BioSync
+            </h1>
+            <p class="mt-2 text-sm text-gray-600">
+                Créez votre compte pour commencer votre voyage vers un meilleur bien-être
+            </p>
+        </div>
+
+        <!-- Registration Form -->
+        {% include 'components/_card.html.twig' with {
+            'variant': 'default',
+            'padding': 'lg'
+        } %}
+        {% block card_body %}
+            {% include 'components/_form.html.twig' with {
+                'action': path('app_register'),
+                'method': 'POST',
+                'fields': [
+                    {
+                        'name': 'first_name',
+                        'type': 'text',
+                        'label': 'Prénom',
+                        'placeholder': 'Jean',
+                        'required': true
+                    },
+                    {
+                        'name': 'last_name',
+                        'type': 'text',
+                        'label': 'Nom',
+                        'placeholder': 'Dupont',
+                        'required': true
+                    },
+                    {
+                        'name': 'email',
+                        'type': 'email',
+                        'label': 'Adresse email',
+                        'placeholder': 'jean.dupont@email.com',
+                        'required': true
+                    },
+                    {
+                        'name': 'password',
+                        'type': 'password',
+                        'label': 'Mot de passe',
+                        'placeholder': 'Min. 8 caractères',
+                        'required': true,
+                        'help': 'Doit contenir au moins 8 caractères, une majuscule et un chiffre'
+                    },
+                    {
+                        'name': 'password_confirm',
+                        'type': 'password',
+                        'label': 'Confirmer le mot de passe',
+                        'placeholder': '••••••••',
+                        'required': true
+                    },
+                    {
+                        'name': 'birth_date',
+                        'type': 'text',
+                        'label': 'Date de naissance',
+                        'placeholder': 'JJ/MM/AAAA',
+                        'required': true,
+                        'help': 'Pour personnaliser votre expérience chronobiologique'
+                    },
+                    {
+                        'name': 'phone',
+                        'type': 'text',
+                        'label': 'Téléphone (optionnel)',
+                        'placeholder': '06 12 34 56 78'
+                    },
+                    {
+                        'name': 'newsletter',
+                        'type': 'checkbox',
+                        'label': 'Je souhaite recevoir des conseils bien-être par email',
+                        'value': true
+                    },
+                    {
+                        'name': 'terms',
+                        'type': 'checkbox',
+                        'label': 'J\'accepte les conditions générales d\'utilisation et la politique de confidentialité',
+                        'required': true
+                    }
+                ],
+                'submit_text': 'Créer mon compte',
+                'submit_variant': 'primary',
+                'cancel_url': path('app_login')
+            } %}
+            
+            <!-- Login Link -->
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-600">
+                    Vous avez déjà un compte ?
+                    <a href="{{ path('app_login') }}" class="font-medium text-blue-600 hover:text-blue-500">
+                        Se connecter
+                    </a>
+                </p>
+            </div>
+        {% endblock %}
+    
+        <!-- Benefits Section -->
+        <div class="mt-8">
+            <h3 class="text-lg font-medium text-gray-900 text-center mb-6">
+                Pourquoi rejoindre BioSync ?
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="text-center">
+                    <div class="mx-auto h-12 w-12 bg-green-100 rounded-full flex items-center justify-center mb-3">
+                        <i class="fas fa-chart-line text-green-600"></i>
+                    </div>
+                    <h4 class="font-medium text-gray-900">Suivi Personnalisé</h4>
+                    <p class="text-sm text-gray-600 mt-1">
+                        Analyse de vos rythmes chronobiologiques
+                    </p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="mx-auto h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center mb-3">
+                        <i class="fas fa-users text-blue-600"></i>
+                    </div>
+                    <h4 class="font-medium text-gray-900">Accompagnement</h4>
+                    <p class="text-sm text-gray-600 mt-1">
+                        Accès à des professionnels de santé
+                    </p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="mx-auto h-12 w-12 bg-purple-100 rounded-full flex items-center justify-center mb-3">
+                        <i class="fas fa-trophy text-purple-600"></i>
+                    </div>
+                    <h4 class="font-medium text-gray-900">Motivation</h4>
+                    <p class="text-sm text-gray-600 mt-1">
+                        Objectifs et récompenses personnalisés
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alert Messages -->
+{% if error is defined and error %}
+    {% include 'components/_alert.html.twig' with {
+        'type': 'error',
+        'message': error,
+        'dismissible': true
+    } %}
+{% endif %}
+
+{% if success is defined and success %}
+    {% include 'components/_alert.html.twig' with {
+        'type': 'success',
+        'message': success,
+        'dismissible': true
+    } %}
+{% endif %}
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const passwordInput = document.querySelector('input[name="password"]');
+    const passwordConfirmInput = document.querySelector('input[name="password_confirm"]');
+    const emailInput = document.querySelector('input[name="email"]');
+    const birthDateInput = document.querySelector('input[name="birth_date"]');
+    
+    // Password strength indicator
+    passwordInput?.addEventListener('input', function() {
+        const password = this.value;
+        const strength = checkPasswordStrength(password);
+        updatePasswordStrength(strength);
+    });
+    
+    // Password confirmation
+    passwordConfirmInput?.addEventListener('blur', function() {
+        if (this.value !== passwordInput.value) {
+            this.classList.add('border-red-500');
+            showError(this, 'Les mots de passe ne correspondent pas');
+        } else {
+            this.classList.remove('border-red-500');
+            hideError(this);
+        }
+    });
+    
+    // Email validation
+    emailInput?.addEventListener('blur', function() {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (this.value && !emailRegex.test(this.value)) {
+            this.classList.add('border-red-500');
+            showError(this, 'Veuillez entrer une adresse email valide');
+        } else {
+            this.classList.remove('border-red-500');
+            hideError(this);
+        }
+    });
+    
+    // Birth date validation
+    birthDateInput?.addEventListener('blur', function() {
+        const dateRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+        if (this.value && !dateRegex.test(this.value)) {
+            this.classList.add('border-red-500');
+            showError(this, 'Format attendu: JJ/MM/AAAA');
+        } else {
+            this.classList.remove('border-red-500');
+            hideError(this);
+        }
+    });
+    
+    // Form submission
+    form?.addEventListener('submit', function(e) {
+        if (!validateForm()) {
+            e.preventDefault();
+            showAlert('Veuillez corriger les erreurs dans le formulaire', 'error');
+        }
+    });
+    
+    // Initialize date picker
+    if (birthDateInput) {
+        birthDateInput.setAttribute('maxlength', '10');
+        birthDateInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.slice(0, 2) + '/' + value.slice(2);
+            }
+            if (value.length >= 5) {
+                value = value.slice(0, 5) + '/' + value.slice(5);
+            }
+            e.target.value = value;
+        });
+    }
+});
+
+function checkPasswordStrength(password) {
+    let strength = 0;
+    if (password.length >= 8) strength++;
+    if (/[a-z]/.test(password)) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[^a-zA-Z0-9]/.test(password)) strength++;
+    return strength;
+}
+
+function updatePasswordStrength(strength) {
+    const strengthBar = document.getElementById('password-strength');
+    if (!strengthBar) return;
+    
+    const colors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-green-500', 'bg-green-600'];
+    const widths = ['20%', '40%', '60%', '80%', '100%'];
+    const texts = ['Très faible', 'Faible', 'Moyen', 'Fort', 'Très fort'];
+    
+    strengthBar.className = 'h-2 rounded ' + colors[strength - 1] || 'bg-gray-300';
+    strengthBar.style.width = widths[strength - 1] || '0%';
+    
+    const strengthText = document.getElementById('password-strength-text');
+    if (strengthText) {
+        strengthText.textContent = texts[strength - 1] || '';
+        strengthText.className = 'text-sm mt-1 ' + (strength >= 3 ? 'text-green-600' : 'text-red-600');
+    }
+}
+
+function validateForm() {
+    const requiredFields = document.querySelectorAll('input[required]');
+    let isValid = true;
+    
+    requiredFields.forEach(field => {
+        if (!field.value || (field.type === 'checkbox' && !field.checked)) {
+            field.classList.add('border-red-500');
+            isValid = false;
+        } else {
+            field.classList.remove('border-red-500');
+        }
+    });
+    
+    return isValid;
+}
+</script>
+
+<!-- Password Strength Indicator -->
+<style>
+.password-strength-container {
+    margin-top: 0.5rem;
+}
+</style>
+{% endblock %}

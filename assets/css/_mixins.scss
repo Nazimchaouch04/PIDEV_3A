@@ -1,0 +1,303 @@
+// BioSync Mixins
+// =============
+
+// Responsive Breakpoints
+@mixin mobile {
+  @media (max-width: #{$breakpoint-sm - 1px}) {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @media (min-width: #{$breakpoint-sm}) and (max-width: #{$breakpoint-md - 1px}) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media (min-width: #{$breakpoint-md}) {
+    @content;
+  }
+}
+
+@mixin lg-desktop {
+  @media (min-width: #{$breakpoint-lg}) {
+    @content;
+  }
+}
+
+// Flexbox Utilities
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+// Card Styles
+@mixin card {
+  background: $white;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-md;
+  padding: $spacing-6;
+  transition: $transition-base;
+  
+  &:hover {
+    box-shadow: $shadow-lg;
+    transform: translateY(-2px);
+  }
+}
+
+@mixin card-soft {
+  background: $bleu-francais;
+  border-radius: $radius-lg;
+  padding: $spacing-6;
+  border: 1px solid rgba($bleu, 0.1);
+}
+
+// Button Styles
+@mixin btn-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-2;
+  padding: $spacing-3 $spacing-6;
+  border-radius: $radius-md;
+  font-family: $font-body;
+  font-weight: 500;
+  text-decoration: none;
+  transition: $transition-base;
+  cursor: pointer;
+  border: none;
+  font-size: $text-base;
+  line-height: 1.5;
+}
+
+@mixin btn-primary {
+  @include btn-base;
+  background: $bleu;
+  color: $white;
+  
+  &:hover {
+    background: darken($bleu, 10%);
+    transform: translateY(-1px);
+    box-shadow: $shadow-md;
+  }
+}
+
+@mixin btn-success {
+  @include btn-base;
+  background: $vert-clair;
+  color: $white;
+  
+  &:hover {
+    background: darken($vert-clair, 10%);
+    transform: translateY(-1px);
+    box-shadow: $shadow-md;
+  }
+}
+
+@mixin btn-outline {
+  @include btn-base;
+  background: transparent;
+  color: $bleu;
+  border: 2px solid $bleu;
+  
+  &:hover {
+    background: $bleu;
+    color: $white;
+    transform: translateY(-1px);
+    box-shadow: $shadow-md;
+  }
+}
+
+@mixin btn-soft {
+  @include btn-base;
+  background: $bleu-francais;
+  color: $bleu;
+  
+  &:hover {
+    background: darken($bleu-francais, 5%);
+    transform: translateY(-1px);
+  }
+}
+
+// Form Styles
+@mixin input-base {
+  width: 100%;
+  padding: $spacing-3 $spacing-4;
+  border: 2px solid $gray-200;
+  border-radius: $radius-md;
+  font-family: $font-body;
+  font-size: $text-base;
+  transition: $transition-base;
+  
+  &:focus {
+    outline: none;
+    border-color: $bleu;
+    box-shadow: 0 0 0 3px rgba($bleu, 0.1);
+  }
+  
+  &::placeholder {
+    color: $gray-400;
+  }
+}
+
+// Typography
+@mixin heading-1 {
+  font-family: $font-heading;
+  font-size: $text-4xl;
+  font-weight: 700;
+  color: $gray-900;
+  line-height: 1.2;
+  margin-bottom: $spacing-6;
+}
+
+@mixin heading-2 {
+  font-family: $font-heading;
+  font-size: $text-3xl;
+  font-weight: 600;
+  color: $gray-900;
+  line-height: 1.3;
+  margin-bottom: $spacing-4;
+}
+
+@mixin heading-3 {
+  font-family: $font-heading;
+  font-size: $text-2xl;
+  font-weight: 600;
+  color: $gray-900;
+  line-height: 1.4;
+  margin-bottom: $spacing-3;
+}
+
+// Status Badges
+@mixin badge {
+  display: inline-flex;
+  align-items: center;
+  padding: $spacing-1 $spacing-3;
+  border-radius: $radius-full;
+  font-size: $text-xs;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+@mixin badge-success {
+  @include badge;
+  background: rgba($vert-clair, 0.1);
+  color: darken($vert-clair, 20%);
+}
+
+@mixin badge-info {
+  @include badge;
+  background: rgba($bleu, 0.1);
+  color: darken($bleu, 20%);
+}
+
+@mixin badge-warning {
+  @include badge;
+  background: rgba($warning, 0.1);
+  color: darken($warning, 20%);
+}
+
+@mixin badge-error {
+  @include badge;
+  background: rgba($error, 0.1);
+  color: darken($error, 20%);
+}
+
+// KPI Cards
+@mixin kpi-card {
+  @include card;
+  @include flex-column;
+  gap: $spacing-2;
+  
+  .kpi-value {
+    font-size: $text-3xl;
+    font-weight: 700;
+    color: $bleu;
+    font-family: $font-heading;
+  }
+  
+  .kpi-label {
+    font-size: $text-sm;
+    color: $gray-600;
+    font-weight: 500;
+  }
+  
+  .kpi-trend {
+    display: flex;
+    align-items: center;
+    gap: $spacing-1;
+    font-size: $text-sm;
+    
+    &.positive {
+      color: $vert-clair;
+    }
+    
+    &.negative {
+      color: $error;
+    }
+  }
+}
+
+// Modal Styles
+@mixin modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  @include flex-center;
+  z-index: $z-modal;
+  padding: $spacing-4;
+}
+
+@mixin modal-content {
+  background: $white;
+  border-radius: $radius-xl;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: $shadow-xl;
+}
+
+// Loading States
+@mixin loading-skeleton {
+  background: linear-gradient(90deg, $gray-200 25%, $gray-100 50%, $gray-200 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+// Chart Placeholder
+@mixin chart-placeholder {
+  background: $gradient-soft;
+  border-radius: $radius-lg;
+  height: 300px;
+  @include flex-center;
+  color: $gray-500;
+  font-style: italic;
+  border: 2px dashed rgba($bleu, 0.2);
+}

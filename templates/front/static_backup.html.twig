@@ -1,0 +1,160 @@
+{% extends 'front/base.html.twig' %}
+
+{% block title %}{{ page_title|default('BioSync') }} - Votre plateforme de bien-être{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section bg-gradient-to-br from-blue-600 to-purple-700 text-white py-20">
+    <div class="container mx-auto px-4">
+        <div class="max-w-4xl mx-auto text-center">
+            <h1 class="text-5xl font-bold mb-6 animate-fade-in">
+                {{ page_title|default('BioSync') }}
+            </h1>
+            <p class="text-xl mb-8 opacity-90">
+                Votre plateforme complète pour le bien-être physique et mental
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                {% include 'components/_button.html.twig' with {
+                    'text': 'Commencer Gratuitement',
+                    'variant': 'primary',
+                    'href': path('app_register'),
+                    'size': 'lg',
+                    'class': 'px-8 py-4 text-lg'
+                } %}
+                {% include 'components/_button.html.twig' with {
+                    'text': 'En Savoir Plus',
+                    'variant': 'outline',
+                    'href': path('app_features'),
+                    'size': 'lg',
+                    'class': 'px-8 py-4 text-lg border-white text-white hover:bg-white hover:text-blue-600'
+                } %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-16 bg-gray-50">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">Pourquoi choisir BioSync ?</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">
+                Une approche holistique du bien-être avec des outils professionnels pour nutrition, sport et santé mentale
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Nutrition Card -->
+            <div class="card p-6 text-center hover:shadow-lg transition-shadow">
+                <h3 class="text-xl font-semibold mb-2">Nutrition</h3>
+                <p class="text-gray-600 mb-4">Plan alimentaire personnalisé</p>
+                <div class="space-y-4">
+                    <div class="text-4xl mb-4">🥗</div>
+                    <p class="text-gray-600">
+                        Suivez vos repas, recevez des recommandations personnalisées et atteignez vos objectifs nutritionnels
+                    </p>
+                    {% include 'components/_button.html.twig' with {
+                        'text': 'Explorer la Nutrition',
+                        'variant': 'success',
+                        'href': path('app_nutrition_meals'),
+                        'class': 'w-full mt-4'
+                    } %}
+                </div>
+            </div>
+
+            <!-- Sport Card -->
+            <div class="card p-6 text-center hover:shadow-lg transition-shadow">
+                <h3 class="text-xl font-semibold mb-2">Sport</h3>
+                <p class="text-gray-600 mb-4">Programmes d'entraînement</p>
+                <div class="space-y-4">
+                    <div class="text-4xl mb-4">💪</div>
+                    <p class="text-gray-600">
+                        Plans d'entraînement adaptés, suivi de progression et coaching personnalisé
+                    </p>
+                    {% include 'components/_button.html.twig' with {
+                        'text': 'Commencer le Sport',
+                        'variant': 'success',
+                        'href': path('app_sport_sessions'),
+                        'class': 'w-full mt-4'
+                    } %}
+                </div>
+            </div>
+
+            <!-- Mental Card -->
+            <div class="card p-6 text-center hover:shadow-lg transition-shadow">
+                <h3 class="text-xl font-semibold mb-2">Santé Mentale</h3>
+                <p class="text-gray-600 mb-4">Quiz et méditation</p>
+                <div class="space-y-4">
+                    <div class="text-4xl mb-4">🧘</div>
+                    <p class="text-gray-600">
+                        Évaluez votre bien-être mental, suivez votre progression et accédez à des ressources de méditation
+                    </p>
+                    {% include 'components/_button.html.twig' with {
+                        'text': 'Quiz Mental',
+                        'variant': 'success',
+                        'href': path('app_mental_quiz_list'),
+                        'class': 'w-full mt-4'
+                    } %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-16 bg-blue-600 text-white">
+    <div class="container mx-auto px-4 text-center">
+        <h2 class="text-3xl font-bold mb-4">Prêt à commencer votre voyage ?</h2>
+        <p class="text-xl mb-8 opacity-90">
+            Rejoignez des milliers d'utilisateurs qui ont déjà amélioré leur bien-être avec BioSync
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            {% include 'components/_button.html.twig' with {
+                'text': 'S\'inscrire Maintenant',
+                'variant': 'primary',
+                'href': path('app_register'),
+                'size': 'lg',
+                'class': 'bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg'
+            } %}
+            {% include 'components/_button.html.twig' with {
+                'text': 'Accès Pro',
+                'variant': 'outline',
+                'href': path('app_pro_login'),
+                'size': 'lg',
+                'class': 'border-white text-white hover:bg-white hover:text-blue-600 px-8 py-4 text-lg'
+            } %}
+        </div>
+    </div>
+</section>
+
+<!-- Dashboard Access -->
+<section class="py-12">
+    <div class="container mx-auto px-4">
+        <div class="max-w-md mx-auto">
+            <div class="card p-6">
+                <h3 class="text-xl font-semibold mb-2">Déjà membre ?</h3>
+                <p class="text-gray-600 mb-4">Accédez à votre espace personnel</p>
+                <div class="space-y-4">
+                    <p class="text-gray-600 text-center">
+                        Connectez-vous pour accéder à votre dashboard et suivre votre progression
+                    </p>
+                    <div class="flex gap-3">
+                        {% include 'components/_button.html.twig' with {
+                            'text': 'Connexion',
+                            'variant': 'primary',
+                            'href': path('app_login'),
+                            'class': 'flex-1'
+                        } %}
+                        {% include 'components/_button.html.twig' with {
+                            'text': 'Dashboard',
+                            'variant': 'outline',
+                            'href': path('app_dashboard'),
+                            'class': 'flex-1'
+                        } %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,714 @@
+{# BioSync Nutrition Module - Meals List
+# Front Office - Nutrition Management
+#}
+
+{% extends 'front/base.html.twig' %}
+
+{% block title %}Nutrition - BioSync{% endblock %}
+
+{% block content %}
+<div class="container py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 font-heading mb-2">
+                    Nutrition
+                </h1>
+                <p class="text-gray-600">
+                    Suivez votre alimentation et atteignez vos objectifs bien-être
+                </p>
+            </div>
+            <div class="mt-4 md:mt-0 flex gap-3">
+                {% include 'components/_button.html.twig' with {
+                    'text': 'Ajouter un repas',
+                    'variant': 'primary',
+                    'icon': 'fas fa-plus',
+                    'onclick': 'openModal_mealModal()'
+                } %}
+                {% include 'components/_button.html.twig' with {
+                    'text': 'Rechercher un aliment',
+                    'variant': 'outline',
+                    'icon': 'fas fa-search'
+                } %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Summary -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        {% include 'components/_kpi_card.html.twig' with {
+            'value': '1,850',
+            'label': 'Calories du jour',
+            'trend': {
+                'value': '-150',
+                'direction': 'down',
+                'color': 'success'
+            },
+            'icon': 'fas fa-fire',
+            'size': 'sm'
+        } %}
+        
+        {% include 'components/_kpi_card.html.twig' with {
+            'value': '125g',
+            'label': 'Protéines',
+            'icon': 'fas fa-drumstick-bite',
+            'size': 'sm'
+        } %}
+        
+        {% include 'components/_kpi_card.html.twig' with {
+            'value': '220g',
+            'label': 'Glucides',
+            'icon': 'fas fa-bread-slice',
+            'size': 'sm'
+        } %}
+        
+        {% include 'components/_kpi_card.html.twig' with {
+            'value': '65g',
+            'label': 'Lipides',
+            'icon': 'fas fa-oil-can',
+            'size': 'sm'
+        } %}
+    </div>
+
+    <!-- Alert for Exciting Food After 16h -->
+    {% if "now"|date("H") >= 16 %}
+        <div class="alert alert-warning mb-8">
+            <div class="flex items-center">
+                <i class="fas fa-exclamation-triangle mr-3"></i>
+                <div>
+                    <strong>Attention:</strong> Il est après 16h. Évitez les aliments excitants (café, thé, chocolat) pour préserver la qualité de votre sommeil.
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Date Navigation -->
+    <div class="mb-6">
+        <div class="flex items-center justify-between">
+            <button class="btn btn-soft btn-sm" onclick="changeDate(-1)">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <h3 class="text-lg font-semibold">
+                {{ "now"|date("d/m/Y") }}
+            </h3>
+            <button class="btn btn-soft btn-sm" onclick="changeDate(1)">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Meals List -->
+    <div class="space-y-6">
+        <!-- Breakfast -->
+        {% include 'components/_card.html.twig' with {
+            'title': 'Petit-déjeuner',
+            'subtitle': '07:30 - 420 calories'
+        } %}
+        {% block card_body %}
+            <div class="space-y-3">
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-coffee text-orange-500"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-medium">Café au lait</h4>
+                            <p class="text-sm text-gray-600">250ml • 45 cal</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="badge badge-info">Laitier</span>
+                        <button class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-bread-slice text-yellow-600"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-medium">Pain complet</h4>
+                            <p class="text-sm text-gray-600">2 tranches • 180 cal</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="badge badge-warning">Glucides</span>
+                        <button class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-apple-alt text-red-500"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-medium">Pomme</h4>
+                            <p class="text-sm text-gray-600">1 moyenne • 95 cal</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="badge badge-success">Fruits</span>
+                        <button class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-egg text-amber-600"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-medium">Oeufs brouillés</h4>
+                            <p class="text-sm text-gray-600">2 oeufs • 100 cal</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="badge badge-info">Protéines</span>
+                        <button class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
+                <div class="text-sm text-gray-600">
+                    Total: <span class="font-semibold">420 cal</span>
+                </div>
+                {% include 'components/_button.html.twig' with {
+                    'text': 'Ajouter un aliment',
+                    'variant': 'soft',
+                    'size': 'sm',
+                    'icon': 'fas fa-plus'
+                } %}
+            </div>
+        {% endblock %}
+        {% endinclude %}
+
+        <!-- Lunch -->
+        {% include 'components/_card.html.twig' with {
+            'title': 'Déjeuner',
+            'subtitle': '12:45 - 680 calories'
+        } %}
+        {% block card_body %}
+            <div class="space-y-3">
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-leaf text-green-500"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-medium">Salade mixte</h4>
+                            <p class="text-sm text-gray-600">150g • 45 cal</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="badge badge-success">Légumes</span>
+                        <button class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-drumstick-bite text-red-500"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-medium">Poulet grillé</h4>
+                            <p class="text-sm text-gray-600">120g • 200 cal</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="badge badge-info">Protéines</span>
+                        <button class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-seedling text-yellow-600"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-medium">Riz complet</h4>
+                            <p class="text-sm text-gray-600">80g • 280 cal</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="badge badge-warning">Glucides</span>
+                        <button class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-cheese text-yellow-500"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-medium">Yaourt nature</h4>
+                            <p class="text-sm text-gray-600">150g • 65 cal</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="badge badge-info">Laitier</span>
+                        <button class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
+                <div class="text-sm text-gray-600">
+                    Total: <span class="font-semibold">680 cal</span>
+                </div>
+                {% include 'components/_button.html.twig' with {
+                    'text': 'Ajouter un aliment',
+                    'variant': 'soft',
+                    'size': 'sm',
+                    'icon': 'fas fa-plus'
+                } %}
+            </div>
+        {% endblock %}
+        {% endinclude %}
+
+        <!-- Snack -->
+        {% include 'components/_card.html.twig' with {
+            'title': 'Collation',
+            'subtitle': '16:30 - 150 calories'
+        } %}
+        {% block card_body %}
+            <div class="space-y-3">
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-blender text-purple-500"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-medium">Smoothie fruits rouges</h4>
+                            <p class="text-sm text-gray-600">200ml • 150 cal</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="badge badge-success">Fruits</span>
+                        <button class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
+                <div class="text-sm text-gray-600">
+                    Total: <span class="font-semibold">150 cal</span>
+                </div>
+                {% include 'components/_button.html.twig' with {
+                    'text': 'Ajouter un aliment',
+                    'variant': 'soft',
+                    'size': 'sm',
+                    'icon': 'fas fa-plus'
+                } %}
+            </div>
+        {% endblock %}
+        {% endinclude %}
+
+        <!-- Dinner -->
+        {% include 'components/_card.html.twig' with {
+            'title': 'Dîner',
+            'subtitle': '19:30 - 520 calories'
+        } %}
+        {% block card_body %}
+            <div class="space-y-3">
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-fish text-orange-500"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-medium">Saumon vapeur</h4>
+                            <p class="text-sm text-gray-600">150g • 280 cal</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="badge badge-info">Protéines</span>
+                        <button class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-carrot text-green-500"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-medium">Légumes vapeur</h4>
+                            <p class="text-sm text-gray-600">200g • 80 cal</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="badge badge-success">Légumes</span>
+                        <button class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-potato text-red-500"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-medium">Patate douce</h4>
+                            <p class="text-sm text-gray-600">150g • 130 cal</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="badge badge-warning">Glucides</span>
+                        <button class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-lemon text-green-500"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-medium">Salade verte</h4>
+                            <p class="text-sm text-gray-600">100g • 30 cal</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="badge badge-success">Légumes</span>
+                        <button class="text-gray-400 hover:text-gray-600">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
+                <div class="text-sm text-gray-600">
+                    Total: <span class="font-semibold">520 cal</span>
+                </div>
+                {% include 'components/_button.html.twig' with {
+                    'text': 'Ajouter un aliment',
+                    'variant': 'soft',
+                    'size': 'sm',
+                    'icon': 'fas fa-plus'
+                } %}
+            </div>
+        {% endblock %}
+        {% endinclude %}
+    </div>
+
+    <!-- Water Intake -->
+    {% include 'components/_card.html.twig' with {
+        'title': 'Hydratation',
+        'subtitle': '1.5L / 2L objectif'
+    } %}
+    {% block card_body %}
+        <div class="space-y-4">
+            <div class="w-full bg-gray-200 rounded-full h-4">
+                <div class="bg-blue-500 h-4 rounded-full transition-all duration-300" style="width: 75%"></div>
+            </div>
+            
+            <div class="grid grid-cols-8 gap-2">
+                {% for i in 1..8 %}
+                    <div class="text-center">
+                        <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-1">
+                            <i class="fas fa-tint text-blue-500 text-xs"></i>
+                        </div>
+                        <span class="text-xs text-gray-500">{{ i * 250 }}ml</span>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            {% include 'components/_button.html.twig' with {
+                'text': 'Ajouter 250ml',
+                'variant': 'soft',
+                'size': 'sm',
+                'icon': 'fas fa-plus',
+                'class': 'w-full'
+            } %}
+        </div>
+    {% endblock %}
+    {% endinclude %}
+</div>
+
+<!-- Add Meal Modal -->
+{% include 'components/_modal.html.twig' with {
+    'id': 'mealModal',
+    'title': 'Ajouter un repas',
+    'size': 'lg'
+} %}
+{% block modal_content %}
+    {% include 'components/_form.html.twig' with {
+        'action': path('app_nutrition_add_meal'),
+        'method': 'POST',
+        'fields': [
+            {
+                'name': 'meal_type',
+                'type': 'select',
+                'label': 'Type de repas',
+                'required': true,
+                'options': [
+                    {'value': 'breakfast', 'label': 'Petit-déjeuner'},
+                    {'value': 'lunch', 'label': 'Déjeuner'},
+                    {'value': 'snack', 'label': 'Collation'},
+                    {'value': 'dinner', 'label': 'Dîner'}
+                ]
+            },
+            {
+                'name': 'food_search',
+                'type': 'text',
+                'label': 'Rechercher un aliment',
+                'placeholder': 'Ex: Poulet, Riz, Pomme...',
+                'help': 'Commencez à taper pour voir les suggestions'
+            },
+            {
+                'name': 'quantity',
+                'type': 'text',
+                'label': 'Quantité',
+                'placeholder': 'Ex: 100g, 1 unité',
+                'required': true
+            },
+            {
+                'name': 'notes',
+                'type': 'textarea',
+                'label': 'Notes (optionnel)',
+                'placeholder': 'Préparation, accompagnement...'
+            }
+        ],
+        'submit_text': 'Ajouter le repas',
+        'submit_variant': 'primary'
+    } %}
+{% endblock %}
+{% endmodal_content %}
+{% endinclude %}
+
+<!-- Food Search Modal -->
+{% include 'components/_modal.html.twig' with {
+    'id': 'foodSearchModal',
+    'title': 'Rechercher un aliment',
+    'size': 'lg'
+} %}
+{% block modal_content %}
+    <div class="space-y-4">
+        <div class="relative">
+            <input type="text" 
+                   class="form-input pl-10" 
+                   placeholder="Rechercher un aliment..."
+                   id="foodSearchInput">
+            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+        </div>
+        
+        <div id="foodSearchResults" class="space-y-2 max-h-96 overflow-y-auto">
+            <!-- Search results will be populated here -->
+            <div class="text-center text-gray-500 py-8">
+                <i class="fas fa-search text-4xl mb-3"></i>
+                <p>Commencez à taper pour rechercher des aliments</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% endmodal_content %}
+{% endinclude %}
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Food search functionality
+    const foodSearchInput = document.getElementById('foodSearchInput');
+    const foodSearchResults = document.getElementById('foodSearchResults');
+    
+    foodSearchInput?.addEventListener('input', function() {
+        const query = this.value.toLowerCase();
+        if (query.length < 2) {
+            foodSearchResults.innerHTML = `
+                <div class="text-center text-gray-500 py-8">
+                    <i class="fas fa-search text-4xl mb-3"></i>
+                    <p>Commencez à taper pour rechercher des aliments</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Simulate API call
+        searchFoods(query);
+    });
+    
+    // Water intake tracking
+    const waterButtons = document.querySelectorAll('.water-glass');
+    waterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            this.classList.toggle('bg-blue-500');
+            this.classList.toggle('bg-blue-100');
+            updateWaterProgress();
+        });
+    });
+    
+    // Initialize date navigation
+    initializeDateNavigation();
+});
+
+function searchFoods(query) {
+    // Mock food database
+    const foods = [
+        {name: 'Poulet', calories: 165, protein: 31, carbs: 0, fat: 3.6, category: 'protéines'},
+        {name: 'Riz complet', calories: 111, protein: 2.6, carbs: 23, fat: 0.9, category: 'glucides'},
+        {name: 'Pomme', calories: 52, protein: 0.3, carbs: 14, fat: 0.2, category: 'fruits'},
+        {name: 'Saumon', calories: 208, protein: 20, carbs: 0, fat: 13, category: 'protéines'},
+        {name: 'Brocoli', calories: 34, protein: 2.8, carbs: 7, fat: 0.4, category: 'légumes'},
+        {name: 'Yaourt nature', calories: 59, protein: 10, carbs: 3.6, fat: 0.4, category: 'laitier'},
+        {name: 'Amandes', calories: 579, protein: 21, carbs: 22, fat: 50, category: 'lipides'},
+        {name: 'Quinoa', calories: 120, protein: 4.4, carbs: 21, fat: 1.9, category: 'glucides'}
+    ];
+    
+    const results = foods.filter(food => 
+        food.name.toLowerCase().includes(query)
+    );
+    
+    const resultsHtml = results.map(food => `
+        <div class="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer food-item" 
+             onclick="selectFood('${food.name}', ${food.calories}, '${food.category}')">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h4 class="font-medium">${food.name}</h4>
+                    <p class="text-sm text-gray-600">${food.calories} cal/100g</p>
+                </div>
+                <div class="text-right">
+                    <span class="badge badge-info">${food.category}</span>
+                    <div class="text-xs text-gray-500 mt-1">
+                        P: ${food.protein}g | G: ${food.carbs}g | L: ${food.fat}g
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+    
+    document.getElementById('foodSearchResults').innerHTML = resultsHtml || 
+        '<div class="text-center text-gray-500 py-8">Aucun aliment trouvé</div>';
+}
+
+function selectFood(name, calories, category) {
+    // Populate the meal form with selected food
+    const foodInput = document.querySelector('input[name="food_search"]');
+    if (foodInput) {
+        foodInput.value = name;
+    }
+    
+    // Close the search modal
+    closeModal_foodSearchModal();
+    
+    // Show success message
+    showAlert(`${name} sélectionné (${calories} cal/100g)`, 'success');
+}
+
+function updateWaterProgress() {
+    const filledGlasses = document.querySelectorAll('.water-glass.bg-blue-500').length;
+    const totalGlasses = 8;
+    const percentage = (filledGlasses / totalGlasses) * 100;
+    
+    const progressBar = document.querySelector('.bg-blue-500.rounded-full');
+    if (progressBar) {
+        progressBar.style.width = percentage + '%';
+    }
+    
+    // Update water intake text
+    const waterText = document.querySelector('.card-subtitle');
+    if (waterText) {
+        const ml = filledGlasses * 250;
+        waterText.textContent = `${ml / 1000}L / 2L objectif`;
+    }
+}
+
+function initializeDateNavigation() {
+    let currentDate = new Date();
+    
+    window.changeDate = function(direction) {
+        currentDate.setDate(currentDate.getDate() + direction);
+        updateDateDisplay();
+        loadMealsForDate(currentDate);
+    };
+    
+    function updateDateDisplay() {
+        const dateElement = document.querySelector('h3.text-lg');
+        if (dateElement) {
+            dateElement.textContent = currentDate.toLocaleDateString('fr-FR');
+        }
+    }
+    
+    function loadMealsForDate(date) {
+        // This would load meals for the selected date from API
+        console.log('Loading meals for:', date);
+        // Show loading state
+        showAlert('Chargement des repas...', 'info');
+    }
+}
+
+// Meal item actions
+document.querySelectorAll('.fa-ellipsis-v').forEach(button => {
+    button.addEventListener('click', function(e) {
+        e.stopPropagation();
+        // Show context menu for meal item
+        showMealContextMenu(this);
+    });
+});
+
+function showMealContextMenu(button) {
+    // Create context menu
+    const menu = document.createElement('div');
+    menu.className = 'absolute bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-50';
+    menu.innerHTML = `
+        <button class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
+            <i class="fas fa-edit mr-2"></i> Modifier
+        </button>
+        <button class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
+            <i class="fas fa-copy mr-2"></i> Dupliquer
+        </button>
+        <button class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+            <i class="fas fa-trash mr-2"></i> Supprimer
+        </button>
+    `;
+    
+    // Position menu
+    const rect = button.getBoundingClientRect();
+    menu.style.top = rect.bottom + 'px';
+    menu.style.left = rect.left + 'px';
+    
+    document.body.appendChild(menu);
+    
+    // Close menu when clicking outside
+    setTimeout(() => {
+        document.addEventListener('click', function closeMenu() {
+            menu.remove();
+            document.removeEventListener('click', closeMenu);
+        });
+    }, 100);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends 'back/base.html.twig' %}
+
+{% block title %}{{ title|default('Administration') }} - BioSync{% endblock %}
+{% block page_title %}{{ title|default('Administration') }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    {% include 'components/_card.html.twig' with {
+        'title': title|default('Page'),
+        'subtitle': 'Page en cours de construction'
+    } %}
+    {% block card_body %}
+        <p class="text-gray-600">
+            Cette page est un placeholder. La structure Front + Back est intégrée, il reste à brancher la logique Symfony (Controllers/CRUD/DB).
+        </p>
+    {% endblock %}
+    {% endinclude %}
+</div>
+{% endblock %}

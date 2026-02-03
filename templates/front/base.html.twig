@@ -1,0 +1,264 @@
+{# BioSync Front Office Base Template
+# Base layout for all front-end pages
+#}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BioSync - Assistant Bien-être Chronobiologique{% endblock %}</title>
+    <meta name="description" content="{% block description %}BioSync, votre assistant personnel pour un bien-être optimal basé sur votre chronobiologie.{% endblock %}">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="{{ asset('assets/css/app.css') }}">
+    
+    {% block stylesheets %}{% endblock %}
+</head>
+<body class="bg-gray-50">
+    <!-- Header Navigation -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <!-- Logo -->
+                <a href="{{ path('app_home') }}" class="logo">
+                    <i class="fas fa-heartbeat mr-2"></i>
+                    BioSync
+                </a>
+                
+                <!-- Main Navigation -->
+                <nav class="nav">
+                    <a href="{{ path('app_home') }}" class="nav-link">Accueil</a>
+                    <a href="{{ path('app_features') }}" class="nav-link">Nutrition</a>
+                    <a href="{{ path('app_features') }}" class="nav-link">Sport</a>
+                    <a href="{{ path('app_features') }}" class="nav-link">Mental</a>
+                    <a href="{{ path('app_features') }}" class="nav-link">Evenements</a>  
+                     <a href="{{ path('app_contact') }}" class="nav-link">Rendez-vous</a> 
+                    
+                    
+                </nav>
+                
+                <!-- User Menu -->
+                <div class="user-menu">
+                    {% if app.user %}
+                        <!-- Logged in user -->
+                        <div class="relative">
+                            <button class="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 transition-colors" onclick="toggleUserMenu()">
+                                <div class="avatar">
+                                    {{ app.user.firstName|first }}{{ app.user.lastName|first }}
+                                </div>
+                                <i class="fas fa-chevron-down text-xs"></i>
+                            </button>
+                            
+                            <!-- Dropdown Menu -->
+                            <div id="user-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 hidden z-50">
+                                <div class="p-3 border-b border-gray-200">
+                                    <p class="font-medium text-gray-900">{{ app.user.firstName }} {{ app.user.lastName }}</p>
+                                    <p class="text-sm text-gray-500">{{ app.user.email }}</p>
+                                </div>
+                                <div class="py-2">
+                                    <a href="{{ path('app_dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        <i class="fas fa-tachometer-alt mr-2"></i> Tableau de bord
+                                    </a>
+                                    <a href="{{ path('app_profile') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        <i class="fas fa-user mr-2"></i> Mon profil
+                                    </a>
+                                    <a href="{{ path('app_settings') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        <i class="fas fa-cog mr-2"></i> Paramètres
+                                    </a>
+                                    {% if is_granted('ROLE_PROFESSIONAL') %}
+                                        <a href="{{ path('app_pro_dashboard') }}" class="block px-4 py-2 text-sm text-blue-600 hover:bg-blue-50">
+                                            <i class="fas fa-user-md mr-2"></i> Espace pro
+                                        </a>
+                                    {% endif %}
+                                    <div class="border-t border-gray-200 mt-2 pt-2">
+                                        <a href="{{ path('app_logout') }}" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                            <i class="fas fa-sign-out-alt mr-2"></i> Déconnexion
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <!-- Not logged in -->
+                        <a href="{{ path('app_login') }}" class="btn btn-outline btn-sm">Connexion</a>
+                        <a href="{{ path('app_register') }}" class="btn btn-primary btn-sm">Inscription</a>
+                    {% endif %}
+                </div>
+                
+                <!-- Mobile Menu Toggle -->
+                <button class="mobile-menu-toggle md:hidden" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Navigation -->
+        <div id="mobile-menu" class="mobile-menu hidden md:hidden bg-white border-t border-gray-200">
+            <div class="container py-4 space-y-3">
+                <a href="{{ path('app_home') }}" class="block py-2 text-gray-700 hover:text-blue-600">Accueil</a>
+                <a href="{{ path('app_features') }}" class="block py-2 text-gray-700 hover:text-blue-600">Fonctionnalités</a>
+                <a href="{{ path('app_pricing') }}" class="block py-2 text-gray-700 hover:text-blue-600">Tarifs</a>
+                <a href="{{ path('app_about') }}" class="block py-2 text-gray-700 hover:text-blue-600">À propos</a>
+                <a href="{{ path('app_contact') }}" class="block py-2 text-gray-700 hover:text-blue-600">Contact</a>
+                
+                {% if not app.user %}
+                    <div class="pt-3 border-t border-gray-200 space-y-2">
+                        <a href="{{ path('app_login') }}" class="block w-full text-center py-2 text-blue-600 border border-blue-600 rounded-lg">Connexion</a>
+                        <a href="{{ path('app_register') }}" class="block w-full text-center py-2 bg-blue-600 text-white rounded-lg">Inscription</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Flash Messages -->
+    {% for type, messages in app.session.flashbag.all() %}
+        {% for message in messages %}
+            <div class="alert alert-{{ type }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white mt-20">
+        <div class="container py-12">
+            <div class="footer-horizontal">
+                <!-- Company Info -->
+                <div class="footer-section">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-heartbeat text-2xl text-blue-400 mr-2"></i>
+                        <span class="text-xl font-bold font-heading">BioSync</span>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-4">
+                        Votre assistant personnel pour un bien-être optimal basé sur votre chronobiologie.
+                    </p>
+                    <div class="footer-social">
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                
+                <!-- Navigation Links -->
+                <div class="footer-section">
+                    <h4 class="font-semibold mb-4">Navigation</h4>
+                    <div class="footer-links">
+                        <ul>
+                            <li><a href="{{ path('app_home') }}">Accueil</a></li>
+                            <li><a href="{{ path('app_features') }}">Fonctionnalités</a></li>
+                            <li><a href="{{ path('app_pricing') }}">Tarifs</a></li>
+                        </ul>
+                        <ul>
+                            <li><a href="{{ path('app_about') }}">À propos</a></li>
+                            <li><a href="{{ path('app_contact') }}">Contact</a></li>
+                            <li><a href="{{ path('app_features') }}">Espace pro</a></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Services Links -->
+                <div class="footer-section">
+                    <h4 class="font-semibold mb-4">Services</h4>
+                    <div class="footer-links">
+                        <ul>
+                            <li><a href="#">Suivi nutritionnel</a></li>
+                            <li><a href="#">Programmes sportifs</a></li>
+                            <li><a href="#">Évaluation mentale</a></li>
+                        </ul>
+                        <ul>
+                            <li><a href="#">Consultations</a></li>
+                            <li><a href="#">Espace pro</a></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Legal Links -->
+                <div class="footer-section">
+                    <h4 class="font-semibold mb-4">Légal</h4>
+                    <div class="footer-links">
+                        <ul>
+                            <li><a href="{{ path('app_privacy') }}">Politique de confidentialité</a></li>
+                            <li><a href="{{ path('app_terms') }}">Conditions générales</a></li>
+                        </ul>
+                        <ul>
+                            <li><a href="{{ path('app_cookies') }}">Gestion des cookies</a></li>
+                            <li><a href="{{ path('app_legal') }}">Mentions légales</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; {{ "now"|date("Y") }} BioSync. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="{{ asset('assets/js/app.js') }}"></script>
+    
+    {% block javascripts %}{% endblock %}
+    
+    <script>
+        // Global functions
+        function toggleUserMenu() {
+            const dropdown = document.getElementById('user-dropdown');
+            dropdown.classList.toggle('hidden');
+        }
+        
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+        
+        function showAlert(message, type = 'info') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show fixed top-4 right-4 z-50`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+        
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(e) {
+            const dropdown = document.getElementById('user-dropdown');
+            const userMenu = document.querySelector('.user-menu');
+            
+            if (dropdown && !userMenu.contains(e.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

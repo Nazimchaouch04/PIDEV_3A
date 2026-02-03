@@ -1,0 +1,579 @@
+{# BioSync Community Module - Support Groups
+# Front Office - Community Support Groups
+#}
+
+{% extends 'front/base.html.twig' %}
+
+{% block title %}Groupes de Soutien - BioSync{% endblock %}
+
+{% block content %}
+<div class="container py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 font-heading mb-2">
+                    Groupes de Soutien
+                </h1>
+                <p class="text-gray-600">
+                    Rejoignez une communauté bienveillante pour partager et progresser ensemble
+                </p>
+            </div>
+            <div class="mt-4 md:mt-0 flex gap-3">
+                {% include 'components/_button.html.twig' with {
+                    'text': 'Créer un groupe',
+                    'variant': 'primary',
+                    'icon': 'fas fa-plus'
+                } %}
+                {% include 'components/_button.html.twig' with {
+                    'text': 'Mes groupes',
+                    'variant': 'outline',
+                    'icon': 'fas fa-users'
+                } %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filters -->
+    {% include 'components/_card.html.twig' with {
+        'variant': 'soft'
+    } %}
+    {% block card_body %}
+        <div class="flex flex-col md:flex-row gap-4">
+            <div class="flex-1">
+                <div class="relative">
+                    <input type="text" 
+                           class="form-input pl-10" 
+                           placeholder="Rechercher un groupe...">
+                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <select class="form-input">
+                    <option>Toutes les catégories</option>
+                    <option>Nutrition</option>
+                    <option>Sport</option>
+                    <option>Mental</option>
+                    <option>Sommeil</option>
+                    <option>Perte de poids</option>
+                </select>
+                <select class="form-input">
+                    <option>Tous les niveaux</option>
+                    <option>Débutant</option>
+                    <option>Intermédiaire</option>
+                    <option>Avancé</option>
+                </select>
+            </div>
+        </div>
+    {% endblock %}
+    {% endinclude %}
+
+    <!-- Featured Groups -->
+    {% include 'components/_card.html.twig' with {
+        'title': 'Groupes Recommandés',
+        'subtitle': 'Sélectionnés pour vous'
+    } %}
+    {% block card_body %}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Weight Loss Support -->
+            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                <div class="flex items-center mb-3">
+                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-weight text-green-500"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold">Perte de Poids Saine</h4>
+                        <p class="text-sm text-gray-600">Dr. Marie Laurent</p>
+                    </div>
+                </div>
+                
+                <p class="text-sm text-gray-600 mb-3">
+                    Un groupe pour accompagner votre perte de poids de manière saine et durable.
+                </p>
+                
+                <div class="flex items-center justify-between text-sm mb-3">
+                    <div class="flex items-center gap-3">
+                        <span><i class="fas fa-users text-gray-400"></i> 124 membres</span>
+                        <span><i class="fas fa-comments text-gray-400"></i> 45 messages/jour</span>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <span class="badge badge-success">Actif</span>
+                    {% include 'components/_button.html.twig' with {
+                        'text': 'Rejoindre',
+                        'variant': 'primary',
+                        'size': 'sm'
+                    } %}
+                </div>
+            </div>
+            
+            <!-- Marathon Runners -->
+            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                <div class="flex items-center mb-3">
+                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-running text-blue-500"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold">Marathon Paris 2024</h4>
+                        <p class="text-sm text-gray-600">Thomas Bernard</p>
+                    </div>
+                </div>
+                
+                <p class="text-sm text-gray-600 mb-3">
+                    Préparation au marathon avec programme d'entraînement et conseils d'experts.
+                </p>
+                
+                <div class="flex items-center justify-between text-sm mb-3">
+                    <div class="flex items-center gap-3">
+                        <span><i class="fas fa-users text-gray-400"></i> 89 membres</span>
+                        <span><i class="fas fa-comments text-gray-400"></i> 32 messages/jour</span>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <span class="badge badge-warning">Presque plein</span>
+                    {% include 'components/_button.html.twig' with {
+                        'text': 'Rejoindre',
+                        'variant': 'primary',
+                        'size': 'sm'
+                    } %}
+                </div>
+            </div>
+            
+            <!-- Stress Management -->
+            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                <div class="flex items-center mb-3">
+                    <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-spa text-purple-500"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold">Gestion du Stress</h4>
+                        <p class="text-sm text-gray-600">Dr. Sophie Martin</p>
+                    </div>
+                </div>
+                
+                <p class="text-sm text-gray-600 mb-3">
+                    Techniques de relaxation, méditation et gestion du stress au quotidien.
+                </p>
+                
+                <div class="flex items-center justify-between text-sm mb-3">
+                    <div class="flex items-center gap-3">
+                        <span><i class="fas fa-users text-gray-400"></i> 156 membres</span>
+                        <span><i class="fas fa-comments text-gray-400"></i> 28 messages/jour</span>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <span class="badge badge-info">Nouveau</span>
+                    {% include 'components/_button.html.twig' with {
+                        'text': 'Rejoindre',
+                        'variant': 'primary',
+                        'size': 'sm'
+                    } %}
+                </div>
+            </div>
+        </div>
+    {% endblock %}
+    {% endinclude %}
+
+    <!-- All Groups -->
+    <div class="mt-8">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-900">Tous les Groupes</h2>
+            <div class="flex gap-2">
+                <button class="btn btn-soft btn-sm">Plus récents</button>
+                <button class="btn btn-soft btn-sm">Plus populaires</button>
+                <button class="btn btn-soft btn-sm">Presque pleins</button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Nutrition Balance -->
+            <div class="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+                <div class="bg-gradient-to-r from-green-400 to-green-600 h-2"></div>
+                <div class="p-4">
+                    <div class="flex items-start justify-between mb-3">
+                        <div>
+                            <h3 class="font-semibold text-lg">Équilibre Nutritionnel</h3>
+                            <p class="text-sm text-gray-600">Animé par Dr. Marie Laurent</p>
+                        </div>
+                        <span class="badge badge-success">Ouvert</span>
+                    </div>
+                    
+                    <p class="text-gray-600 mb-4">
+                        Apprenez à équilibrer votre alimentation pour une santé optimale. Partagez recettes et astuces.
+                    </p>
+                    
+                    <div class="flex items-center gap-4 text-sm text-gray-500 mb-4">
+                        <span><i class="fas fa-users"></i> 67 membres</span>
+                        <span><i class="fas fa-calendar"></i> Créé il y a 2 mois</span>
+                        <span><i class="fas fa-comments"></i> Actif</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <div class="flex -space-x-2">
+                            <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-medium">JD</div>
+                            <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-medium">MC</div>
+                            <div class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white text-xs font-medium">AB</div>
+                            <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 text-xs font-medium">+64</div>
+                        </div>
+                        {% include 'components/_button.html.twig' with {
+                            'text': 'Rejoindre',
+                            'variant': 'primary',
+                            'size': 'sm'
+                        } %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Morning Runners -->
+            <div class="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+                <div class="bg-gradient-to-r from-blue-400 to-blue-600 h-2"></div>
+                <div class="p-4">
+                    <div class="flex items-start justify-between mb-3">
+                        <div>
+                            <h3 class="font-semibold text-lg">Coureurs du Matin</h3>
+                            <p class="text-sm text-gray-600">Animé par Thomas Bernard</p>
+                        </div>
+                        <span class="badge badge-warning">3 places</span>
+                    </div>
+                    
+                    <p class="text-gray-600 mb-4">
+                        Groupes de course matinaux pour démarrer la journée avec énergie et motivation.
+                    </p>
+                    
+                    <div class="flex items-center gap-4 text-sm text-gray-500 mb-4">
+                        <span><i class="fas fa-users"></i> 47/50 membres</span>
+                        <span><i class="fas fa-calendar"></i> Créé il y a 1 mois</span>
+                        <span><i class="fas fa-comments"></i> Très actif</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <div class="flex -space-x-2">
+                            <div class="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs font-medium">KL</div>
+                            <div class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-medium">PN</div>
+                            <div class="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center text-white text-xs font-medium">RS</div>
+                            <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 text-xs font-medium">+44</div>
+                        </div>
+                        {% include 'components/_button.html.twig' with {
+                            'text': 'Rejoindre',
+                            'variant': 'primary',
+                            'size': 'sm'
+                        } %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Better Sleep -->
+            <div class="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+                <div class="bg-gradient-to-r from-purple-400 to-purple-600 h-2"></div>
+                <div class="p-4">
+                    <div class="flex items-start justify-between mb-3">
+                        <div>
+                            <h3 class="font-semibold text-lg">Sommeil de Qualité</h3>
+                            <p class="text-sm text-gray-600">Animé par Dr. Pierre Dubois</p>
+                        </div>
+                        <span class="badge badge-success">Ouvert</span>
+                    </div>
+                    
+                    <p class="text-gray-600 mb-4">
+                        Améliorez votre sommeil avec des techniques naturelles et conseils d'experts.
+                    </p>
+                    
+                    <div class="flex items-center gap-4 text-sm text-gray-500 mb-4">
+                        <span><i class="fas fa-users"></i> 93 membres</span>
+                        <span><i class="fas fa-calendar"></i> Créé il y a 3 semaines</span>
+                        <span><i class="fas fa-comments"></i> Actif</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <div class="flex -space-x-2">
+                            <div class="w-8 h-8 bg-teal-500 rounded-full flex items-center justify-center text-white text-xs font-medium">LM</div>
+                            <div class="w-8 h-8 bg-pink-500 rounded-full flex items-center justify-center text-white text-xs font-medium">DV</div>
+                            <div class="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center text-white text-xs font-medium">FG</div>
+                            <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 text-xs font-medium">+90</div>
+                        </div>
+                        {% include 'components/_button.html.twig' with {
+                            'text': 'Rejoindre',
+                            'variant': 'primary',
+                            'size': 'sm'
+                        } %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Full Capacity Group -->
+            <div class="border border-gray-200 rounded-lg overflow-hidden opacity-75">
+                <div class="bg-gradient-to-r from-gray-400 to-gray-600 h-2"></div>
+                <div class="p-4">
+                    <div class="flex items-start justify-between mb-3">
+                        <div>
+                            <h3 class="font-semibold text-lg">Défi 30 Jours</h3>
+                            <p class="text-sm text-gray-600">Animé par Sophie Martin</p>
+                        </div>
+                        <span class="badge badge-error">Complet</span>
+                    </div>
+                    
+                    <p class="text-gray-600 mb-4">
+                        Défi fitness de 30 jours avec suivi quotidien et motivation de groupe.
+                    </p>
+                    
+                    <div class="flex items-center gap-4 text-sm text-gray-500 mb-4">
+                        <span><i class="fas fa-users"></i> 100/100 membres</span>
+                        <span><i class="fas fa-calendar"></i> Créé il y a 1 semaine</span>
+                        <span><i class="fas fa-comments"></i> Très actif</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <div class="flex -space-x-2">
+                            <div class="w-8 h-8 bg-cyan-500 rounded-full flex items-center justify-center text-white text-xs font-medium">TW</div>
+                            <div class="w-8 h-8 bg-lime-500 rounded-full flex items-center justify-center text-white text-xs font-medium">QH</div>
+                            <div class="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center text-white text-xs font-medium">ZX</div>
+                            <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 text-xs font-medium">+97</div>
+                        </div>
+                        {% include 'components/_button.html.twig' with {
+                            'text': 'Liste d\'attente',
+                            'variant': 'outline',
+                            'size': 'sm',
+                            'icon': 'fas fa-clock'
+                        } %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- My Groups (if user is member of any) -->
+    {% include 'components/_card.html.twig' with {
+        'title': 'Mes Groupes',
+        'subtitle': 'Groupes que vous avez rejoints'
+    } %}
+    {% block card_body %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="border border-gray-200 rounded-lg p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-weight text-green-500"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-medium">Perte de Poids Saine</h4>
+                            <p class="text-sm text-gray-600">Membre depuis 2 semaines</p>
+                        </div>
+                    </div>
+                    <span class="badge badge-success">Membre</span>
+                </div>
+                
+                <div class="text-sm text-gray-600 mb-3">
+                    <div class="flex justify-between mb-1">
+                        <span>Progression cette semaine</span>
+                        <span>3/7 jours</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-green-500 h-2 rounded-full" style="width: 43%"></div>
+                    </div>
+                </div>
+                
+                {% include 'components/_button.html.twig' with {
+                    'text': 'Voir le groupe',
+                    'variant': 'primary',
+                    'size': 'sm',
+                    'class': 'w-full'
+                } %}
+            </div>
+        </div>
+    {% endblock %}
+    {% endinclude %}
+
+    <!-- Create Group CTA -->
+    {% include 'components/_card.html.twig' with {
+        'variant': 'soft'
+    } %}
+    {% block card_body %}
+        <div class="text-center">
+            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-users text-blue-500 text-2xl"></i>
+            </div>
+            <h3 class="text-xl font-semibold mb-2">Créez votre propre groupe</h3>
+            <p class="text-gray-600 mb-4">
+                Lancez un groupe de soutien autour d'un thème qui vous passionne
+            </p>
+            {% include 'components/_button.html.twig' with {
+                'text': 'Créer un groupe',
+                'variant': 'primary',
+                'icon': 'fas fa-plus'
+            } %}
+        </div>
+    {% endblock %}
+    {% endinclude %}
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize group interactions
+    initializeGroupInteractions();
+    
+    // Initialize search functionality
+    initializeSearch();
+    
+    // Initialize join buttons
+    initializeJoinButtons();
+});
+
+function initializeGroupInteractions() {
+    // Group card hover effects
+    const groupCards = document.querySelectorAll('.border.border-gray-200.rounded-lg');
+    groupCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+            this.style.transition = 'transform 0.2s ease-in-out';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+}
+
+function initializeSearch() {
+    const searchInput = document.querySelector('input[placeholder="Rechercher un groupe..."]');
+    const categorySelect = document.querySelector('select');
+    const levelSelect = document.querySelectorAll('select')[1];
+    
+    searchInput?.addEventListener('input', function() {
+        const query = this.value.toLowerCase();
+        filterGroups(query, categorySelect.value, levelSelect.value);
+    });
+    
+    categorySelect?.addEventListener('change', function() {
+        filterGroups(searchInput.value.toLowerCase(), this.value, levelSelect.value);
+    });
+    
+    levelSelect?.addEventListener('change', function() {
+        filterGroups(searchInput.value.toLowerCase(), categorySelect.value, this.value);
+    });
+}
+
+function filterGroups(query, category, level) {
+    const groupCards = document.querySelectorAll('.grid .border.border-gray-200.rounded-lg');
+    
+    groupCards.forEach(card => {
+        const title = card.querySelector('h3, h4')?.textContent.toLowerCase() || '';
+        const description = card.querySelector('p')?.textContent.toLowerCase() || '';
+        
+        const matchesQuery = !query || title.includes(query) || description.includes(query);
+        const matchesCategory = !category || category === 'Toutes les catégories';
+        const matchesLevel = !level || level === 'Tous les niveaux';
+        
+        if (matchesQuery && matchesCategory && matchesLevel) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+function initializeJoinButtons() {
+    const joinButtons = document.querySelectorAll('.btn');
+    joinButtons.forEach(button => {
+        if (button.textContent.includes('Rejoindre')) {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                joinGroup(this);
+            });
+        }
+    });
+}
+
+function joinGroup(button) {
+    const groupCard = button.closest('.border.border-gray-200.rounded-lg');
+    const groupName = groupCard.querySelector('h3, h4')?.textContent;
+    
+    // Show confirmation
+    if (confirm(`Voulez-vous rejoindre le groupe "${groupName}" ?`)) {
+        // Disable button and show loading
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Rejoindre...';
+        
+        // Simulate API call
+        setTimeout(() => {
+            button.textContent = 'Rejoint';
+            button.classList.remove('btn-primary');
+            button.classList.add('btn-success');
+            button.disabled = false;
+            
+            showAlert(`Vous avez rejoint le groupe "${groupName}" !`, 'success');
+            
+            // Update badge
+            const badge = groupCard.querySelector('.badge');
+            if (badge) {
+                badge.textContent = 'Membre';
+                badge.className = 'badge badge-success';
+            }
+        }, 1500);
+    }
+}
+
+// Waitlist functionality
+document.addEventListener('click', function(e) {
+    if (e.target.textContent.includes('Liste d\'attente')) {
+        e.preventDefault();
+        const groupName = e.target.closest('.border.border-gray-200.rounded-lg').querySelector('h3, h4')?.textContent;
+        
+        if (confirm(`Voulez-vous vous inscrire sur la liste d'attente pour "${groupName}" ?`)) {
+            e.target.disabled = true;
+            e.target.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Inscription...';
+            
+            setTimeout(() => {
+                e.target.textContent = 'Inscrit en attente';
+                e.target.classList.remove('btn-outline');
+                e.target.classList.add('btn-soft');
+                e.target.disabled = false;
+                
+                showAlert(`Vous êtes inscrit sur la liste d'attente pour "${groupName}"`, 'info');
+            }, 1000);
+        }
+    }
+});
+
+// Sort functionality
+document.addEventListener('click', function(e) {
+    if (e.target.textContent.includes('Plus récents')) {
+        sortGroups('recent');
+    } else if (e.target.textContent.includes('Plus populaires')) {
+        sortGroups('popular');
+    } else if (e.target.textContent.includes('Presque pleins')) {
+        sortGroups('almost-full');
+    }
+});
+
+function sortGroups(sortType) {
+    const container = document.querySelector('.grid.grid-cols-1.md\\:grid-cols-2');
+    const groups = Array.from(container.children);
+    
+    groups.sort((a, b) => {
+        if (sortType === 'recent') {
+            // Sort by creation date (mock)
+            return Math.random() - 0.5;
+        } else if (sortType === 'popular') {
+            // Sort by member count
+            const aMembers = parseInt(a.textContent.match(/(\d+) membres/)?.[1] || 0);
+            const bMembers = parseInt(b.textContent.match(/(\d+) membres/)?.[1] || 0);
+            return bMembers - aMembers;
+        } else if (sortType === 'almost-full') {
+            // Sort by capacity
+            const aCapacity = a.textContent.includes('Complet') ? 0 : 1;
+            const bCapacity = b.textContent.includes('Complet') ? 0 : 1;
+            return aCapacity - bCapacity;
+        }
+    });
+    
+    // Re-append sorted groups
+    groups.forEach(group => container.appendChild(group));
+}
+</script>
+{% endblock %}

@@ -1,0 +1,526 @@
+{# BioSync Nutrition Module - Add Meal Form
+# Front Office - Add New Meal
+#}
+
+{% extends 'front/base.html.twig' %}
+
+{% block title %}Ajouter un repas - BioSync{% endblock %}
+
+{% block content %}
+<div class="container py-8 max-w-4xl">
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex items-center mb-4">
+            <a href="{{ path('app_nutrition_meals') }}" class="text-blue-600 hover:text-blue-500 mr-3">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <h1 class="text-3xl font-bold text-gray-900 font-heading">
+                Ajouter un repas
+            </h1>
+        </div>
+        <p class="text-gray-600">
+            Enregistrez votre repas pour suivre votre alimentation et atteindre vos objectifs
+        </p>
+    </div>
+
+    <!-- Quick Add Section -->
+    {% include 'components/_card.html.twig' with {
+        'title': 'Ajout Rapide',
+        'subtitle': 'Sélectionnez des aliments fréquemment consommés'
+    } %}
+    {% block card_body %}
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+            <button class="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 text-center quick-add-item" 
+                    onclick="quickAdd('Pomme', 52)">
+                <i class="fas fa-apple-alt text-red-500 text-xl mb-2"></i>
+                <p class="text-sm font-medium">Pomme</p>
+                <p class="text-xs text-gray-500">52 cal</p>
+            </button>
+            
+            <button class="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 text-center quick-add-item" 
+                    onclick="quickAdd('Banane', 89)">
+                <i class="fas fa-lemon text-yellow-500 text-xl mb-2"></i>
+                <p class="text-sm font-medium">Banane</p>
+                <p class="text-xs text-gray-500">89 cal</p>
+            </button>
+            
+            <button class="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 text-center quick-add-item" 
+                    onclick="quickAdd('Yaourt', 59)">
+                <i class="fas fa-blender text-blue-500 text-xl mb-2"></i>
+                <p class="text-sm font-medium">Yaourt</p>
+                <p class="text-xs text-gray-500">59 cal</p>
+            </button>
+            
+            <button class="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 text-center quick-add-item" 
+                    onclick="quickAdd('Pain complet', 247)">
+                <i class="fas fa-bread-slice text-yellow-600 text-xl mb-2"></i>
+                <p class="text-sm font-medium">Pain</p>
+                <p class="text-xs text-gray-500">247 cal</p>
+            </button>
+        </div>
+    {% endblock %}
+    {% endinclude %}
+
+    <!-- Main Add Meal Form -->
+    {% include 'components/_card.html.twig' with {
+        'title': 'Détails du repas',
+        'variant': 'default'
+    } %}
+    {% block card_body %}
+        {% include 'components/_form.html.twig' with {
+            'action': path('app_nutrition_add_meal'),
+            'method': 'POST',
+            'fields': [
+                {
+                    'name': 'meal_type',
+                    'type': 'select',
+                    'label': 'Type de repas *',
+                    'required': true,
+                    'options': [
+                        {'value': 'breakfast', 'label': 'Petit-déjeuner'},
+                        {'value': 'lunch', 'label': 'Déjeuner'},
+                        {'value': 'snack', 'label': 'Collation'},
+                        {'value': 'dinner', 'label': 'Dîner'}
+                    ]
+                },
+                {
+                    'name': 'meal_time',
+                    'type': 'text',
+                    'label': 'Heure du repas',
+                    'placeholder': 'HH:MM',
+                    'value': "now"|date("H:i"),
+                    'help': 'Laissez vide pour utiliser l\'heure actuelle'
+                }
+            ],
+            'submit_text': '',
+            'submit_variant': 'primary'
+        } %}
+        
+        <!-- Food Items Section -->
+        <div class="mt-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold">Aliments</h3>
+                {% include 'components/_button.html.twig' with {
+                    'text': 'Ajouter un aliment',
+                    'variant': 'outline',
+                    'size': 'sm',
+                    'icon': 'fas fa-plus',
+                    'onclick': 'addFoodItem()'
+                } %}
+            </div>
+            
+            <div id="foodItemsList" class="space-y-3">
+                <!-- Initial food item -->
+                <div class="food-item p-4 border border-gray-200 rounded-lg">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <div class="md:col-span-2">
+                            <label class="form-label">Aliment *</label>
+                            <input type="text" 
+                                   name="foods[]" 
+                                   class="form-input food-search" 
+                                   placeholder="Rechercher un aliment..."
+                                   required>
+                        </div>
+                        <div>
+                            <label class="form-label">Quantité *</label>
+                            <input type="text" 
+                                   name="quantities[]" 
+                                   class="form-input" 
+                                   placeholder="Ex: 100g, 1 unité"
+                                   required>
+                        </div>
+                        <div>
+                            <label class="form-label">Calories</label>
+                            <input type="number" 
+                                   name="calories[]" 
+                                   class="form-input calories-display" 
+                                   placeholder="0" 
+                                   readonly>
+                        </div>
+                    </div>
+                    <div class="mt-3 flex justify-between items-center">
+                        <div class="text-sm text-gray-600">
+                            <span class="protein-display">Prot: 0g</span> • 
+                            <span class="carbs-display">Glucides: 0g</span> • 
+                            <span class="fat-display">Lipides: 0g</span>
+                        </div>
+                        <button type="button" class="text-red-500 hover:text-red-700" onclick="removeFoodItem(this)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Meal Total -->
+        <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h4 class="font-semibold">Total du repas</h4>
+                    <div class="text-sm text-gray-600 mt-1">
+                        <span id="totalProtein">Prot: 0g</span> • 
+                        <span id="totalCarbs">Glucides: 0g</span> • 
+                        <span id="totalFat">Lipides: 0g</span>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-2xl font-bold text-blue-600">
+                        <span id="totalCalories">0</span> cal
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Additional Information -->
+        <div class="mt-6">
+            {% include 'components/_form.html.twig' with {
+                'action': '',
+                'method': 'POST',
+                'fields': [
+                    {
+                        'name': 'notes',
+                        'type': 'textarea',
+                        'label': 'Notes (optionnel)',
+                        'placeholder': 'Préparation, accompagnement, contexte...',
+                        'help': 'Ajoutez des détails sur votre repas pour un meilleur suivi'
+                    },
+                    {
+                        'name': 'mood_before',
+                        'type': 'select',
+                        'label': 'Humeur avant le repas',
+                        'options': [
+                            {'value': '', 'label': 'Non spécifié'},
+                            {'value': 'very_hungry', 'label': 'Très faim'},
+                            {'value': 'hungry', 'label': 'Faim'},
+                            {'value': 'neutral', 'label': 'Neutre'},
+                            {'value': 'not_hungry', 'label': 'Pas faim'},
+                            {'value': 'stressed', 'label': 'Stressé'}
+                        ]
+                    },
+                    {
+                        'name': 'mood_after',
+                        'type': 'select',
+                        'label': 'Humeur après le repas',
+                        'options': [
+                            {'value': '', 'label': 'Non spécifié'},
+                            {'value': 'satisfied', 'label': 'Satisfait'},
+                            {'value': 'full', 'label': 'Rassasié'},
+                            {'value': 'bloated', 'label': 'Ballonné'},
+                            {'value': 'still_hungry', 'label': 'Encore faim'},
+                            {'value': 'energetic', 'label': 'Énergique'}
+                        ]
+                    }
+                ],
+                'submit_text': '',
+                'submit_variant': 'primary'
+            } %}
+        </div>
+        
+        <!-- Form Actions -->
+        <div class="mt-8 flex gap-3">
+            {% include 'components/_button.html.twig' with {
+                'text': 'Enregistrer le repas',
+                'variant': 'primary',
+                'type': 'submit',
+                'icon': 'fas fa-check'
+            } %}
+            
+            {% include 'components/_button.html.twig' with {
+                'text': 'Annuler',
+                'variant': 'outline',
+                'href': path('app_nutrition_meals')
+            } %}
+        </div>
+    {% endblock %}
+    {% endinclude %}
+</div>
+
+<!-- Food Search Results Dropdown -->
+<div id="foodSearchDropdown" class="hidden absolute bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
+    <!-- Search results will be populated here -->
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize food search functionality
+    initializeFoodSearch();
+    
+    // Initialize form validation
+    initializeFormValidation();
+    
+    // Calculate initial totals
+    updateMealTotals();
+});
+
+// Food database (mock)
+const foodDatabase = [
+    {name: 'Pomme', calories: 52, protein: 0.3, carbs: 14, fat: 0.2, unit: '100g'},
+    {name: 'Banane', calories: 89, protein: 1.1, carbs: 23, fat: 0.3, unit: '100g'},
+    {name: 'Yaourt nature', calories: 59, protein: 10, carbs: 3.6, fat: 0.4, unit: '100g'},
+    {name: 'Pain complet', calories: 247, protein: 13, carbs: 41, fat: 3.4, unit: '100g'},
+    {name: 'Poulet', calories: 165, protein: 31, carbs: 0, fat: 3.6, unit: '100g'},
+    {name: 'Riz complet', calories: 111, protein: 2.6, carbs: 23, fat: 0.9, unit: '100g'},
+    {name: 'Saumon', calories: 208, protein: 20, carbs: 0, fat: 13, unit: '100g'},
+    {name: 'Brocoli', calories: 34, protein: 2.8, carbs: 7, fat: 0.4, unit: '100g'},
+    {name: 'Oeuf', calories: 155, protein: 13, carbs: 1.1, fat: 11, unit: '100g'},
+    {name: 'Fromage', calories: 402, protein: 25, carbs: 1.3, fat: 33, unit: '100g'},
+    {name: 'Avocat', calories: 160, protein: 2, carbs: 9, fat: 15, unit: '100g'},
+    {name: 'Amandes', calories: 579, protein: 21, carbs: 22, fat: 50, unit: '100g'}
+];
+
+function initializeFoodSearch() {
+    document.addEventListener('input', function(e) {
+        if (e.target.classList.contains('food-search')) {
+            const query = e.target.value.toLowerCase();
+            const dropdown = document.getElementById('foodSearchDropdown');
+            
+            if (query.length < 2) {
+                dropdown.classList.add('hidden');
+                return;
+            }
+            
+            const results = foodDatabase.filter(food => 
+                food.name.toLowerCase().includes(query)
+            );
+            
+            displayFoodSearchResults(results, e.target);
+        }
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.classList.contains('food-search')) {
+            document.getElementById('foodSearchDropdown').classList.add('hidden');
+        }
+    });
+}
+
+function displayFoodSearchResults(results, inputElement) {
+    const dropdown = document.getElementById('foodSearchDropdown');
+    
+    if (results.length === 0) {
+        dropdown.innerHTML = '<div class="p-3 text-gray-500">Aucun aliment trouvé</div>';
+    } else {
+        dropdown.innerHTML = results.map(food => `
+            <div class="p-3 hover:bg-gray-50 cursor-pointer food-result" 
+                 onclick="selectFood('${food.name}', ${food.calories}, ${food.protein}, ${food.carbs}, ${food.fat}, '${food.unit}')">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <div class="font-medium">${food.name}</div>
+                        <div class="text-sm text-gray-500">${food.calories} cal/${food.unit}</div>
+                    </div>
+                    <div class="text-xs text-gray-600">
+                        P:${food.protein}g G:${food.carbs}g L:${food.fat}g
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    // Position dropdown
+    const rect = inputElement.getBoundingClientRect();
+    dropdown.style.top = (rect.bottom + window.scrollY) + 'px';
+    dropdown.style.left = rect.left + 'px';
+    dropdown.style.width = rect.width + 'px';
+    dropdown.classList.remove('hidden');
+}
+
+function selectFood(name, calories, protein, carbs, fat, unit) {
+    const activeInput = document.activeElement;
+    if (activeInput && activeInput.classList.contains('food-search')) {
+        activeInput.value = name;
+        activeInput.dataset.calories = calories;
+        activeInput.dataset.protein = protein;
+        activeInput.dataset.carbs = carbs;
+        activeInput.dataset.fat = fat;
+        activeInput.dataset.unit = unit;
+        
+        // Update the calories display
+        const foodItem = activeInput.closest('.food-item');
+        updateFoodItemCalories(foodItem);
+        
+        // Update meal totals
+        updateMealTotals();
+    }
+    
+    // Hide dropdown
+    document.getElementById('foodSearchDropdown').classList.add('hidden');
+}
+
+function addFoodItem() {
+    const foodItemsList = document.getElementById('foodItemsList');
+    const newItem = document.createElement('div');
+    newItem.className = 'food-item p-4 border border-gray-200 rounded-lg';
+    newItem.innerHTML = `
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+            <div class="md:col-span-2">
+                <label class="form-label">Aliment *</label>
+                <input type="text" 
+                       name="foods[]" 
+                       class="form-input food-search" 
+                       placeholder="Rechercher un aliment..."
+                       required>
+            </div>
+            <div>
+                <label class="form-label">Quantité *</label>
+                <input type="text" 
+                       name="quantities[]" 
+                       class="form-input" 
+                       placeholder="Ex: 100g, 1 unité"
+                       required>
+            </div>
+            <div>
+                <label class="form-label">Calories</label>
+                <input type="number" 
+                       name="calories[]" 
+                       class="form-input calories-display" 
+                       placeholder="0" 
+                       readonly>
+            </div>
+        </div>
+        <div class="mt-3 flex justify-between items-center">
+            <div class="text-sm text-gray-600">
+                <span class="protein-display">Prot: 0g</span> • 
+                <span class="carbs-display">Glucides: 0g</span> • 
+                <span class="fat-display">Lipides: 0g</span>
+            </div>
+            <button type="button" class="text-red-500 hover:text-red-700" onclick="removeFoodItem(this)">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    `;
+    
+    foodItemsList.appendChild(newItem);
+}
+
+function removeFoodItem(button) {
+    const foodItem = button.closest('.food-item');
+    foodItem.remove();
+    updateMealTotals();
+}
+
+function updateFoodItemCalories(foodItem) {
+    const foodInput = foodItem.querySelector('.food-search');
+    const quantityInput = foodItem.querySelector('input[name="quantities[]"]');
+    const caloriesDisplay = foodItem.querySelector('.calories-display');
+    
+    if (foodInput.dataset.calories && quantityInput.value) {
+        // Parse quantity (extract number)
+        const quantity = parseFloat(quantityInput.value) || 0;
+        const baseCalories = parseFloat(foodInput.dataset.calories) || 0;
+        
+        // Calculate calories based on quantity
+        let calculatedCalories = 0;
+        if (quantityInput.value.includes('g')) {
+            calculatedCalories = (baseCalories * quantity) / 100;
+        } else {
+            // Assume units
+            calculatedCalories = baseCalories * quantity;
+        }
+        
+        caloriesDisplay.value = Math.round(calculatedCalories);
+        
+        // Update macro displays
+        const protein = (parseFloat(foodInput.dataset.protein) || 0) * (quantity / 100);
+        const carbs = (parseFloat(foodInput.dataset.carbs) || 0) * (quantity / 100);
+        const fat = (parseFloat(foodInput.dataset.fat) || 0) * (quantity / 100);
+        
+        foodItem.querySelector('.protein-display').textContent = `Prot: ${protein.toFixed(1)}g`;
+        foodItem.querySelector('.carbs-display').textContent = `Glucides: ${carbs.toFixed(1)}g`;
+        foodItem.querySelector('.fat-display').textContent = `Lipides: ${fat.toFixed(1)}g`;
+    }
+}
+
+function updateMealTotals() {
+    const foodItems = document.querySelectorAll('.food-item');
+    let totalCalories = 0;
+    let totalProtein = 0;
+    let totalCarbs = 0;
+    let totalFat = 0;
+    
+    foodItems.forEach(item => {
+        const calories = parseFloat(item.querySelector('.calories-display').value) || 0;
+        const proteinText = item.querySelector('.protein-display').textContent;
+        const carbsText = item.querySelector('.carbs-display').textContent;
+        const fatText = item.querySelector('.fat-display').textContent;
+        
+        totalCalories += calories;
+        totalProtein += parseFloat(proteinText.match(/[\d.]+/)?.[0] || 0);
+        totalCarbs += parseFloat(carbsText.match(/[\d.]+/)?.[0] || 0);
+        totalFat += parseFloat(fatText.match(/[\d.]+/)?.[0] || 0);
+    });
+    
+    document.getElementById('totalCalories').textContent = totalCalories;
+    document.getElementById('totalProtein').textContent = `Prot: ${totalProtein.toFixed(1)}g`;
+    document.getElementById('totalCarbs').textContent = `Glucides: ${totalCarbs.toFixed(1)}g`;
+    document.getElementById('totalFat').textContent = `Lipides: ${totalFat.toFixed(1)}g`;
+}
+
+function quickAdd(foodName, calories) {
+    const foodInput = document.querySelector('.food-search');
+    if (foodInput) {
+        foodInput.value = foodName;
+        
+        // Find the food in database
+        const food = foodDatabase.find(f => f.name === foodName);
+        if (food) {
+            foodInput.dataset.calories = food.calories;
+            foodInput.dataset.protein = food.protein;
+            foodInput.dataset.carbs = food.carbs;
+            foodInput.dataset.fat = food.fat;
+            foodInput.dataset.unit = food.unit;
+            
+            // Set default quantity
+            const quantityInput = foodInput.closest('.food-item').querySelector('input[name="quantities[]"]');
+            quantityInput.value = '100g';
+            
+            updateFoodItemCalories(foodInput.closest('.food-item'));
+            updateMealTotals();
+        }
+    }
+}
+
+function initializeFormValidation() {
+    const form = document.querySelector('form');
+    form?.addEventListener('submit', function(e) {
+        const foodInputs = document.querySelectorAll('input[name="foods[]"]');
+        const quantityInputs = document.querySelectorAll('input[name="quantities[]"]');
+        
+        let isValid = true;
+        
+        foodInputs.forEach((input, index) => {
+            if (!input.value.trim()) {
+                input.classList.add('border-red-500');
+                isValid = false;
+            } else {
+                input.classList.remove('border-red-500');
+            }
+            
+            if (!quantityInputs[index].value.trim()) {
+                quantityInputs[index].classList.add('border-red-500');
+                isValid = false;
+            } else {
+                quantityInputs[index].classList.remove('border-red-500');
+            }
+        });
+        
+        if (!isValid) {
+            e.preventDefault();
+            showAlert('Veuillez remplir tous les champs obligatoires', 'error');
+        }
+    });
+    
+    // Update calories when quantity changes
+    document.addEventListener('input', function(e) {
+        if (e.target.name === 'quantities[]') {
+            const foodItem = e.target.closest('.food-item');
+            updateFoodItemCalories(foodItem);
+            updateMealTotals();
+        }
+    });
+}
+</script>
+{% endblock %}

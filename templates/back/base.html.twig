@@ -1,0 +1,328 @@
+{# BioSync Back Office Base Template
+# Base layout for all admin/back-office pages
+#}
+
+{% set pending_pro_requests = pending_pro_requests|default(0) %}
+{% set unread_notifications = unread_notifications|default(0) %}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Administration - BioSync{% endblock %}</title>
+    <meta name="description" content="Panneau d'administration BioSync">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="{{ asset('assets/css/app.css') }}">
+    
+    {% block stylesheets %}{% endblock %}
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="{{ path('app_admin_dashboard') }}" class="logo">
+                    <i class="fas fa-heartbeat mr-2"></i>
+                    BioSync
+                    <span class="text-xs text-gray-500 ml-2">Admin</span>
+                </a>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <!-- Dashboard -->
+                <div class="nav-section">
+                    <div class="nav-title">Principal</div>
+                    <a href="{{ path('app_admin_dashboard') }}" class="nav-item {% if app.request.get('_route') starts with 'app_admin_dashboard' %}active{% endif %}">
+                        <i class="fas fa-tachometer-alt nav-icon"></i>
+                        Tableau de bord
+                    </a>
+                </div>
+                
+                <!-- User Management -->
+                <div class="nav-section">
+                    <div class="nav-title">Utilisateurs</div>
+                    <a href="{{ path('app_admin_users') }}" class="nav-item {% if app.request.get('_route') starts with 'app_admin_users' %}active{% endif %}">
+                        <i class="fas fa-users nav-icon"></i>
+                        Gestion des utilisateurs
+                    </a>
+                    <a href="{{ path('app_admin_pro_requests') }}" class="nav-item {% if app.request.get('_route') starts with 'app_admin_pro_requests' %}active{% endif %}">
+                        <i class="fas fa-user-md nav-icon"></i>
+                        Demandes pro
+                        {% if pending_pro_requests > 0 %}
+                            <span class="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-1">{{ pending_pro_requests }}</span>
+                        {% endif %}
+                    </a>
+                </div>
+                
+                <!-- Content Management -->
+                <div class="nav-section">
+                    <div class="nav-title">Contenu</div>
+                    <a href="{{ path('app_admin_nutrition') }}" class="nav-item {% if app.request.get('_route') starts with 'app_admin_nutrition' %}active{% endif %}">
+                        <i class="fas fa-utensils nav-icon"></i>
+                        Nutrition
+                    </a>
+                    <a href="{{ path('app_admin_sport') }}" class="nav-item {% if app.request.get('_route') starts with 'app_admin_sport' %}active{% endif %}">
+                        <i class="fas fa-dumbbell nav-icon"></i>
+                        Sport
+                    </a>
+                    <a href="{{ path('app_admin_mental') }}" class="nav-item {% if app.request.get('_route') starts with 'app_admin_mental' %}active{% endif %}">
+                        <i class="fas fa-brain nav-icon"></i>
+                        Quiz & Mental
+                    </a>
+                    <a href="{{ path('app_admin_appointments') }}" class="nav-item {% if app.request.get('_route') starts with 'app_admin_appointments' %}active{% endif %}">
+                        <i class="fas fa-calendar nav-icon"></i>
+                        Rendez-vous
+                    </a>
+                    <a href="{{ path('app_admin_community') }}" class="nav-item {% if app.request.get('_route') starts with 'app_admin_community' %}active{% endif %}">
+                        <i class="fas fa-users nav-icon"></i>
+                        Communauté
+                    </a>
+                </div>
+                
+                <!-- System -->
+                <div class="nav-section">
+                    <div class="nav-title">Système</div>
+                    <a href="{{ path('app_admin_settings') }}" class="nav-item {% if app.request.get('_route') starts with 'app_admin_settings' %}active{% endif %}">
+                        <i class="fas fa-cog nav-icon"></i>
+                        Paramètres
+                    </a>
+                    <a href="{{ path('app_admin_logs') }}" class="nav-item {% if app.request.get('_route') starts with 'app_admin_logs' %}active{% endif %}">
+                        <i class="fas fa-file-alt nav-icon"></i>
+                        Logs
+                    </a>
+                    <a href="{{ path('app_admin_analytics') }}" class="nav-item {% if app.request.get('_route') starts with 'app_admin_analytics' %}active{% endif %}">
+                        <i class="fas fa-chart-line nav-icon"></i>
+                        Analytics
+                    </a>
+                </div>
+            </nav>
+            
+            <!-- User Menu -->
+            <div class="sidebar-footer p-4 border-t border-gray-200">
+                <div class="flex items-center">
+                    <div class="avatar mr-3">
+                        {% if app.user %}{{ app.user.firstName|default('A')|first }}{{ app.user.lastName|default('D')|first }}{% else %}AD{% endif %}
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-sm font-medium">{% if app.user %}{{ app.user.firstName|default('Admin') }} {{ app.user.lastName|default('') }}{% else %}Admin{% endif %}</div>
+                        <div class="text-xs text-gray-500">Administrateur</div>
+                    </div>
+                    <div class="relative">
+                        <button class="text-gray-400 hover:text-gray-600" onclick="toggleAdminMenu()">
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </button>
+                        
+                        <div id="admin-dropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 hidden z-50">
+                            <a href="{{ path('app_admin_profile') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <i class="fas fa-user mr-2"></i> Mon profil
+                            </a>
+                            <a href="{{ path('app_admin_settings') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <i class="fas fa-cog mr-2"></i> Paramètres
+                            </a>
+                            <div class="border-t border-gray-200 mt-2 pt-2">
+                                <a href="{{ path('app_front_dashboard') }}" class="block px-4 py-2 text-sm text-blue-600 hover:bg-blue-50">
+                                    <i class="fas fa-eye mr-2"></i> Voir le site
+                                </a>
+                                <a href="{{ path('app_logout') }}" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                    <i class="fas fa-sign-out-alt mr-2"></i> Déconnexion
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <header class="bg-white shadow-sm border-b border-gray-200">
+                <div class="flex items-center justify-between px-6 py-4">
+                    <div class="flex items-center">
+                        <button class="mobile-menu-toggle md:hidden" onclick="toggleMobileSidebar()">
+                            <i class="fas fa-bars text-xl"></i>
+                        </button>
+                        <h1 class="text-xl font-semibold text-gray-900 ml-4">
+                            {% block page_title %}Tableau de bord{% endblock %}
+                        </h1>
+                    </div>
+                    
+                    <div class="flex items-center gap-4">
+                        <!-- Search -->
+                        <div class="relative hidden md:block">
+                            <input type="text" 
+                                   class="form-input pl-10 pr-4 py-2 text-sm" 
+                                   placeholder="Rechercher...">
+                            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                        </div>
+                        
+                        <!-- Notifications -->
+                        <div class="relative">
+                            <button class="relative p-2 text-gray-400 hover:text-gray-600" onclick="toggleNotifications()">
+                                <i class="fas fa-bell"></i>
+                                {% if unread_notifications > 0 %}
+                                    <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+                                {% endif %}
+                            </button>
+                            
+                            <div id="notifications-dropdown" class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 hidden z-50">
+                                <div class="p-4 border-b border-gray-200">
+                                    <h3 class="font-medium">Notifications</h3>
+                                </div>
+                                <div class="max-h-96 overflow-y-auto">
+                                    <!-- Notifications will be loaded here -->
+                                    <div class="p-4 text-center text-gray-500">
+                                        Aucune notification
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Quick Actions -->
+                        <div class="relative">
+                            <button class="btn btn-soft btn-sm" onclick="toggleQuickActions()">
+                                <i class="fas fa-plus mr-2"></i>
+                                Actions rapides
+                            </button>
+                            
+                            <div id="quick-actions-dropdown" class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 hidden z-50">
+                                <a href="{{ path('app_admin_user_create') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-user-plus mr-2"></i> Ajouter un utilisateur
+                                </a>
+                                <a href="{{ path('app_admin_nutrition_food_create') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-apple-alt mr-2"></i> Ajouter un aliment
+                                </a>
+                                <a href="{{ path('app_admin_sport_exercise_create') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-dumbbell mr-2"></i> Ajouter un exercice
+                                </a>
+                                <a href="{{ path('app_admin_mental_quiz_create') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-question-circle mr-2"></i> Créer un quiz
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Flash Messages -->
+            {% for type, messages in app.session.flashbag.all() %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ type }} alert-dismissible fade show m-4" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+
+            <!-- Page Content -->
+            <div class="p-6">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="{{ asset('assets/js/app.js') }}"></script>
+    
+    {% block javascripts %}{% endblock %}
+    
+    <script>
+        // Admin-specific functions
+        function toggleAdminMenu() {
+            const dropdown = document.getElementById('admin-dropdown');
+            dropdown.classList.toggle('hidden');
+        }
+        
+        function toggleMobileSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('open');
+        }
+        
+        function toggleNotifications() {
+            const dropdown = document.getElementById('notifications-dropdown');
+            dropdown.classList.toggle('hidden');
+        }
+        
+        function toggleQuickActions() {
+            const dropdown = document.getElementById('quick-actions-dropdown');
+            dropdown.classList.toggle('hidden');
+        }
+        
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(e) {
+            const adminDropdown = document.getElementById('admin-dropdown');
+            const adminMenu = e.target.closest('.relative');
+            
+            if (!adminMenu.contains(e.target)) {
+                adminDropdown.classList.add('hidden');
+            }
+            
+            const notificationsDropdown = document.getElementById('notifications-dropdown');
+            const notificationsButton = e.target.closest('button');
+            
+            if (!notificationsButton || !notificationsButton.onclick?.toString().includes('toggleNotifications')) {
+                notificationsDropdown.classList.add('hidden');
+            }
+            
+            const quickActionsDropdown = document.getElementById('quick-actions-dropdown');
+            const quickActionsButton = e.target.closest('button');
+            
+            if (!quickActionsButton || !quickActionsButton.onclick?.toString().includes('toggleQuickActions')) {
+                quickActionsDropdown.classList.add('hidden');
+            }
+        });
+        
+        // Global alert function
+        function showAlert(message, type = 'info') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show fixed top-4 right-4 z-50`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+        
+        // Initialize tooltips and other UI elements
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add hover effects to navigation items
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.addEventListener('mouseenter', function() {
+                    if (!this.classList.contains('active')) {
+                        this.style.backgroundColor = '#f3f4f6';
+                    }
+                });
+                
+                item.addEventListener('mouseleave', function() {
+                    if (!this.classList.contains('active')) {
+                        this.style.backgroundColor = 'transparent';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,145 @@
+{# BioSync Form Component
+# Variables:
+# - action: string (form action URL)
+# - method: 'GET' | 'POST' (default: 'POST')
+# - enctype: string (optional)
+# - class: string (optional additional classes)
+# - id: string (optional)
+# - fields: array of field configurations
+#   - name: string
+#   - type: 'text' | 'email' | 'password' | 'textarea' | 'select' | 'file' | 'checkbox' | 'radio'
+#   - label: string
+#   - placeholder: string (optional)
+#   - required: boolean (default: false)
+#   - options: array (for select/radio/checkbox)
+#   - value: mixed (optional)
+#   - error: string (optional)
+#   - help: string (optional)
+#   - class: string (optional)
+# - submit_text: string (default: 'Submit')
+# - submit_variant: 'primary' | 'success' | 'outline' | 'soft' (default: 'primary')
+# - cancel_url: string (optional)
+# - loading: boolean (default: false)
+#}
+
+{% set submit_text = submit_text|default('Submit') %}
+{% set submit_variant = submit_variant|default('primary') %}
+{% set enctype = enctype|default(null) %}
+{% set id = id|default(null) %}
+{% set cancel_url = cancel_url|default(null) %}
+{% set form_classes = [
+    'form',
+    class|default('')
+]|join(' ')|trim %}
+
+<form action="{{ action }}" method="{{ method|default('POST') }}" {% if enctype %}enctype="{{ enctype }}"{% endif %} class="{{ form_classes }}" {% if id %}id="{{ id }}"{% endif %}>
+    {% for field in fields %}
+        {% set field_id = field.name ~ '_' ~ loop.index %}
+        
+        <div class="form-group {{ field.type == 'checkbox' or field.type == 'radio' ? 'form-group-inline' : '' }}">
+            {% if field.type != 'checkbox' and field.type != 'radio' %}
+                <label for="{{ field_id }}" class="form-label">
+                    {{ field.label }}
+                    {% if field.required is defined and field.required %}<span class="text-red-500">*</span>{% endif %}
+                </label>
+            {% endif %}
+            
+            {% if field.type == 'text' or field.type == 'email' or field.type == 'password' %}
+                <input type="{{ field.type }}" 
+                       id="{{ field_id }}" 
+                       name="{{ field.name }}" 
+                       value="{{ field.value|default('') }}"
+                       placeholder="{{ field.placeholder|default('') }}"
+                       {% if field.required is defined and field.required %}required{% endif %}
+                       {% if field.class is defined %}class="form-input {{ field.class }}"{% else %}class="form-input"{% endif %}>
+            {% elseif field.type == 'textarea' %}
+                <textarea id="{{ field_id }}" 
+                          name="{{ field.name }}" 
+                          {% if field.class is defined %}class="form-textarea {{ field.class }}"{% else %}class="form-textarea"{% endif %}
+                          placeholder="{{ field.placeholder|default('') }}"
+                          {% if field.required is defined and field.required %}required{% endif %}>{{ field.value|default('') }}</textarea>
+                          
+            {% elseif field.type == 'select' %}
+                <select id="{{ field_id }}" 
+                        name="{{ field.name }}" 
+                        class="form-select {{ field.class|default('') }}"
+                        {% if field.required is defined and field.required %}required{% endif %}>
+                    {% if field.placeholder is defined and field.placeholder %}
+                        <option value="">{{ field.placeholder }}</option>
+                    {% endif %}
+                    {% for option in field.options %}
+                        <option value="{{ option.value }}" {{ field.value == option.value ? 'selected' : '' }}>
+                            {{ option.label }}
+                        </option>
+                    {% endfor %}
+                </select>
+                
+            {% elseif field.type == 'file' %}
+                <input type="file" 
+                       id="{{ field_id }}" 
+                       name="{{ field.name }}" 
+                       class="form-input {{ field.class|default('') }}"
+                       {% if field.required is defined and field.required %}required{% endif %}>
+                       
+            {% elseif field.type == 'checkbox' %}
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" 
+                           id="{{ field_id }}" 
+                           name="{{ field.name }}" 
+                           class="form-checkbox {{ field.class|default('') }}"
+                           value="{{ field.value|default('1') }}"
+                           {{ field.value is defined and field.value ? 'checked' : '' }}
+                           {% if field.required is defined and field.required %}required{% endif %}>
+                    <label for="{{ field_id }}" class="form-label-inline">
+                        {{ field.label }}
+                        {% if field.required is defined and field.required %}<span class="text-red-500">*</span>{% endif %}
+                    </label>
+                </div>
+                
+            {% elseif field.type == 'radio' %}
+                <div class="radio-group">
+                    {% for option in field.options %}
+                        <div class="radio-wrapper">
+                            <input type="radio" 
+                                   id="{{ field_id }}_{{ loop.index }}" 
+                                   name="{{ field.name }}" 
+                                   class="form-radio {{ field.class|default('') }}"
+                                   value="{{ option.value }}"
+                                   {{ field.value is defined and field.value == option.value ? 'checked' : '' }}
+                                   {% if field.required is defined and field.required %}required{% endif %}>
+                            <label for="{{ field_id }}_{{ loop.index }}" class="form-label-inline">
+                                {{ option.label }}
+                            </label>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            {% if field.error is defined and field.error %}
+                <div class="form-error">{{ field.error }}</div>
+            {% endif %}
+            
+            {% if field.help is defined and field.help %}
+                <div class="form-help text-sm text-gray-500 mt-1">{{ field.help }}</div>
+            {% endif %}
+        </div>
+    {% endfor %}
+    
+    <div class="form-actions mt-6 flex gap-3">
+        {% include 'components/_button.html.twig' with {
+            'text': submit_text|default('Submit'),
+            'variant': submit_variant|default('primary'),
+            'type': 'submit',
+            'loading': loading|default(false),
+            'icon': loading|default(false) ? 'fas fa-spinner fa-spin' : ''
+        } %}
+        
+        {% if cancel_url %}
+            {% include 'components/_button.html.twig' with {
+                'text': 'Cancel',
+                'variant': 'outline',
+                'href': cancel_url
+            } %}
+        {% endif %}
+    </div>
+</form>
