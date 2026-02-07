@@ -1,0 +1,80 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ repas.titreRepas }} - BioSync{% endblock %}
+
+{% block body %}
+<div class="app-layout">
+    {% include 'partials/_sidebar.html.twig' with {'active': 'nutrition'} %}
+
+    <main class="main-content">
+        <div class="page-header flex-between">
+            <div>
+                <h1 class="page-title">{{ repas.titreRepas }}</h1>
+                <p class="page-subtitle">{{ repas.typeMoment.label }} - {{ repas.dateConsommation|date('d/m/Y H:i') }}</p>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+                <a href="{{ path('app_nutrition_edit', {id: repas.id}) }}" class="btn btn-ghost">Modifier</a>
+                <a href="{{ path('app_nutrition') }}" class="btn btn-primary">Retour</a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Details du repas</h4>
+                </div>
+                <div class="list-item">
+                    <div class="list-item-content">
+                        <div class="list-item-subtitle">Moment</div>
+                        <div class="list-item-title">{{ repas.typeMoment.label }}</div>
+                    </div>
+                </div>
+                <div class="list-item">
+                    <div class="list-item-content">
+                        <div class="list-item-subtitle">Date</div>
+                        <div class="list-item-title">{{ repas.dateConsommation|date('d/m/Y H:i') }}</div>
+                    </div>
+                </div>
+                <div class="list-item">
+                    <div class="list-item-content">
+                        <div class="list-item-subtitle">Total Calories</div>
+                        <div class="list-item-title">{{ repas.totalCalories }} cal</div>
+                    </div>
+                </div>
+                <div class="list-item">
+                    <div class="list-item-content">
+                        <div class="list-item-subtitle">Points gagnes</div>
+                        <div class="list-item-title">{{ repas.pointsGagnes }} points</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Aliments ({{ repas.aliments|length }})</h4>
+                </div>
+                {% if repas.aliments|length > 0 %}
+                    {% for aliment in repas.aliments %}
+                        <div class="list-item">
+                            <div class="list-item-icon" style="background: rgba(110, 197, 166, 0.1); color: var(--primary);">
+                                {{ loop.index }}
+                            </div>
+                            <div class="list-item-content">
+                                <div class="list-item-title">{{ aliment.nomAliment }}</div>
+                                <div class="list-item-subtitle">{{ aliment.calories }} cal - IG: {{ aliment.indexGlycemique }}</div>
+                            </div>
+                            {% if aliment.estExcitant %}
+                                <span class="badge badge-warning">Excitant</span>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <p class="text-gray">Aucun aliment enregistre pour ce repas</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

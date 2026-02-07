@@ -1,0 +1,551 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Aliments Management - BioSync{% endblock %}
+
+{% block body %}
+        {# Page Header #}
+        <div class="page-header">
+            <h1 class="page-title">Aliments Management</h1>
+            <p class="page-subtitle">Manage your nutrition database</p>
+        </div>
+
+        {# Stats Grid #}
+        <div class="grid-4" style="margin-bottom: 32px;">
+            {# Total Aliments Card #}
+            <div class="stats-card">
+                <div class="stat-icon calories">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/>
+                        <path d="M7 2v20"/>
+                        <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>
+                    </svg>
+                </div>
+                <div class="stat-value">{{ aliments|length }}</div>
+                <div class="stat-label">Total Aliments</div>
+                <div class="stat-progress">
+                    <div class="stat-progress-bar progress-green" style="width: 100%;"></div>
+                </div>
+            </div>
+
+            {# Total Calories Card #}
+            <div class="stats-card">
+                <div class="stat-value">{{ aliments|reduce((sum, a) => sum + a.calories, 0) }}</div>
+                <div class="stat-label">Total Calories</div>
+                <div class="stat-progress">
+                    <div class="stat-progress-bar progress-orange" style="width: 75%;"></div>
+                </div>
+            </div>
+
+            {# Average GI Card #}
+            <div class="stats-card">
+                <div class="stat-value">
+                    {% set totalGI = aliments|reduce((sum, a) => sum + a.indexGlycemique, 0) %}
+                    {% set countGI = aliments|filter(a => a.indexGlycemique > 0)|length %}
+                    {% if countGI > 0 %}
+                        {{ (totalGI / countGI)|round(0) }}
+                    {% else %}
+                        0
+                    {% endif %}
+                </div>
+                <div class="stat-label">Average GI</div>
+                <div class="stat-progress">
+                    <div class="stat-progress-bar progress-blue" style="width: 60%;"></div>
+                </div>
+            </div>
+
+            {# Excitants Card #}
+            <div class="stats-card">
+                <div class="stat-value">{{ aliments|filter(a => a.estExcitant)|length }}</div>
+                <div class="stat-label">Excitants</div>
+                <div class="stat-progress">
+                    <div class="stat-progress-bar progress-red" style="width: 25%;"></div>
+                </div>
+            </div>
+        </div>
+
+        {# Aliments Section #}
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h2 style="font-size: 20px; font-weight: 700; color: var(--text-primary);">All Aliments</h2>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <a href="{{ path('app_aliment_pdf') }}" class="btn btn-outline" style="display: flex; align-items: center; gap: 8px; padding: 10px 16px; border: 2px solid #e5e7eb; border-radius: 8px; text-decoration: none; color: #6b7280; transition: all 0.3s ease;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 18px; height: 18px;">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    Export PDF
+                </a>
+                <a href="{{ path('app_aliment_new') }}" class="btn btn-success">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                    Add Aliment
+                </a>
+            </div>
+        </div>
+
+        {# Search and Filters Bar #}
+        <div style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #e5e7eb; margin-bottom: 24px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);">
+            <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+                {# Search Input #}
+                <div style="flex: 1; min-width: 300px; position: relative;">
+                    <input type="text" id="searchInput" placeholder="Search aliments..." style="width: 100%; padding: 12px 16px 12px 44px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.95rem; transition: all 0.3s ease;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#9ca3af" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px;">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="m21 21-4.35-4.35"/>
+                    </svg>
+                </div>
+
+                {# Sort Buttons #}
+                <div style="display: flex; gap: 8px;">
+                    <button id="sortAsc" class="btn btn-outline" style="display: flex; align-items: center; gap: 8px; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; background: white; color: #6b7280; cursor: pointer; transition: all 0.3s ease;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 18px; height: 18px;">
+                            <path d="M3 7h18M3 12h18M3 17h18"/>
+                            <path d="M7 3v18M17 3v18"/>
+                        </svg>
+                        Sort A-Z
+                    </button>
+                    <button id="sortDesc" class="btn btn-outline" style="display: flex; align-items: center; gap: 8px; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; background: white; color: #6b7280; cursor: pointer; transition: all 0.3s ease;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 18px; height: 18px;">
+                            <path d="M3 7h18M3 12h18M3 17h18"/>
+                            <path d="M7 3v18M17 3v18"/>
+                        </svg>
+                        Sort Z-A
+                    </button>
+                </div>
+
+                {# Calories Sort #}
+                <button id="sortCalories" class="btn btn-outline" style="display: flex; align-items: center; gap: 8px; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; background: white; color: #6b7280; cursor: pointer; transition: all 0.3s ease;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 18px; height: 18px;">
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                    </svg>
+                    Sort by Calories
+                </button>
+            </div>
+        </div>
+
+        {# Aliments List #}
+        <div class="aliment-list">
+            {% if aliments is defined and aliments|length > 0 %}
+                {% for a in aliments %}
+                    <div class="aliment-card" data-id="{{ a.id }}">
+                        <div class="aliment-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                            </svg>
+                        </div>
+                        <div class="aliment-info">
+                            <div class="aliment-name">{{ a.nomAliment }}</div>
+                            <div class="aliment-macros">{{ a.calories|default(0) }} cal  P: {{ a.proteines|default(0) }}g  C: {{ a.glucides|default(0) }}g  F: {{ a.lipides|default(0) }}g</div>
+                            <div class="aliment-details">
+                                <span class="aliment-type">{{ a.typeAliment|default('N/A') }}</span>
+                                <span class="gi-badge">GI: {{ a.indexGlycemique|default(0) }}</span>
+                                {% if a.estExcitant %}
+                                    <span class="excitant-badge">Excitant</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="aliment-scores">
+                            {% if a.nutriScore %}
+                                <span class="nutri-score nutri-{{ a.nutriScore|lower }}">{{ a.nutriScore }}</span>
+                            {% endif %}
+                            {% if a.multiScore %}
+                                <span class="multi-score">{{ a.multiScore }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="aliment-actions">
+                            <a href="{{ path('app_aliment_show', {'id': a.id}) }}" class="icon-btn icon-btn-view" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;" title="View aliment details">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </a>
+                            <a href="{{ path('app_aliment_edit', {'id': a.id}) }}" class="icon-btn icon-btn-edit" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; margin-left: 8px;" title="Edit aliment">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                </svg>
+                            </a>
+                            <form method="post" action="{{ path('app_aliment_delete', {'id': a.id}) }}" style="display: inline-block; margin-left: 8px;" onsubmit="return confirm('Are you sure you want to delete this aliment?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ a.id) }}">
+                                <button type="submit" class="icon-btn icon-btn-delete" style="border: none; background: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;" title="Delete aliment">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <polyline points="3 6 5 6 21 6"/>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                    </svg>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="aliment-card">
+                    <div class="aliment-info">
+                        <div class="aliment-name">No aliments found</div>
+                        <div class="aliment-macros">Start by adding your first aliment</div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+{% endblock %}
+
+{% block javascripts %}
+<style>
+.aliment-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.aliment-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.3s ease;
+}
+
+.aliment-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.aliment-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #10b981, #34d399);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    flex-shrink: 0;
+}
+
+.aliment-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.aliment-name {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 4px;
+}
+
+.aliment-macros {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-bottom: 8px;
+}
+
+.aliment-details {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.aliment-type {
+    background: #d1fae5;
+    color: #065f46;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.gi-badge {
+    background: #dbeafe;
+    color: #1e40af;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.excitant-badge {
+    background: #fef2f2;
+    color: #dc2626;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.aliment-scores {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+}
+
+.nutri-score {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: white;
+}
+
+.nutri-a { background: #22c55e; }
+.nutri-b { background: #84cc16; }
+.nutri-c { background: #eab308; }
+.nutri-d { background: #f97316; }
+.nutri-e { background: #ef4444; }
+
+.multi-score {
+    background: #f3f4f6;
+    color: #374151;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.aliment-actions {
+    display: flex;
+    align-items: center;
+}
+
+.icon-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    color: #6b7280;
+}
+
+.icon-btn:hover {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.icon-btn-view:hover {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.icon-btn-edit:hover {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.icon-btn-delete:hover {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+.icon-btn svg {
+    width: 18px;
+    height: 18px;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const sortAscBtn = document.getElementById('sortAsc');
+    const sortDescBtn = document.getElementById('sortDesc');
+    const sortCaloriesBtn = document.getElementById('sortCalories');
+    const alimentList = document.querySelector('.aliment-list');
+    let currentSort = 'none';
+    
+    // Données des aliments
+    let alimentsData = [
+        {% for a in aliments %}
+        {
+            id: {{ a.id }},
+            nom: "{{ a.nomAliment|e('js') }}",
+            type: "{{ a.typeAliment|default('')|e('js') }}",
+            calories: {{ a.calories|default(0) }},
+            proteines: {{ a.proteines|default(0) }},
+            glucides: {{ a.glucides|default(0) }},
+            lipides: {{ a.lipides|default(0) }},
+            indexGlycemique: {{ a.indexGlycemique|default(0) }},
+            estExcitant: {{ a.estExcitant ? 'true' : 'false' }},
+            nutriScore: "{{ a.nutriScore|default('')|e('js') }}",
+            multiScore: {{ a.multiScore|default(0) }},
+            showUrl: "{{ path('app_aliment_show', {'id': a.id}) }}",
+            editUrl: "{{ path('app_aliment_edit', {'id': a.id}) }}",
+            deleteUrl: "{{ path('app_aliment_delete', {'id': a.id}) }}",
+            deleteToken: "{{ csrf_token('delete' ~ a.id) }}"
+        },
+        {% endfor %}
+    ];
+
+    // Fonction pour afficher les aliments
+    function displayAliments(aliments) {
+        if (aliments.length === 0) {
+            alimentList.innerHTML = `
+                <div class="aliment-card">
+                    <div class="aliment-info">
+                        <div class="aliment-name">No aliments found</div>
+                        <div class="aliment-macros">Try adjusting your search or filters</div>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        alimentList.innerHTML = aliments.map(a => `
+            <div class="aliment-card" data-id="${a.id}">
+                <div class="aliment-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                </div>
+                <div class="aliment-info">
+                    <div class="aliment-name">${a.nom}</div>
+                    <div class="aliment-macros">${a.calories} cal  P: ${a.proteines}g  C: ${a.glucides}g  F: ${a.lipides}g</div>
+                    <div class="aliment-details">
+                        <span class="aliment-type">${a.type || 'N/A'}</span>
+                        <span class="gi-badge">GI: ${a.indexGlycemique}</span>
+                        ${a.estExcitant ? '<span class="excitant-badge">Excitant</span>' : ''}
+                    </div>
+                </div>
+                <div class="aliment-scores">
+                    ${a.nutriScore ? <span class="nutri-score nutri-${a.nutriScore.toLowerCase()}">${a.nutriScore}</span> : ''}
+                    ${a.multiScore ? <span class="multi-score">${a.multiScore}</span> : ''}
+                </div>
+                <div class="aliment-actions">
+                    <a href="${a.showUrl}" class="icon-btn icon-btn-view" title="View aliment details">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                    </a>
+                    <a href="${a.editUrl}" class="icon-btn icon-btn-edit" title="Edit aliment">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                    </a>
+                    <form method="post" action="${a.deleteUrl}" style="display: inline-block;" onsubmit="return confirm('Are you sure you want to delete this aliment?');">
+                        <input type="hidden" name="_token" value="${a.deleteToken}">
+                        <button type="submit" class="icon-btn icon-btn-delete" title="Delete aliment">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <polyline points="3 6 5 6 21 6"/>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Fonction de recherche
+    function searchAliments(query) {
+        if (!query) {
+            return alimentsData;
+        }
+        
+        const lowerQuery = query.toLowerCase();
+        return alimentsData.filter(a => 
+            a.nom.toLowerCase().includes(lowerQuery) ||
+            a.type.toLowerCase().includes(lowerQuery) ||
+            a.calories.toString().includes(lowerQuery) ||
+            a.indexGlycemique.toString().includes(lowerQuery)
+        );
+    }
+
+    // Fonctions de tri
+    function sortAliments(aliments, type) {
+        const sorted = [...aliments];
+        
+        switch(type) {
+            case 'asc':
+                return sorted.sort((a, b) => a.nom.localeCompare(b.nom));
+            case 'desc':
+                return sorted.sort((a, b) => b.nom.localeCompare(a.nom));
+            case 'calories':
+                return sorted.sort((a, b) => b.calories - a.calories);
+            default:
+                return sorted;
+        }
+    }
+
+    // Gestionnaire de recherche
+    searchInput.addEventListener('input', function() {
+        const query = this.value;
+        const filtered = searchAliments(query);
+        const sorted = sortAliments(filtered, currentSort);
+        displayAliments(sorted);
+    });
+
+    // Gestionnaires de tri
+    sortAscBtn.addEventListener('click', function() {
+        currentSort = 'asc';
+        updateButtonStyles(this);
+        const filtered = searchAliments(searchInput.value);
+        const sorted = sortAliments(filtered, 'asc');
+        displayAliments(sorted);
+    });
+
+    sortDescBtn.addEventListener('click', function() {
+        currentSort = 'desc';
+        updateButtonStyles(this);
+        const filtered = searchAliments(searchInput.value);
+        const sorted = sortAliments(filtered, 'desc');
+        displayAliments(sorted);
+    });
+
+    sortCaloriesBtn.addEventListener('click', function() {
+        currentSort = 'calories';
+        updateButtonStyles(this);
+        const filtered = searchAliments(searchInput.value);
+        const sorted = sortAliments(filtered, 'calories');
+        displayAliments(sorted);
+    });
+
+    // Mettre à jour les styles des boutons
+    function updateButtonStyles(activeBtn) {
+        [sortAscBtn, sortDescBtn, sortCaloriesBtn].forEach(btn => {
+            if (btn === activeBtn) {
+                btn.style.background = '#10b981';
+                btn.style.color = 'white';
+                btn.style.borderColor = '#10b981';
+            } else {
+                btn.style.background = 'white';
+                btn.style.color = '#6b7280';
+                btn.style.borderColor = '#e5e7eb';
+            }
+        });
+    }
+
+    // Effets de survol pour les boutons
+    [sortAscBtn, sortDescBtn, sortCaloriesBtn].forEach(btn => {
+        btn.addEventListener('mouseenter', function() {
+            if (this.style.background !== 'rgb(16, 185, 129)') {
+                this.style.borderColor = '#9ca3af';
+                this.style.transform = 'translateY(-1px)';
+            }
+        });
+        
+        btn.addEventListener('mouseleave', function() {
+            if (this.style.background !== 'rgb(16, 185, 129)') {
+                this.style.borderColor = '#e5e7eb';
+                this.style.transform = 'translateY(0)';
+            }
+        });
+    });
+
+    // Effet de survol pour le champ de recherche
+    searchInput.addEventListener('focus', function() {
+        this.style.borderColor = '#10b981';
+        this.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+    });
+
+    searchInput.addEventListener('blur', function() {
+        this.style.borderColor = '#e5e7eb';
+        this.style.boxShadow = 'none';
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Rapport des Utilisateurs et leurs Repas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            margin: 20px;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #3b82f6;
+            padding-bottom: 20px;
+        }
+        .header h1 {
+            color: #3b82f6;
+            margin: 0;
+            font-size: 24px;
+        }
+        .header p {
+            color: #666;
+            margin: 5px 0 0 0;
+            font-size: 14px;
+        }
+        .user-section {
+            margin-bottom: 30px;
+            page-break-inside: avoid;
+        }
+        .user-header {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .user-name {
+            font-weight: bold;
+            font-size: 16px;
+            color: #1f2937;
+            margin: 0 0 5px 0;
+        }
+        .user-email {
+            color: #6b7280;
+            font-size: 12px;
+            margin: 0;
+        }
+        .meals-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-left: 20px;
+        }
+        .meals-table th {
+            background: #3b82f6;
+            color: white;
+            padding: 8px;
+            text-align: left;
+            font-size: 11px;
+            border: 1px solid #2563eb;
+        }
+        .meals-table td {
+            padding: 8px;
+            border: 1px solid #e5e7eb;
+            font-size: 11px;
+        }
+        .meals-table tr:nth-child(even) {
+            background: #f9fafb;
+        }
+        .no-meals {
+            color: #6b7280;
+            font-style: italic;
+            margin-left: 20px;
+        }
+        .summary {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 30px;
+        }
+        .summary h3 {
+            color: #0369a1;
+            margin: 0 0 10px 0;
+            font-size: 14px;
+        }
+        .summary p {
+            margin: 5px 0;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Rapport des Utilisateurs et leurs Repas</h1>
+        <p>Généré le {{ date|date('d/m/Y H:i') }}</p>
+    </div>
+
+    {% set totalUsers = 0 %}
+    {% set totalMeals = 0 %}
+    
+    {% for user in users %}
+        {% set totalUsers = totalUsers + 1 %}
+        {% set userMeals = user.repas|length %}
+        {% set totalMeals = totalMeals + userMeals %}
+        
+        <div class="user-section">
+            <div class="user-header">
+                <div class="user-name">{{ user.nomComplet|default('N/A') }}</div>
+                <div class="user-email">{{ user.email }}</div>
+            </div>
+            
+            {% if user.repas|length > 0 %}
+                <table class="meals-table">
+                    <thead>
+                        <tr>
+                            <th>Titre du repas</th>
+                            <th>Moment</th>
+                            <th>Date</th>
+                            <th>Calories</th>
+                            <th>Protéines</th>
+                            <th>Glucides</th>
+                            <th>Lipides</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for repas in user.repas %}
+                            <tr>
+                                <td>{{ repas.titreRepas }}</td>
+                                <td>{{ repas.typeMoment ? repas.typeMoment.label() : '' }}</td>
+                                <td>{{ repas.dateConsommation ? repas.dateConsommation|date('d/m/Y H:i') : '' }}</td>
+                                <td>{{ repas.totalCalories|number_format(1) }} cal</td>
+                                <td>{{ repas.totalProteines|number_format(1) }} g</td>
+                                <td>{{ repas.totalGlucides|number_format(1) }} g</td>
+                                <td>{{ repas.totalLipides|number_format(1) }} g</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="no-meals">Aucun repas enregistré pour cet utilisateur</div>
+            {% endif %}
+        </div>
+    {% endfor %}
+
+    <div class="summary">
+        <h3>Résumé</h3>
+        <p><strong>Total utilisateurs :</strong> {{ totalUsers }}</p>
+        <p><strong>Total repas :</strong> {{ totalMeals }}</p>
+        <p><strong>Moyenne de repas par utilisateur :</strong> {% if totalUsers > 0 %}{{ (totalMeals / totalUsers)|number_format(1) }}{% else %}0{% endif %}</p>
+    </div>
+</body>
+</html>

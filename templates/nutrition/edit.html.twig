@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier repas - BioSync{% endblock %}
+
+{% block body %}
+<div class="app-layout">
+    {% include 'partials/_sidebar.html.twig' with {'active': 'nutrition'} %}
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Modifier le repas</h1>
+            <p class="page-subtitle">{{ repas.titreRepas }}</p>
+        </div>
+
+        <div class="card" style="max-width: 600px;">
+            {{ form_start(form) }}
+                <div class="form-group">
+                    {{ form_label(form.titreRepas) }}
+                    {{ form_widget(form.titreRepas) }}
+                    {{ form_errors(form.titreRepas) }}
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.typeMoment) }}
+                    {{ form_widget(form.typeMoment) }}
+                    {{ form_errors(form.typeMoment) }}
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.dateConsommation) }}
+                    {{ form_widget(form.dateConsommation) }}
+                    {{ form_errors(form.dateConsommation) }}
+                </div>
+
+                <div class="modal-footer" style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--gray-200);">
+                    <a href="{{ path('app_nutrition') }}" class="btn btn-ghost">Annuler</a>
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </main>
+</div>
+{% endblock %}

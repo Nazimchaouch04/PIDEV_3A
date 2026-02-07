@@ -1,0 +1,52 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Admin - Utilisateurs{% endblock %}
+
+{% block body %}
+<div class="page-header flex-between">
+  <div>
+    <h1 class="page-title">Utilisateurs</h1>
+    <p class="page-subtitle">Superviser les profils et accéder à leurs repas</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-content">
+    <div style="overflow-x: auto;">
+      <table style="width:100%; border-collapse: collapse;">
+        <thead>
+          <tr style="text-align: left; border-bottom: 1px solid var(--border-color);">
+            <th style="padding: 12px;">Nom</th>
+            <th style="padding: 12px;">Email</th>
+            <th style="padding: 12px;">Rôle</th>
+            <th style="padding: 12px; text-align: right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for user in users %}
+          <tr style="border-bottom: 1px solid var(--border-light);">
+            <td style="padding: 12px; font-weight: 600;">{{ user.nom ?? user.name ?? (user.prenom ~ ' ' ~ user.nom)|default('N/A') }}</td>
+            <td style="padding: 12px;">{{ user.email }}</td>
+            <td style="padding: 12px;">
+              {% set roles = user.roles ?? [] %}
+              {% if 'ROLE_ADMIN' in roles %}
+                Admin
+              {% elseif 'ROLE_COACH' in roles %}
+                Coach
+              {% else %}
+                Utilisateur
+              {% endif %}
+            </td>
+            <td style="padding: 12px; text-align: right;">
+              <a class="btn btn-outline" href="{{ path('admin_user_meals', {'id': user.id}) }}">Voir ses repas</a>
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="4" style="padding: 16px; color: var(--text-secondary);">Aucun utilisateur trouvé.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
