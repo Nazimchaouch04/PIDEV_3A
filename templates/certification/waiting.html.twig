@@ -1,0 +1,33 @@
+{% extends 'base_front.html.twig' %}
+
+{% block title %}Validation en cours - BioSync{% endblock %}
+
+{% block body %}
+<div class="modern-auth-wrapper">
+    <div class="modern-auth-container">
+        <div class="modern-auth-card" style="text-align: center;">
+            <div style="color: #f59e0b; margin-bottom: 1rem;">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+            </div>
+            
+            <h2 class="modern-auth-form-title">Vérification en cours</h2>
+            
+            <p class="cert-description">
+                Votre demande de certification est actuellement examinée par nos administrateurs.
+            </p>
+            
+            <p style="color: #64748b; margin-bottom: 2rem;">
+                Vous recevrez l'accès à votre tableau de bord dès que votre statut sera validé (délai moyen : 24-48h).
+            </p>
+
+            <a href="{{ path('app_logout') }}" class="modern-btn-gradient" style="text-decoration: none; display: inline-block;">
+                Se déconnecter
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

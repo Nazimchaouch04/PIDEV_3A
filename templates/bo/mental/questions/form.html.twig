@@ -1,0 +1,155 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}{{ isEdit ? 'Modifier' : 'Nouvelle' }} Question - Admin{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">{{ isEdit ? 'Modifier une question' : 'Nouvelle question' }}</h1>
+        <p class="page-subtitle">{{ isEdit ? 'Modifier les détails de la question' : 'Créer une nouvelle question de quiz' }}</p>
+    </div>
+</div>
+
+<div class="form-layout">
+    <div class="form-main">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Détails de la question</h4>
+            </div>
+            <div class="card-body">
+                {# HTML5 validation disabled - using Symfony validators instead #}
+                <form method="post" novalidate>
+                    {# Énoncé de la question #}
+                    <div class="form-group">
+                        <label class="form-label" for="enonce">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="12" y1="16" x2="12" y2="12"/>
+                                <line x1="12" y1="8" x2="12.01" y2="8"/>
+                            </svg>
+                            Énoncé de la question *
+                        </label>
+                        <textarea id="enonce" 
+                                  name="enonce" 
+                                  class="form-control" 
+                                  rows="4" 
+                                  {# required #}
+                                  placeholder="Ex: Comment gérez-vous le stress quotidien?"
+                        >{{ question.enonce ?? '' }}</textarea>
+                        <small class="form-hint">Formulez une question claire et concise</small>
+                    </div>
+
+                    {# Réponse correcte #}
+                    <div class="form-group">
+                        <label class="form-label" for="reponse_correcte">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            Réponse correcte *
+                        </label>
+                        <input type="text" 
+                               id="reponse_correcte" 
+                               name="reponse_correcte" 
+                               class="form-control" 
+                               value="{{ question.reponseCorrecte ?? '' }}" 
+                               {# required #}
+                               placeholder="Ex: Je pratique la méditation">
+                        <small class="form-hint">La bonne réponse à la question</small>
+                    </div>
+
+                    {# Options fausses #}
+                    <div class="form-group">
+                        <label class="form-label">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18"/>
+                                <line x1="6" y1="6" x2="18" y2="18"/>
+                            </svg>
+                            Options incorrectes *
+                        </label>
+                        {% set options = question.optionsFaussesArray ?? ['', '', ''] %}
+                        <input type="text" 
+                               name="option_1" 
+                               class="form-control mb-2" 
+                               value="{{ options[0] ?? '' }}" 
+                               placeholder="Option incorrecte 1">
+                        <input type="text" 
+                               name="option_2" 
+                               class="form-control mb-2" 
+                               value="{{ options[1] ?? '' }}" 
+                               placeholder="Option incorrecte 2">
+                        <input type="text" 
+                               name="option_3" 
+                               class="form-control" 
+                               value="{{ options[2] ?? '' }}" 
+                               placeholder="Option incorrecte 3">
+                        <small class="form-hint">Fournissez 2 à 3 options incorrectes</small>
+                    </div>
+
+                    {# Points #}
+                    <div class="form-group">
+                        <label class="form-label" for="points_valeur">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                            </svg>
+                            Points *
+                        </label>
+                        {# HTML5 type=number disabled - using Symfony Range validator instead #}
+                        <input type="text" 
+                               id="points_valeur" 
+                               name="points_valeur" 
+                               class="form-control" 
+                               value="{{ question.pointsValeur ?? 10 }}" 
+                               {# min="1" #}
+                               {# max="100" #}
+                               {# required #}>
+                        <small class="form-hint">Points attribués pour une bonne réponse</small>
+                    </div>
+
+                    {# Actions #}
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            {{ isEdit ? 'Enregistrer les modifications' : 'Créer la question' }}
+                        </button>
+                        <a href="{{ path('app_mental_admin_questions') }}" class="btn btn-secondary">
+                            Annuler
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-sidebar">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Informations</h4>
+            </div>
+            <div class="card-body">
+                <div class="info-item">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="16" x2="12" y2="12"/>
+                        <line x1="12" y1="8" x2="12.01" y2="8"/>
+                    </svg>
+                    <div>
+                        <strong>Structure du quiz</strong>
+                        <p>Chaque question est composée d'un énoncé, d'une réponse correcte et de 2-3 options incorrectes.</p>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    </svg>
+                    <div>
+                        <strong>Système de points</strong>
+                        <p>Attribuez plus de points aux questions plus difficiles ou importantes.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

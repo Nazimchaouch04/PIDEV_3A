@@ -1,0 +1,185 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}{{ isEdit ? 'Modifier' : 'Créer' }} Quiz - Admin{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">{{ isEdit ? 'Modifier un quiz' : 'Créer un nouveau quiz' }}</h1>
+        <p class="page-subtitle">{{ isEdit ? 'Modifier les détails du quiz' : 'Créer un quiz mental pour un utilisateur' }}</p>
+    </div>
+</div>
+
+<div class="form-layout">
+    <div class="form-main">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Informations du quiz</h4>
+            </div>
+            <div class="card-body">
+                {# HTML5 validation disabled - using Symfony validators instead #}
+                <form method="post" novalidate>
+                    {# Titre du quiz #}
+                    <div class="form-group">
+                        <label class="form-label" for="titre">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                <polyline points="14 2 14 8 20 8"/>
+                            </svg>
+                            Titre du quiz *
+                        </label>
+                        <input type="text" 
+                               id="titre" 
+                               name="titre" 
+                               class="form-control" 
+                               value="{{ quiz.titre ?? '' }}" 
+                               {# required #}
+                               placeholder="Ex: Mental Health Assessment - 04/02/2026">
+                        <small class="form-hint">Titre descriptif du quiz</small>
+                    </div>
+
+                    {# Utilisateur #}
+                    <div class="form-group">
+                        <label class="form-label" for="utilisateur_id">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                            Utilisateur *
+                        </label>
+                        <select id="utilisateur_id" name="utilisateur_id" class="form-control" {# required #}>
+                            <option value="">Sélectionner un utilisateur</option>
+                            {% for utilisateur in utilisateurs %}
+                                <option value="{{ utilisateur.id }}" 
+                                        {{ quiz.utilisateur and quiz.utilisateur.id == utilisateur.id ? 'selected' : '' }}>
+                                    {{ utilisateur.nomComplet }} ({{ utilisateur.email }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <small class="form-hint">L'utilisateur qui a passé ce quiz</small>
+                    </div>
+
+                    {# Niveau de stress #}
+                    <div class="form-group">
+                        <label class="form-label" for="niveau_stress">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                            </svg>
+                            Niveau de stress cible *
+                        </label>
+                        {# HTML5 type=number disabled - using Symfony Range validator instead #}
+                        <input type="text" 
+                               name="niveau_stress" 
+                               class="form-control" 
+                               value="{{ quiz.niveauStressCible ?? 5 }}" 
+                               {# min="1" #}
+                               {# max="10" #}
+                               {# required #}>
+                        <small class="form-hint">Sur une échelle de 1 (faible) à 10 (élevé)</small>
+                    </div>
+
+                    {# Score #}
+                    <div class="form-group">
+                        <label class="form-label" for="score">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                            </svg>
+                            Score obtenu *
+                        </label>
+                        {# HTML5 type=number disabled - using Symfony Range validator instead #}
+                        <input type="text" 
+                               name="score" 
+                               class="form-control" 
+                               value="{{ quiz.scoreResultat ?? 0 }}" 
+                               {# min="0" #}
+                               {# required #}>
+                        <small class="form-hint">Total des points obtenus</small>
+                    </div>
+
+                    {# Médaille #}
+                    <div class="form-group">
+                        <label class="form-label" for="medaille">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="8" r="6"/>
+                                <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
+                            </svg>
+                            Médaille obtenue
+                        </label>
+                        <select id="medaille" name="medaille" class="form-control">
+                            <option value="">Aucune médaille</option>
+                            <option value="Expert Santé" {{ quiz.medailleQuiz == 'Expert Santé' ? 'selected' : '' }}>Expert Santé</option>
+                            <option value="Connaisseur" {{ quiz.medailleQuiz == 'Connaisseur' ? 'selected' : '' }}>Connaisseur</option>
+                            <option value="Apprenti" {{ quiz.medailleQuiz == 'Apprenti' ? 'selected' : '' }}>Apprenti</option>
+                        </select>
+                        <small class="form-hint">Médaille en fonction du score (optionnel)</small>
+                    </div>
+
+                    {# Date du quiz #}
+                    <div class="form-group">
+                        <label class="form-label" for="date_quiz">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                <line x1="16" y1="2" x2="16" y2="6"/>
+                                <line x1="8" y1="2" x2="8" y2="6"/>
+                                <line x1="3" y1="10" x2="21" y2="10"/>
+                            </svg>
+                            Date du quiz *
+                        </label>
+                        {# HTML5 type=datetime-local disabled - using Symfony validators instead #}
+                        <input type="text" 
+                               id="date_quiz" 
+                               name="date_quiz" 
+                               class="form-control" 
+                               value="{{ quiz.dateQuiz ? quiz.dateQuiz|date('Y-m-d\\TH:i') : 'now'|date('Y-m-d\\TH:i') }}" 
+                               {# required #}>
+                        <small class="form-hint">Date et heure du passage du quiz</small>
+                    </div>
+
+                    {# Actions #}
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            {{ isEdit ? 'Enregistrer les modifications' : 'Créer le quiz' }}
+                        </button>
+                        <a href="{{ path('app_mental_admin_quiz_list') }}" class="btn btn-secondary">
+                            Annuler
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-sidebar">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Aide</h4>
+            </div>
+            <div class="card-body">
+                <div class="info-item">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="16" x2="12" y2="12"/>
+                        <line x1="12" y1="8" x2="12.01" y2="8"/>
+                    </svg>
+                    <div>
+                        <strong>Quiz Mental</strong>
+                        <p>Un quiz représente une session d'évaluation passée par un utilisateur.</p>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    </svg>
+                    <div>
+                        <strong>Médailles</strong>
+                        <p>Expert Santé (80%+), Connaisseur (60%+), Apprenti (40%+)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

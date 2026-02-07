@@ -1,0 +1,156 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Community & Support - BioSync{% endblock %}
+
+{% block body %}
+        {# Page Header #}
+        <div class="page-header flex-between">
+            <div>
+                <h1 class="page-title">Community & Support</h1>
+                <p class="page-subtitle">Connect with others on their wellness journey</p>
+            </div>
+            <button class="btn btn-success">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Create Event
+            </button>
+        </div>
+
+        {# Tabs #}
+        <div class="tabs">
+            <button class="tab-btn active">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                Support Groups
+            </button>
+            <button class="tab-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                Events
+            </button>
+        </div>
+
+        {# Support Groups Grid #}
+        <div class="grid-3">
+            {# Group Card 1 - Mindful Living Circle #}
+            <div class="group-card">
+                <img src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800&h=400&fit=crop" alt="Mindful Living" class="group-image">
+                <button class="message-icon-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                </button>
+                <div class="group-content">
+                    <div class="group-header">
+                        <h3 class="group-title">Mindful Living Circle</h3>
+                        <span class="badge badge-mental-health">Mental Health</span>
+                    </div>
+                    <p class="group-description">A supportive community for those practicing mindfulness and meditation techniques.</p>
+                    <div class="group-meta">
+                        <span class="group-meta-item">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                <circle cx="9" cy="7" r="4"/>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                            </svg>
+                            234 members
+                        </span>
+                        <span class="group-meta-item">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                <line x1="16" y1="2" x2="16" y2="6"/>
+                                <line x1="8" y1="2" x2="8" y2="6"/>
+                                <line x1="3" y1="10" x2="21" y2="10"/>
+                            </svg>
+                            Feb 2, 2026
+                        </span>
+                    </div>
+                    <button class="btn btn-primary group-btn">Join Group</button>
+                </div>
+            </div>
+
+            {# Group Card 2 - Nutrition Warriors #}
+            <div class="group-card">
+                <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&h=400&fit=crop" alt="Nutrition Warriors" class="group-image">
+                <button class="message-icon-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                </button>
+                <div class="group-content">
+                    <div class="group-header">
+                        <h3 class="group-title">Nutrition Warriors</h3>
+                        <span class="badge badge-nutrition">Nutrition</span>
+                    </div>
+                    <p class="group-description">Share recipes, meal plans, and nutritional tips with fellow health enthusiasts.</p>
+                    <div class="group-meta">
+                        <span class="group-meta-item">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                <circle cx="9" cy="7" r="4"/>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                            </svg>
+                            512 members
+                        </span>
+                        <span class="group-meta-item">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                <line x1="16" y1="2" x2="16" y2="6"/>
+                                <line x1="8" y1="2" x2="8" y2="6"/>
+                                <line x1="3" y1="10" x2="21" y2="10"/>
+                            </svg>
+                            Feb 5, 2026
+                        </span>
+                    </div>
+                    <button class="btn btn-primary group-btn">Join Group</button>
+                </div>
+            </div>
+
+            {# Group Card 3 - Active Lifestyle Club #}
+            <div class="group-card">
+                <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=400&fit=crop" alt="Active Lifestyle" class="group-image">
+                <button class="message-icon-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                </button>
+                <div class="group-content">
+                    <div class="group-header">
+                        <h3 class="group-title">Active Lifestyle Club</h3>
+                        <span class="badge badge-fitness">Fitness</span>
+                    </div>
+                    <p class="group-description">Join group workouts, challenges, and fitness events in your area.</p>
+                    <div class="group-meta">
+                        <span class="group-meta-item">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                <circle cx="9" cy="7" r="4"/>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                            </svg>
+                            387 members
+                        </span>
+                        <span class="group-meta-item">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                <line x1="16" y1="2" x2="16" y2="6"/>
+                                <line x1="8" y1="2" x2="8" y2="6"/>
+                                <line x1="3" y1="10" x2="21" y2="10"/>
+                            </svg>
+                            Feb 3, 2026
+                        </span>
+                    </div>
+                    <button class="btn btn-primary group-btn">Join Group</button>
+                </div>
+            </div>
+        </div>
+{% endblock %}

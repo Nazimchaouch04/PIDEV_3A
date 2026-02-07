@@ -1,0 +1,339 @@
+{% extends 'base_front.html.twig' %}
+
+{% block title %}BioSync - Your Health, Synced to Perfection{% endblock %}
+
+{% block body %}
+{# Navbar #}
+<nav class="landing-navbar">
+    <div class="landing-container">
+        <a href="{{ path('app_landing') }}" class="landing-brand">
+            <div class="landing-logo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+            </div>
+            <span class="landing-brand-text">BioSync</span>
+        </a>
+        <ul class="landing-nav-menu">
+            <li><a href="#features" class="landing-nav-link">Features</a></li>
+            <li><a href="#pricing" class="landing-nav-link">Pricing</a></li>
+            <li><a href="#experts" class="landing-nav-link">Experts</a></li>
+        </ul>
+        <div class="landing-nav-actions">
+            <a href="{{ path('app_login') }}" class="btn-landing-ghost">Sign In</a>
+            <a href="{{ path('app_register') }}" class="btn-landing-primary">
+                Get Started
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                    <polyline points="12 5 19 12 12 19"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+</nav>
+
+{# Hero Section #}
+<section class="landing-hero">
+    <div class="landing-container">
+        <div class="landing-hero-grid">
+            <div class="landing-hero-left">
+                <h1 class="landing-hero-title">
+                    Your Health,<br>
+                    <span class="landing-hero-gradient">Synced to Perfection</span>
+                </h1>
+                <p class="landing-hero-description">
+                    Experience the future of personalized wellness. BioSync combines nutrition tracking, 
+                    fitness planning, and mental health support in one premium platform designed by medical professionals.
+                </p>
+                <div class="landing-hero-buttons">
+                    <a href="{{ path('app_register') }}" class="btn-landing-cta">
+                        Start Your Journey
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                            <polyline points="12 5 19 12 12 19"/>
+                        </svg>
+                    </a>
+                    <a href="#features" class="btn-landing-outline">Watch Demo</a>
+                </div>
+                <div class="landing-hero-stats">
+                    <div class="landing-stat">
+                        <div class="landing-stat-value">50K+</div>
+                        <div class="landing-stat-label">Active Users</div>
+                    </div>
+                    <div class="landing-stat">
+                        <div class="landing-stat-value">4.9★</div>
+                        <div class="landing-stat-label">App Rating</div>
+                    </div>
+                    <div class="landing-stat">
+                        <div class="landing-stat-value">200+</div>
+                        <div class="landing-stat-label">Health Experts</div>
+                    </div>
+                </div>
+            </div>
+            <div class="landing-hero-right">
+                <div class="landing-hero-visual">
+                    {# Carte principale #}
+                    <div class="landing-main-card">
+                        <div class="landing-card-header">
+                            <span class="landing-card-welcome">Welcome back,</span>
+                            <span class="landing-card-name">Mehdi</span>
+                        </div>
+                        <div class="landing-card-stats">
+                            <div class="landing-stat-card green">
+                                <div class="landing-stat-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/>
+                                        <path d="M7 2v20"/>
+                                        <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>
+                                    </svg>
+                                </div>
+                                <div class="landing-stat-number">1,847</div>
+                                <div class="landing-stat-text">Calories Today</div>
+                            </div>
+                            <div class="landing-stat-card blue">
+                                <div class="landing-stat-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                                    </svg>
+                                </div>
+                                <div class="landing-stat-number">8,432</div>
+                                <div class="landing-stat-text">Steps Today</div>
+                            </div>
+                        </div>
+                        <div class="landing-health-score">
+                            <div class="landing-score-label">Health Score</div>
+                            <div class="landing-score-bar">
+                                <div class="landing-score-fill" style="width: 87%;"></div>
+                            </div>
+                            <div class="landing-score-value">87/100</div>
+                        </div>
+                        <div class="landing-days-text">5/7 Days</div>
+                    </div>
+
+                    {# Cartes flottantes animées #}
+                    <div class="floating-card floating-card-top">
+                        <div class="floating-card-icon green">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                        </div>
+                        <div class="floating-card-content">
+                            <div class="floating-card-value">15 min</div>
+                            <div class="floating-card-label">Meditation</div>
+                        </div>
+                    </div>
+
+                    <div class="floating-card floating-card-bottom">
+                        <div class="floating-card-icon orange">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                            </svg>
+                        </div>
+                        <div class="floating-card-content">
+                            <div class="floating-card-value">92 bpm</div>
+                            <div class="floating-card-label">Heart Rate</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{# Modules Section #}
+<section id="features" class="landing-modules">
+    <div class="landing-container">
+        <div class="landing-section-header">
+            <h2 class="landing-section-title">Everything You Need to Thrive</h2>
+            <p class="landing-section-subtitle">
+                Comprehensive health modules designed by experts to support your wellness journey
+            </p>
+        </div>
+        <div class="landing-modules-grid">
+            <div class="landing-module-card">
+                <div class="landing-module-icon green">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/>
+                        <path d="M7 2v20"/>
+                        <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>
+                    </svg>
+                </div>
+                <h3 class="landing-module-title">Nutrition Tracking</h3>
+                <p class="landing-module-description">
+                    Log meals, track macros, and receive personalized nutrition recommendations based on your health goals.
+                </p>
+                <ul class="landing-module-features">
+                    <li>Calorie & macro tracking</li>
+                    <li>Food database with 10K+ items</li>
+                    <li>AI meal suggestions</li>
+                </ul>
+            </div>
+
+            <div class="landing-module-card">
+                <div class="landing-module-icon blue">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                    </svg>
+                </div>
+                <h3 class="landing-module-title">Sport & Fitness</h3>
+                <p class="landing-module-description">
+                    Access hundreds of workouts, track your progress, and optimize your training with data-driven insights.
+                </p>
+                <ul class="landing-module-features">
+                    <li>500+ video exercises</li>
+                    <li>Custom workout plans</li>
+                    <li>Performance analytics</li>
+                </ul>
+            </div>
+
+            <div class="landing-module-card">
+                <div class="landing-module-icon sky">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+                        <line x1="9" y1="9" x2="9.01" y2="9"/>
+                        <line x1="15" y1="9" x2="15.01" y2="9"/>
+                    </svg>
+                </div>
+                <h3 class="landing-module-title">Mental Wellness</h3>
+                <p class="landing-module-description">
+                    Monitor your mental health with scientifically validated assessments and personalized wellness programs.
+                </p>
+                <ul class="landing-module-features">
+                    <li>Mental health assessments</li>
+                    <li>Meditation & mindfulness</li>
+                    <li>Progress tracking & badges</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+{# Testimonials Section #}
+<section id="experts" class="landing-testimonials">
+    <div class="landing-container">
+        <div class="landing-section-header">
+            <h2 class="landing-section-title">Trusted by Health Professionals</h2>
+        </div>
+        <div class="landing-testimonials-grid">
+            <div class="landing-testimonial-card">
+                <div class="landing-testimonial-stars">★★★★★</div>
+                <p class="landing-testimonial-text">
+                    "BioSync has revolutionized how I monitor patient progress. The comprehensive data tracking and 
+                    intuitive interface make it an invaluable tool for healthcare professionals."
+                </p>
+                <div class="landing-testimonial-author">
+                    <img src="https://i.pravatar.cc/80?img=5" alt="Dr. Sarah Chen" class="landing-testimonial-avatar">
+                    <div>
+                        <div class="landing-testimonial-name">Dr. Sarah Chen</div>
+                        <div class="landing-testimonial-role">Cardiologist</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="landing-testimonial-card">
+                <div class="landing-testimonial-stars">★★★★★</div>
+                <p class="landing-testimonial-text">
+                    "As a nutritionist, I recommend BioSync to all my clients. The nutrition tracking is incredibly 
+                    detailed and the meal planning features are second to none."
+                </p>
+                <div class="landing-testimonial-author">
+                    <img src="https://i.pravatar.cc/80?img=48" alt="Dr. Emily Rodriguez" class="landing-testimonial-avatar">
+                    <div>
+                        <div class="landing-testimonial-name">Dr. Emily Rodriguez</div>
+                        <div class="landing-testimonial-role">Clinical Nutritionist</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="landing-testimonial-card">
+                <div class="landing-testimonial-stars">★★★★★</div>
+                <p class="landing-testimonial-text">
+                    "The mental health module is groundbreaking. BioSync provides evidence-based assessments that help 
+                    me better understand my patients' wellbeing."
+                </p>
+                <div class="landing-testimonial-author">
+                    <img src="https://i.pravatar.cc/80?img=33" alt="Dr. Michael Park" class="landing-testimonial-avatar">
+                    <div>
+                        <div class="landing-testimonial-name">Dr. Michael Park</div>
+                        <div class="landing-testimonial-role">Psychiatrist</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{# Footer #}
+<footer class="landing-footer">
+    <div class="landing-container">
+        <div class="landing-footer-content">
+            <div class="landing-footer-left">
+                <div class="landing-footer-brand">
+                    <div class="landing-logo">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                        </svg>
+                    </div>
+                    <span class="landing-brand-text">BioSync</span>
+                </div>
+                <p class="landing-footer-description">
+                    Your complete health and wellness platform. Track nutrition, fitness, mental health, 
+                    and connect with medical experts—all in one place.
+                </p>
+                <div class="landing-footer-icons">
+                    <div class="landing-footer-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                    </div>
+                    <div class="landing-footer-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                        </svg>
+                    </div>
+                    <div class="landing-footer-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            <div class="landing-footer-right">
+                <h3 class="landing-footer-title">Subscribe to Our Newsletter</h3>
+                <p class="landing-footer-subtitle">
+                    Get the latest health tips, product updates, and wellness insights delivered to your inbox.
+                </p>
+                <form class="landing-newsletter-form">
+                    {# HTML5 type=email disabled - using Symfony Email validator instead #}
+                    <input type="text" placeholder="Enter your email" class="landing-newsletter-input">
+                    <button type="submit" class="btn-landing-cta">Subscribe</button>
+                </form>
+            </div>
+        </div>
+        <div class="landing-footer-bottom">
+            <p>© 2026 BioSync. All rights reserved.</p>
+            <div class="landing-footer-links">
+                <a href="#privacy">Privacy Policy</a>
+                <a href="#terms">Terms of Service</a>
+                <a href="#contact">Contact</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script>
+// Smooth scrolling for navigation links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
+});
+</script>
+{% endblock %}
