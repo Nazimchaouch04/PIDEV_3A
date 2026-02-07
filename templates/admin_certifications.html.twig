@@ -1,0 +1,119 @@
+{% extends 'base_back.html.twig' %}
+
+{% block body %}
+<div class="page-header flex-between">
+    <h1 class="page-title">Certifications en attente</h1>
+    <a href="{{ path('app_admin_dashboard') }}" class="btn btn-secondary">Retour</a>
+</div>
+
+<div class="card">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Utilisateur</th>
+                <th>Type</th>
+                <th>Spécialité</th>
+                <th>N° Enregistrement</th>
+                <th>Motivation</th>
+                <th>Diplôme</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in certifications %}
+            <tr>
+                <td>{{ c.utilisateur.nomComplet }}</td>
+                <td>
+                    <span class="badge badge-{{ c.type == 'COACH' ? 'primary' : 'success' }}">
+                        {{ c.type == 'COACH' ? 'Coach' : 'Spécialiste' }}
+                    </span>
+                </td>
+                <td>{{ c.specialite }}</td>
+                <td>{{ c.numeroEnregistrement }}</td>
+                <td>
+                    <button type="button" class="btn btn-sm btn-info" onclick="showMotivation('{{ c.id }}')">
+                        Voir
+                    </button>
+                    <div id="motivation-{{ c.id }}" class="motivation-text" style="display: none;">
+                        {{ c.motivation|nl2br }}
+                    </div>
+                </td>
+                <td>
+                    {% if c.diplomeFilename %}
+                        <a href="/uploads/diplomes/{{ c.diplomeFilename }}" target="_blank" class="btn btn-sm btn-secondary">
+                            📄 Voir
+                        </a>
+                    {% else %}
+                        <span class="text-muted">Aucun</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ path('app_admin_cert_approve', {id: c.id}) }}" class="btn btn-sm btn-primary">Approuver</a>
+                </td>
+            </tr>
+            {% else %}
+                <tr><td colspan="7" class="text-center">Aucune demande en attente.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+.badge-primary {
+    background: #007bff;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+.badge-success {
+    background: #28a745;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+.motivation-text {
+    position: absolute;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    padding: 10px;
+    border-radius: 4px;
+    max-width: 300px;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+td {
+    position: relative;
+}
+</style>
+
+<script>
+function showMotivation(id) {
+    const element = document.getElementById('motivation-' + id);
+    const allMotivations = document.querySelectorAll('.motivation-text');
+    
+    // Cacher toutes les autres motivations
+    allMotivations.forEach(el => {
+        if (el.id !== 'motivation-' + id) {
+            el.style.display = 'none';
+        }
+    });
+    
+    // Afficher/cacher la motivation actuelle
+    element.style.display = element.style.display === 'none' ? 'block' : 'none';
+}
+
+// Cacher les motivations quand on clique ailleurs
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('button') && !e.target.closest('.motivation-text')) {
+        document.querySelectorAll('.motivation-text').forEach(el => {
+            el.style.display = 'none';
+        });
+    }
+});
+</script>
+{% endblock %}

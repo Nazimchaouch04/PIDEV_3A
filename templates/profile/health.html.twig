@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Profil Sante - BioSync{% endblock %}
+
+{% block body %}
+<div class="app-layout">
+    {% include 'partials/_sidebar.html.twig' with {'active': 'profile'} %}
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Profil Sante</h1>
+            <p class="page-subtitle">Configurez vos parametres de sante pour un suivi personnalise.</p>
+        </div>
+
+        <div class="card" style="max-width: 600px;">
+            {{ form_start(form) }}
+                <div class="form-group">
+                    {{ form_label(form.age) }}
+                    {{ form_widget(form.age) }}
+                    {{ form_errors(form.age) }}
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.poids) }}
+                    {{ form_widget(form.poids) }}
+                    {{ form_errors(form.poids) }}
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.heureReveil) }}
+                    {{ form_widget(form.heureReveil) }}
+                    {{ form_errors(form.heureReveil) }}
+                </div>
+
+                <div class="modal-footer" style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--gray-200);">
+                    <a href="{{ path('app_profile') }}" class="btn btn-ghost">Annuler</a>
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </main>
+</div>
+{% endblock %}

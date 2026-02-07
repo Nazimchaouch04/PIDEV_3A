@@ -1,0 +1,72 @@
+{% extends 'base_back.html.twig' %}
+
+{% block body %}
+<div class="page-header flex-between">
+    <div>
+        <h1 class="page-title">Utilisateurs BioSync</h1>
+        <p class="page-subtitle">Gérez les membres de la plateforme</p>
+    </div>
+    <div style="display: flex; gap: 1rem;">
+        <a href="{{ path('app_admin_user_new') }}" class="btn btn-primary">+ Nouvel utilisateur</a>
+        <a href="{{ path('app_admin_dashboard') }}" class="btn btn-secondary">Retour au Dashboard</a>
+    </div>
+</div>
+
+{# Barre de Recherche et Tri #}
+<div class="card mb-4">
+    <form method="get" action="{{ path('app_admin_users') }}" class="flex gap-4">
+        <input type="text" name="q" value="{{ current_q }}" placeholder="Rechercher un nom ou email..." class="form-control" style="flex: 2;">
+        
+        <select name="sort" class="form-control" style="flex: 1;">
+            <option value="nomComplet" {{ current_sort == 'nomComplet' ? 'selected' }}>Trier par Nom</option>
+            <option value="dateInscription" {{ current_sort == 'dateInscription' ? 'selected' }}>Trier par Date</option>
+            <option value="scoreGlobal" {{ current_sort == 'scoreGlobal' ? 'selected' }}>Trier par Score</option>
+        </select>
+
+        <select name="direction" class="form-control" style="flex: 1;">
+            <option value="ASC" {{ current_direction == 'ASC' ? 'selected' }}>Croissant</option>
+            <option value="DESC" {{ current_direction == 'DESC' ? 'selected' }}>Décroissant</option>
+        </select>
+
+        <button type="submit" class="btn btn-primary">Filtrer</button>
+        <a href="{{ path('app_admin_users') }}" class="btn btn-ghost">Reset</a>
+    </form>
+</div>
+
+<div class="card">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Email</th>
+                <th>Date d'inscription</th>
+                <th>Score</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in users %}
+            <tr>
+                <td><strong>{{ u.nomComplet }}</strong></td>
+                <td>{{ u.email }}</td>
+                <td>{{ u.dateInscription|date('d/m/Y') }}</td>
+                <td>{{ u.scoreGlobal }} pts</td>
+                <td>
+                    <div class="flex gap-2">
+                        <a href="{{ path('app_admin_user_show', {id: u.id}) }}" class="btn btn-sm btn-ghost">Voir Profil</a>
+                        <a href="{{ path('app_admin_user_edit', {id: u.id}) }}" class="btn btn-sm btn-secondary">Modifier</a>
+                        {% if u != app.user %}
+                            <a href="{{ path('app_admin_user_delete', {id: u.id}) }}" class="btn btn-sm btn-ghost text-danger" onclick="return confirm('Supprimer définitivement ?')">Supprimer</a>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" class="text-center">Aucun utilisateur trouvé.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
