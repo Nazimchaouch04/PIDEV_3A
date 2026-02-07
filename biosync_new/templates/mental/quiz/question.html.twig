@@ -1,0 +1,61 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Quiz Mental - Question {{ currentIndex + 1 }}/{{ totalQuestions }}{% endblock %}
+
+{% block body %}
+<div class="quiz-container">
+    {# Progress Bar #}
+    <div class="quiz-progress-wrapper">
+        <div class="quiz-progress-info">
+            <span class="quiz-progress-text">Question {{ currentIndex + 1 }} sur {{ totalQuestions }}</span>
+            <span class="quiz-progress-percent">{{ progress }}%</span>
+        </div>
+        <div class="quiz-progress-bar">
+            <div class="quiz-progress-fill" style="width: {{ progress }}%"></div>
+        </div>
+    </div>
+
+    {# Question Card #}
+    <div class="quiz-question-card">
+        <div class="quiz-question-header">
+            <div class="quiz-question-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="16" x2="12" y2="12"/>
+                    <line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+            </div>
+            <h2 class="quiz-question-title">{{ question.enonce }}</h2>
+        </div>
+
+        <form method="post" class="quiz-options-form">
+            {% set allOptions = question.allOptions %}
+            <div class="quiz-options">
+                {% for option in allOptions %}
+                    <label class="quiz-option">
+                        <input type="radio" name="answer" value="{{ option }}" required>
+                        <div class="quiz-option-content">
+                            <div class="quiz-option-radio"></div>
+                            <span class="quiz-option-text">{{ option }}</span>
+                        </div>
+                    </label>
+                {% endfor %}
+            </div>
+
+            <div class="quiz-actions">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    {% if currentIndex + 1 < totalQuestions %}
+                        Question suivante
+                    {% else %}
+                        Voir les résultats
+                    {% endif %}
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                        <polyline points="12 5 19 12 12 19"/>
+                    </svg>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

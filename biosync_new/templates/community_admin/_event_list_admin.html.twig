@@ -1,0 +1,19 @@
+{# templates/community_admin/_event_list_admin.html.twig #}
+{% for event in events %}
+    <tr style="border-bottom: 1px solid var(--border-light);">
+        <td style="padding: 12px; font-weight: 600;">{{ event.titreEvent }}</td>
+        <td style="padding: 12px;"><span class="badge badge-fitness">{{ event.groupe.nomGroupe }}</span></td>
+        <td style="padding: 12px;">{{ event.dateEvent|date('d/m/Y H:i') }}</td>
+        <td style="padding: 12px; display: flex; gap: 8px;">
+            <a href="{{ path('app_admin_event_edit', {id: event.id}) }}" class="btn btn-outline btn-sm" style="color: var(--primary-blue); border-color: var(--primary-blue);">
+                Modifier
+            </a>
+            <form method="post" action="{{ path('app_admin_event_delete', {id: event.id}) }}" onsubmit="return confirm('Annuler ?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete_event' ~ event.id) }}">
+                <button class="btn btn-outline btn-sm" style="color: #EF4444; border-color: #EF4444;">Annuler</button>
+            </form>
+        </td>
+    </tr>
+{% else %}
+    <tr><td colspan="4" style="padding: 20px; text-align: center;">Aucun événement trouvé.</td></tr>
+{% endfor %}

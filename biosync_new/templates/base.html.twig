@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BioSync{% endblock %}</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2245%22 fill=%22%236EC5A6%22/><text x=%2250%22 y=%2265%22 font-size=%2240%22 text-anchor=%22middle%22 fill=%22white%22>B</text></svg>">
+
+    {# Google Fonts #}
+    <link rel="stylesheet" href="{{ asset('css/fonts.css') }}">
+
+    {# Main CSS #}
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+
+    {% block stylesheets %}{% endblock %}
+</head>
+<body>
+    {% block body %}{% endblock %}
+
+    {# Main JS #}
+    <script src="{{ asset('js/app.js') }}"></script>
+
+    {# Flash Messages #}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div data-flash-message="{{ message }}" data-flash-type="{{ label }}" style="display:none;"></div>
+        {% endfor %}
+    {% endfor %}
+
+    {% block javascripts %}{% endblock %}
+</body>
+</html>

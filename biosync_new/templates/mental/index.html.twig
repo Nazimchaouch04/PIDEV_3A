@@ -1,0 +1,160 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Mental Wellness - BioSync{% endblock %}
+
+{% block body %}
+<div class="mental-wellness-page">
+    {# Page Header #}
+    <div class="page-header-mental">
+        <h1 class="page-title-mental">Mental Wellness</h1>
+        <p class="page-subtitle-mental">Choisissez un quiz thématique pour évaluer votre bien-être mental</p>
+    </div>
+
+    {# Quiz Disponibles créés par l'admin #}
+    {% if quizzesDisponibles|length > 0 %}
+    <div class="quiz-available-section">
+        <h2 class="section-title">Quiz Disponibles</h2>
+        <p class="section-subtitle">Quiz créés pour vous par votre coach</p>
+        
+        <div class="quiz-selection-grid">
+            {% for quiz in quizzesDisponibles %}
+            <a href="{{ path('app_mental_quiz_start', {quizId: quiz.id}) }}" class="quiz-theme-card">
+                <div class="quiz-theme-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                </div>
+                <h3 class="quiz-theme-title">{{ quiz.titre }}</h3>
+                <p class="quiz-theme-desc">Niveau de stress cible : {{ quiz.niveauStressCible }}/10</p>
+                <div class="quiz-theme-meta">
+                    <span class="quiz-duration">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                        {{ quiz.questions|length > 0 ? (quiz.questions|length * 2) : 5 }} min
+                    </span>
+                    <span class="quiz-questions">{{ quiz.questions|length > 0 ? quiz.questions|length : '5' }} questions</span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-section">
+        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <h3>Aucun quiz disponible</h3>
+        <p>Votre coach n'a pas encore créé de quiz pour vous</p>
+    </div>
+    {% endif %}
+
+    {# Your Achievements #}
+    {% if achievements.total_quiz > 0 %}
+    <div class="achievements-section">
+        <h2 class="achievements-title">Vos Réussites</h2>
+        
+        <div class="achievements-grid">
+            {# Achievement Badge - Expert Santé #}
+            <div class="achievement-badge {{ achievements.has_expert ? 'completed' : 'locked' }}">
+                <div class="achievement-icon zen">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
+                        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+                        <path d="M4 22h16"/>
+                        <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+                        <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+                        <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+                    </svg>
+                </div>
+                <div class="achievement-info">
+                    <h3 class="achievement-name">Expert Santé {{ achievements.has_expert ? '✓' : '' }}</h3>
+                    <p class="achievement-desc">Obtenir 80% ou plus à un quiz</p>
+                </div>
+            </div>
+
+            {# Achievement Badge - Connaisseur #}
+            <div class="achievement-badge {{ achievements.has_connaisseur ? 'completed' : 'locked' }}">
+                <div class="achievement-icon mindful">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <circle cx="12" cy="8" r="6"/>
+                        <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
+                    </svg>
+                </div>
+                <div class="achievement-info">
+                    <h3 class="achievement-name">Connaisseur {{ achievements.has_connaisseur ? '✓' : '' }}</h3>
+                    <p class="achievement-desc">Obtenir 60% ou plus à un quiz</p>
+                </div>
+            </div>
+
+            {# Achievement Badge - Apprenti #}
+            <div class="achievement-badge {{ achievements.has_apprenti ? 'completed' : 'locked' }}">
+                <div class="achievement-icon stress">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    </svg>
+                </div>
+                <div class="achievement-info">
+                    <h3 class="achievement-name">Apprenti {{ achievements.has_apprenti ? '✓' : '' }}</h3>
+                    <p class="achievement-desc">Obtenir 40% ou plus à un quiz</p>
+                </div>
+            </div>
+
+            {# Achievement Badge - Quiz Master #}
+            <div class="achievement-badge {{ achievements.total_quiz >= 5 ? 'completed' : 'locked' }}">
+                <div class="achievement-icon selfcare">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                </div>
+                <div class="achievement-info">
+                    <h3 class="achievement-name">Quiz Master {{ achievements.total_quiz >= 5 ? '✓' : '' }}</h3>
+                    <p class="achievement-desc">Compléter 5 quiz ({{ achievements.total_quiz }}/5)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {# Quiz History - Quiz passés uniquement #}
+    {% if quizzesPasses|length > 0 %}
+    <div class="quiz-history-section">
+        <h2 class="quiz-history-title">Historique de vos Quiz Passés</h2>
+        
+        <div class="quiz-history-list">
+            {% for quiz in quizzesPasses|slice(0, 5) %}
+            <div class="quiz-history-item">
+                <div class="quiz-history-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                </div>
+                <div class="quiz-history-content">
+                    <h4 class="quiz-history-name">{{ quiz.titre }}</h4>
+                    <p class="quiz-history-date">{{ quiz.dateQuiz|date('d/m/Y à H:i') }}</p>
+                </div>
+                <div class="quiz-history-score">
+                    <span class="score-value">{{ quiz.scoreResultat }} pts</span>
+                    {% if quiz.medailleQuiz %}
+                        <span class="quiz-medaille">🏆 {{ quiz.medailleQuiz }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if quizzesPasses|length > 5 %}
+        <div class="quiz-history-footer">
+            <p class="text-gray">{{ quizzesPasses|length - 5 }} autre(s) quiz non affichés</p>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

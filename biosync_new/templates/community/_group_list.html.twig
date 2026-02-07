@@ -1,0 +1,26 @@
+{# templates/community_admin/_group_list_admin.html.twig #}
+{% for group in groupes %}
+    <div class="group-card">
+        <div class="group-content">
+            <div class="group-header">
+                <h3 class="group-title">{{ group.nomGroupe }}</h3>
+                <span class="badge badge-mental-health">{{ group.thematique }}</span>
+            </div>
+            <p class="group-description">{{ group.description|slice(0, 80) }}...</p>
+            <div class="group-meta">
+                <span class="group-meta-item">Membres: {{ group.membres|length }}/{{ group.capaciteMax }}</span>
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 16px;">
+                <a href="{{ path('app_admin_group_edit', {id: group.id}) }}" class="btn btn-outline btn-sm">Modifier</a>
+                <form method="post" action="{{ path('app_admin_group_delete', {id: group.id}) }}" onsubmit="return confirm('Supprimer définitivement ce groupe ?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ group.id) }}">
+                    <button class="btn btn-outline btn-sm" style="color: #EF4444; border-color: #EF4444;">Supprimer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div class="card" style="grid-column: span 3; text-align: center; padding: 20px;">
+        <p>Aucun groupe trouvé.</p>
+    </div>
+{% endfor %}

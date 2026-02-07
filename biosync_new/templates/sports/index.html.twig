@@ -1,0 +1,118 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Sports & Fitness - BioSync{% endblock %}
+
+{% block body %}
+        <div class="page-header flex-between">
+            <div>
+                <h1 class="page-title">Sport</h1>
+                <p class="page-subtitle">Suivez vos seances d'entrainement.</p>
+            </div>
+            <a href="{{ path('app_sports_new') }}" class="btn btn-secondary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Ajouter une seance
+            </a>
+        </div>
+
+        {# Stats #}
+        <div class="grid grid-cols-3 gap-4 mb-6">
+            <div class="stat-card">
+                <div class="stat-card-icon secondary">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                </div>
+                <div class="stat-card-value">{{ totalMinutesWeek }}</div>
+                <div class="stat-card-label">Minutes cette semaine</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-value">{{ weekSeances|length }}</div>
+                <div class="stat-card-label">Seances cette semaine</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-value">{{ seances|length }}</div>
+                <div class="stat-card-label">Total seances</div>
+            </div>
+        </div>
+
+        {# Liste des seances #}
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Historique des seances</h4>
+            </div>
+            {% if seances|length > 0 %}
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Seance</th>
+                                <th>Date</th>
+                                <th>Heure</th>
+                                <th>Duree</th>
+                                <th>Medaille</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for s in seances %}
+                                <tr>
+                                    <td><strong>{{ s.nomSeance }}</strong></td>
+                                    <td>{{ s.dateSeance|date('d/m/Y') }}</td>
+                                    <td>{{ s.heureDebut|date('H:i') }}</td>
+                                    <td>{{ s.dureeMinutes }} min</td>
+                                    <td>
+                                        {% if s.medailleObtenue %}
+                                            <span class="badge badge-warning">{{ s.medailleObtenue }}</span>
+                                        {% else %}
+                                            <span class="text-gray">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="table-actions">
+                                            <a href="{{ path('app_sports_show', {id: s.id}) }}" class="icon-btn" title="Voir">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                                    <circle cx="12" cy="12" r="3"/>
+                                                </svg>
+                                            </a>
+                                            <a href="{{ path('app_sports_edit', {id: s.id}) }}" class="icon-btn" title="Modifier">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                                </svg>
+                                            </a>
+                                            <form action="{{ path('app_sports_delete', {id: s.id}) }}" method="post" style="display: inline;" id="delete-form-{{ s.id }}">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ s.id) }}">
+                                                <button type="button" class="icon-btn danger" title="Supprimer" onclick="confirmDelete('delete-form-{{ s.id }}')">
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <polyline points="3 6 5 6 21 6"/>
+                                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                                    </svg>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--gray-300)" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    <h4 class="empty-state-title">Aucune seance enregistree</h4>
+                    <p class="text-gray">Commencez a suivre votre activite physique.</p>
+                    <a href="{{ path('app_sports_new') }}" class="btn btn-secondary mt-4">Ajouter une seance</a>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+{% endblock %}

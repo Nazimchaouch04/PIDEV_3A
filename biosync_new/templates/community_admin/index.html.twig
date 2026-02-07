@@ -1,0 +1,80 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Admin - Gestion Communautés{% endblock %}
+
+{% block body %}
+    <div class="page-header flex-between">
+        <div>
+            <h1 class="page-title">Gestion Communauté</h1>
+            <p class="page-subtitle">Pilotez les cercles et événements BioSync.</p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <a href="{{ path('app_admin_group_new') }}" class="btn btn-primary">+ Nouveau Groupe</a>
+            <a href="{{ path('app_admin_event_new') }}" class="btn btn-success">+ Nouvel Événement</a>
+        </div>
+    </div>
+
+    <!-- RECHERCHE & TRI ADMIN -->
+    <div class="card" style="margin: 20px 0; display: flex; gap: 20px; align-items: center;">
+        <div style="flex: 1;">
+            <input type="text" id="admin-search" class="form-control" placeholder="Rechercher un groupe ou un événement..." autocomplete="off">
+        </div>
+        <div>
+            <select class="form-control" style="width: 200px;" onchange="window.location.href='{{ path('app_admin_community_index') }}?sort=' + this.value">
+                <option value="recent" {{ currentSort == 'recent' ? 'selected' }}>Plus récents</option>
+                <option value="oldest" {{ currentSort == 'oldest' ? 'selected' }}>Plus anciens</option>
+                <option value="name" {{ currentSort == 'name' ? 'selected' }}>Nom (A-Z)</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Section des Groupes -->
+    <h2 style="margin-bottom: 15px;">Groupes Actifs</h2>
+    <div class="grid-3" id="admin-groups-container">
+        {% include 'community_admin/_group_list_admin.html.twig' %}
+    </div>
+
+    <!-- Section des Événements -->
+    <h2 style="margin: 40px 0 15px;">Liste des Événements</h2>
+    <div class="card">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="text-align: left; border-bottom: 2px solid var(--border-light);">
+                    <th style="padding: 12px;">Titre</th>
+                    <th style="padding: 12px;">Groupe</th>
+                    <th style="padding: 12px;">Date</th>
+                    <th style="padding: 12px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="admin-events-container">
+                {% include 'community_admin/_event_list_admin.html.twig' %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('admin-search');
+        const groupsContainer = document.getElementById('admin-groups-container');
+        const eventsContainer = document.getElementById('admin-events-container');
+
+        searchInput.addEventListener('keyup', function() {
+            const query = searchInput.value;
+
+            fetch('{{ path("app_admin_community_index") }}?search=' + query, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json()) // On attend du JSON ici car on met à jour 2 zones
+            .then(data => {
+                groupsContainer.innerHTML = data.groupsHtml;
+                eventsContainer.innerHTML = data.eventsHtml;
+            })
+            .catch(error => console.error('Erreur:', error));
+        });
+    });
+</script>
+{% endblock %}
