@@ -45,33 +45,37 @@ final class ConsultationController extends AbstractController
         );
     }
 
-    #[Route('/{id}/edit', name: 'app_consultation_edit', methods: ['GET', 'POST'])]
-    public function edit(
-        Request $request,
-        Consultation $consultation,
-        EntityManagerInterface $entityManager
-    ): Response {
+   #[Route('/{id}/edit', name: 'app_consultation_edit', methods: ['GET', 'POST'])]
+public function edit(
+    Request $request,
+    Consultation $consultation,
+    EntityManagerInterface $entityManager
+): Response {
 
-        if ($consultation->getRendezVous()->getSpecialiste() !== $this->getUser()) {
-            throw $this->createAccessDeniedException();
-        }
-
-        $form = $this->createForm(ConsultationType::class, $consultation);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-
-            $consultation->getRendezVous()->setStatut('REALISE');
-            $entityManager->flush();
-
-            return $this->redirectToRoute('app_specialiste');
-        }
-
-        return $this->render('consultation/edit.html.twig', [
-            'consultation' => $consultation,
-            'form' => $form->createView(),
-        ]);
+    if ($consultation->getRendezVous()->getSpecialiste() !== $this->getUser()) {
+        throw $this->createAccessDeniedException();
     }
+
+    $form = $this->createForm(ConsultationType::class, $consultation);
+    $form->handleRequest($request);
+
+    if ($form->isSubmitted() && $form->isValid()) {
+
+        // important: update RDV status
+        $rdv = $consultation->getRendezVous();
+        $rdv->setStatut('REALISE');
+
+        $entityManager->persist($rdv);   
+        $entityManager->flush();
+
+        return $this->redirectToRoute('app_specialiste');
+    }
+
+    return $this->render('consultation/edit.html.twig', [
+        'consultation' => $consultation,
+        'form' => $form->createView(),
+    ]);
+}
 
     #[Route('/{id}', name: 'app_consultation_show', methods: ['GET'])]
     public function show(Consultation $consultation): Response

@@ -10,10 +10,32 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use App\Repository\ConsultationRepository;
 
 #[Route('/medical')]
 class MedicalController extends AbstractController
 {
+
+#[Route('/dossier', name: 'app_medical_dossier')]
+public function dossier(
+    RendezVousRepository $rdvRepo,
+    ConsultationRepository $consultRepo
+): Response {
+
+    $user = $this->getUser();
+
+    return $this->render('medical/dossier.html.twig', [
+        'rdvs' => $rdvRepo->findBy(['patient'=>$user]),
+        'consultations' => $consultRepo->createQueryBuilder('c')
+    ->join('c.rendezVous','r')
+    ->where('r.patient = :patient')
+    ->setParameter('patient',$user)
+    ->getQuery()
+    ->getResult()
+
+    ]);
+}
+
     // LIST MY RENDEZ-VOUS
     #[Route('', name: 'app_medical')]
     public function index(RendezVousRepository $rendezVousRepository): Response
@@ -31,29 +53,30 @@ class MedicalController extends AbstractController
     }
 
     // CREATE RENDEZ-VOUS
-    #[Route('/new', name: 'app_medical_new')]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
-    {
-        $rdv = new RendezVous();
-        $rdv->setPatient($this->getUser());
-        $rdv->setStatut('DEMANDE'); // default status
+   #[Route('/new', name: 'app_medical_new')]
+public function new(Request $request, EntityManagerInterface $entityManager): Response
+{
+    $rdv = new RendezVous();
+    $rdv->setPatient($this->getUser());
+    $rdv->setStatut('DEMANDE');
 
-        $form = $this->createForm(RendezVousType::class, $rdv);
-        $form->handleRequest($request);
+    $form = $this->createForm(RendezVousType::class, $rdv);
+    $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($rdv);
-            $entityManager->flush();
+    if ($form->isSubmitted() && $form->isValid()) {
 
-            $this->addFlash('success', 'Rendez-vous demandé avec succès');
+        $rdv->setSpecialiste($form->get('specialiste')->getData());
 
-            return $this->redirectToRoute('app_medical');
-        }
+        $entityManager->persist($rdv);
+        $entityManager->flush();
 
-        return $this->render('medical/new.html.twig', [
-            'form' => $form->createView(),
-        ]);
+        return $this->redirectToRoute('app_medical');
     }
+
+    return $this->render('medical/new.html.twig', [
+        'form' => $form->createView(),
+    ]);
+}
 
     // SHOW RENDEZ-VOUS
     #[Route('/{id<\d+>}', name: 'app_medical_show', methods: ['GET'])]

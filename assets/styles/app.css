@@ -156,3 +156,40 @@ input[type="radio"]{
 .prescription-table tbody tr:hover{
     background:#fafafa;
 }
+
+.dossier-card{
+    background:white;
+    border-radius:18px;
+    padding:30px;
+    box-shadow:0 6px 20px rgba(0,0,0,0.08);
+}
+
+.dossier-header{
+    font-size:26px;
+    font-weight:700;
+    margin-bottom:20px;
+}
+
+.dossier-table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.dossier-table th{
+    background:#f5f7fb;
+    padding:14px;
+    text-align:left;
+}
+
+.dossier-table td{
+    padding:14px;
+    border-top:1px solid #eee;
+}
+
+.btn-view{
+    background:#4e7cf4;
+    color:white;
+    padding:6px 14px;
+    border-radius:8px;
+    text-decoration:none;
+}
