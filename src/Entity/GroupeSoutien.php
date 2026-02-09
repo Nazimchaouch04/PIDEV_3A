@@ -20,31 +20,27 @@ class GroupeSoutien
 
     #[ORM\Column(length: 100)]
     #[Assert\NotBlank(message: 'Le nom du groupe est requis')]
-    #[Assert\Length(max: 100)]
     private ?string $nomGroupe = null;
 
     #[ORM\Column(length: 50)]
-    #[Assert\NotBlank(message: 'La thematique est requise')]
-    #[Assert\Length(max: 50)]
+    #[Assert\NotBlank(message: 'La thématique est requise')]
     private ?string $thematique = null;
 
     #[ORM\Column]
-    #[Assert\NotNull(message: 'La capacite maximale est requise')]
-    #[Assert\Range(min: 1, max: 20, notInRangeMessage: 'La capacite doit etre entre {{ min }} et {{ max }}')]
+    #[Assert\NotNull]
+    #[Assert\Range(min: 1, max: 20)]
     private ?int $capaciteMax = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
 
-    /**
-     * @var Collection<int, EvenementSante>
-     */
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\NotBlank(message: 'L\'image est requise')]
+    private ?string $image = null;
+
     #[ORM\OneToMany(targetEntity: EvenementSante::class, mappedBy: 'groupe', orphanRemoval: true)]
     private Collection $evenements;
 
-    /**
-     * @var Collection<int, MembreGroupe>
-     */
     #[ORM\OneToMany(targetEntity: MembreGroupe::class, mappedBy: 'groupe', orphanRemoval: true)]
     private Collection $membres;
 
@@ -103,58 +99,27 @@ class GroupeSoutien
         return $this;
     }
 
-    /**
-     * @return Collection<int, EvenementSante>
-     */
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): static
+    {
+        $this->image = $image;
+        return $this;
+    }
+
+    /** @return Collection<int, EvenementSante> */
     public function getEvenements(): Collection
     {
         return $this->evenements;
     }
 
-    public function addEvenement(EvenementSante $evenement): static
-    {
-        if (!$this->evenements->contains($evenement)) {
-            $this->evenements->add($evenement);
-            $evenement->setGroupe($this);
-        }
-        return $this;
-    }
-
-    public function removeEvenement(EvenementSante $evenement): static
-    {
-        if ($this->evenements->removeElement($evenement)) {
-            if ($evenement->getGroupe() === $this) {
-                $evenement->setGroupe(null);
-            }
-        }
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, MembreGroupe>
-     */
+    /** @return Collection<int, MembreGroupe> */
     public function getMembres(): Collection
     {
         return $this->membres;
-    }
-
-    public function addMembre(MembreGroupe $membre): static
-    {
-        if (!$this->membres->contains($membre)) {
-            $this->membres->add($membre);
-            $membre->setGroupe($this);
-        }
-        return $this;
-    }
-
-    public function removeMembre(MembreGroupe $membre): static
-    {
-        if ($this->membres->removeElement($membre)) {
-            if ($membre->getGroupe() === $this) {
-                $membre->setGroupe(null);
-            }
-        }
-        return $this;
     }
 
     public function getNombreMembres(): int

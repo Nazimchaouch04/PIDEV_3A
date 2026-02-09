@@ -64,17 +64,27 @@ class AdminUserType extends AbstractType
                 ]
             ]);
 
-        // Ajouter le champ mot de passe uniquement pour la création
+        // Ajouter le champ mot de passe pour la création et la modification
         if ($options['include_password']) {
             $builder->add('plainPassword', PasswordType::class, [
                 'label' => 'Mot de passe',
                 'mapped' => false,
+                'required' => $options['password_required'] ?? true, // Optionnel en modification
                 'attr' => [
                     'placeholder' => '••••••••',
                     'novalidate' => 'novalidate'
                 ],
-                'constraints' => [
+                'constraints' => $options['password_required'] ?? true ? [
                     new Assert\NotBlank(['message' => 'Le mot de passe est requis']),
+                    new Assert\Length([
+                        'min' => 6,
+                        'minMessage' => 'Le mot de passe doit contenir au moins {{ limit }} caractères'
+                    ]),
+                    new Assert\Regex([
+                        'pattern' => '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/',
+                        'message' => 'Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre'
+                    ])
+                ] : [
                     new Assert\Length([
                         'min' => 6,
                         'minMessage' => 'Le mot de passe doit contenir au moins {{ limit }} caractères'
@@ -93,6 +103,7 @@ class AdminUserType extends AbstractType
         $resolver->setDefaults([
             'data_class' => Utilisateur::class,
             'include_password' => false,
+            'password_required' => true, // Par défaut requis
             'attr' => ['novalidate' => 'novalidate'],
             'constraints' => [
                 new UniqueEntity([

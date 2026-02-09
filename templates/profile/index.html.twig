@@ -126,8 +126,12 @@
                     <div class="stat-card-label">Quiz</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-card-value">{{ user.rendezVous|length }}</div>
-                    <div class="stat-card-label">RDV</div>
+                    <div class="stat-card-value">{{ user.rendezVousPatient|length }}</div>
+                    <div class="stat-card-label">RDV Patient</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-value">{{ user.rendezVousSpecialiste|length }}</div>
+                    <div class="stat-card-label">RDV Spécialiste</div>
                 </div>
             </div>
         </div>

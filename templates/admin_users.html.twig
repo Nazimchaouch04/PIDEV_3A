@@ -8,29 +8,55 @@
     </div>
     <div style="display: flex; gap: 1rem;">
         <a href="{{ path('app_admin_user_new') }}" class="btn btn-primary">+ Nouvel utilisateur</a>
+        <a href="{{ path('app_admin_users_pdf') }}" class="btn btn-success" target="_blank">📄 Exporter PDF</a>
         <a href="{{ path('app_admin_dashboard') }}" class="btn btn-secondary">Retour au Dashboard</a>
     </div>
 </div>
 
 {# Barre de Recherche et Tri #}
 <div class="card mb-4">
-    <form method="get" action="{{ path('app_admin_users') }}" class="flex gap-4">
-        <input type="text" name="q" value="{{ current_q }}" placeholder="Rechercher un nom ou email..." class="form-control" style="flex: 2;">
+    <div class="flex gap-4">
+        <input type="text" name="q" id="user-search" value="{{ current_q }}" placeholder="Rechercher un nom ou email..." class="form-control" style="flex: 2;">
         
-        <select name="sort" class="form-control" style="flex: 1;">
-            <option value="nomComplet" {{ current_sort == 'nomComplet' ? 'selected' }}>Trier par Nom</option>
-            <option value="dateInscription" {{ current_sort == 'dateInscription' ? 'selected' }}>Trier par Date</option>
-            <option value="scoreGlobal" {{ current_sort == 'scoreGlobal' ? 'selected' }}>Trier par Score</option>
-        </select>
+        <button type="button" onclick="sortUsers('nomComplet')" class="btn btn-outline">
+            Nom 
+            {% if current_sort == 'nomComplet' %}
+                {% if current_direction == 'ASC' %}
+                    ↑
+                {% else %}
+                    ↓
+                {% endif %}
+            {% else %}
+                ↕
+            {% endif %}
+        </button>
 
-        <select name="direction" class="form-control" style="flex: 1;">
-            <option value="ASC" {{ current_direction == 'ASC' ? 'selected' }}>Croissant</option>
-            <option value="DESC" {{ current_direction == 'DESC' ? 'selected' }}>Décroissant</option>
-        </select>
+        <button type="button" onclick="sortUsers('dateInscription')" class="btn btn-outline">
+            Date 
+            {% if current_sort == 'dateInscription' %}
+                {% if current_direction == 'ASC' %}
+                    ↑
+                {% else %}
+                    ↓
+                {% endif %}
+            {% else %}
+                ↕
+            {% endif %}
+        </button>
 
-        <button type="submit" class="btn btn-primary">Filtrer</button>
-        <a href="{{ path('app_admin_users') }}" class="btn btn-ghost">Reset</a>
-    </form>
+        <button type="button" onclick="sortUsers('scoreGlobal')" class="btn btn-outline">
+            Score 
+            {% if current_sort == 'scoreGlobal' %}
+                {% if current_direction == 'ASC' %}
+                    ↑
+                {% else %}
+                    ↓
+                {% endif %}
+            {% else %}
+                ↕
+            {% endif %}
+        </button>
+    </div>
 </div>
 
 <div class="card">
@@ -44,29 +70,58 @@
                 <th>Actions</th>
             </tr>
         </thead>
-        <tbody>
-            {% for u in users %}
-            <tr>
-                <td><strong>{{ u.nomComplet }}</strong></td>
-                <td>{{ u.email }}</td>
-                <td>{{ u.dateInscription|date('d/m/Y') }}</td>
-                <td>{{ u.scoreGlobal }} pts</td>
-                <td>
-                    <div class="flex gap-2">
-                        <a href="{{ path('app_admin_user_show', {id: u.id}) }}" class="btn btn-sm btn-ghost">Voir Profil</a>
-                        <a href="{{ path('app_admin_user_edit', {id: u.id}) }}" class="btn btn-sm btn-secondary">Modifier</a>
-                        {% if u != app.user %}
-                            <a href="{{ path('app_admin_user_delete', {id: u.id}) }}" class="btn btn-sm btn-ghost text-danger" onclick="return confirm('Supprimer définitivement ?')">Supprimer</a>
-                        {% endif %}
-                    </div>
-                </td>
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="5" class="text-center">Aucun utilisateur trouvé.</td>
-            </tr>
-            {% endfor %}
+        <tbody id="users-table-body">
+            {% include 'admin/_user_list.html.twig' %}
         </tbody>
     </table>
 </div>
+
+<script>
+let currentSort = '{{ current_sort }}';
+let currentDirection = '{{ current_direction }}';
+
+function sortUsers(field) {
+    if (currentSort === field) {
+        currentDirection = currentDirection === 'ASC' ? 'DESC' : 'ASC';
+    } else {
+        currentSort = field;
+        currentDirection = 'ASC';
+    }
+    
+    loadUsers();
+}
+
+function loadUsers() {
+    const searchValue = document.getElementById('user-search').value;
+    const url = new URL('{{ path('app_admin_users') }}', window.location.origin);
+    
+    url.searchParams.set('sort', currentSort);
+    url.searchParams.set('direction', currentDirection);
+    if (searchValue) {
+        url.searchParams.set('q', searchValue);
+    }
+    
+    fetch(url, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('users-table-body').innerHTML = data.usersHtml;
+    })
+    .catch(error => console.error('Erreur:', error));
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Recherche en temps réel
+    const searchInput = document.getElementById('user-search');
+    if (searchInput) {
+        searchInput.addEventListener('keyup', function() {
+            clearTimeout(this.timeout);
+            this.timeout = setTimeout(loadUsers, 300);
+        });
+    }
+});
+</script>
 {% endblock %}

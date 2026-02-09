@@ -1,43 +1,17 @@
-{% extends 'base.html.twig' %}
-
-{% block title %}Nouveau RDV - BioSync{% endblock %}
+{% extends 'base_back.html.twig' %}
+{% block title %}Nouveau rendez-vous{% endblock %}
 
 {% block body %}
-<div class="app-layout">
-    {% include 'partials/_sidebar.html.twig' with {'active': 'medical'} %}
 
-    <main class="main-content">
-        <div class="page-header">
-            <h1 class="page-title">Nouveau rendez-vous</h1>
-            <p class="page-subtitle">Planifiez un rendez-vous avec un specialiste.</p>
-        </div>
+<div class="container mt-4">
 
-        <div class="card" style="max-width: 600px;">
-            {{ form_start(form) }}
-                <div class="form-group">
-                    {{ form_label(form.specialiste) }}
-                    {{ form_widget(form.specialiste) }}
-                    {{ form_errors(form.specialiste) }}
-                </div>
+    <h2 class="mb-2">Nouveau rendez-vous</h2>
+    <p class="text-muted mb-4">Planifiez un rendez-vous avec un spécialiste.</p>
 
-                <div class="form-group">
-                    {{ form_label(form.dateHeureRdv) }}
-                    {{ form_widget(form.dateHeureRdv) }}
-                    {{ form_errors(form.dateHeureRdv) }}
-                </div>
+    <div class="rdv-card">
+        {{ include('medical/_form.html.twig') }}
+    </div>
 
-                <div class="form-group">
-                    {{ form_label(form.motif) }}
-                    {{ form_widget(form.motif) }}
-                    {{ form_errors(form.motif) }}
-                </div>
-
-                <div class="modal-footer" style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--gray-200);">
-                    <a href="{{ path('app_medical') }}" class="btn btn-ghost">Annuler</a>
-                    <button type="submit" class="btn btn-primary">Confirmer le RDV</button>
-                </div>
-            {{ form_end(form) }}
-        </div>
-    </main>
 </div>
+
 {% endblock %}

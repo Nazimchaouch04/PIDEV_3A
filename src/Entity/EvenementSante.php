@@ -18,20 +18,15 @@ class EvenementSante
 
     #[ORM\Column(length: 100)]
     #[Assert\NotBlank(message: 'Le titre de l\'evenement est requis')]
-    #[Assert\Length(max: 100)]
     private ?string $titreEvent = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Assert\NotNull(message: 'La date de l\'evenement est requise')]
+    #[Assert\NotNull(message: 'La date est requise')]
+    #[Assert\GreaterThan("now", message: "La date doit être dans le futur")]
     private ?\DateTimeInterface $dateEvent = null;
 
-    #[ORM\Column(length: 255)]
-    #[Assert\NotBlank(message: 'Le lien de reunion est requis')]
-    #[Assert\Url(message: 'Le lien de reunion n\'est pas valide')]
-    private ?string $lienReunion = null;
-
     #[ORM\Column]
-    private int $pointsParticipation = 0;
+    private int $pointsParticipation = 10;
 
     #[ORM\ManyToOne(inversedBy: 'evenements')]
     #[ORM\JoinColumn(nullable: false)]
@@ -39,7 +34,7 @@ class EvenementSante
 
     public function getId(): ?int
     {
-        return $this->id;
+        return $this->id; 
     }
 
     public function getTitreEvent(): ?string
@@ -64,17 +59,6 @@ class EvenementSante
         return $this;
     }
 
-    public function getLienReunion(): ?string
-    {
-        return $this->lienReunion;
-    }
-
-    public function setLienReunion(string $lienReunion): static
-    {
-        $this->lienReunion = $lienReunion;
-        return $this;
-    }
-
     public function getPointsParticipation(): int
     {
         return $this->pointsParticipation;
@@ -95,11 +79,6 @@ class EvenementSante
     {
         $this->groupe = $groupe;
         return $this;
-    }
-
-    public function isPassed(): bool
-    {
-        return $this->dateEvent < new \DateTime();
     }
 
     public function isUpcoming(): bool

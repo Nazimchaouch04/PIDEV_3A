@@ -1,0 +1,68 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Modifier Rendez-vous{% endblock %}
+
+{% block body %}
+
+<div class="page-header flex-between">
+    <div>
+        <h1 class="page-title">Modifier Rendez-vous</h1>
+        <p class="page-subtitle">Modifier les informations du rendez-vous</p>
+    </div>
+</div>
+
+<div class="form-container">
+    {{ form_start(form, {'attr': {'class': 'form-grid'}}) }}
+
+        <div class="form-group">
+            {{ form_label(form.patient, 'Patient') }}
+            {{ form_widget(form.patient, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.patient) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.specialiste, 'Spécialiste') }}
+            {{ form_widget(form.specialiste, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.specialiste) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.dateHeure, 'Date et heure') }}
+            {{ form_widget(form.dateHeure, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.dateHeure) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.mode, 'Mode de consultation') }}
+            {{ form_widget(form.mode, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.mode) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.motif, 'Motif') }}
+            {{ form_widget(form.motif, {'attr': {'class': 'form-control', 'rows': 4}}) }}
+            {{ form_errors(form.motif) }}
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                    <polyline points="17 21 17 13 7 13 7 21"/>
+                    <polyline points="7 3 7 8 15 8"/>
+                </svg>
+                Enregistrer les modifications
+            </button>
+            <a href="{{ path('app_admin_rendez_vous_index') }}" class="btn btn-secondary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="19" y1="12" x2="5" y2="12"/>
+                    <polyline points="12 19 5 12 12 5"/>
+                </svg>
+                Annuler
+            </a>
+        </div>
+
+    {{ form_end(form) }}
+</div>
+
+{% endblock %}

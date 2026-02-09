@@ -7,6 +7,8 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use App\Entity\Utilisateur;
+use App\Entity\RendezVous;
 
 #[ORM\Entity(repositoryClass: SpecialisteRepository::class)]
 #[ORM\Table(name: 'specialiste')]
@@ -19,17 +21,14 @@ class Specialiste
 
     #[ORM\Column(length: 100)]
     #[Assert\NotBlank(message: 'Le nom du docteur est requis')]
-    #[Assert\Length(max: 100)]
     private ?string $nomDocteur = null;
 
     #[ORM\Column(length: 100)]
     #[Assert\NotBlank(message: 'La specialite est requise')]
-    #[Assert\Length(max: 100)]
     private ?string $specialite = null;
 
     #[ORM\Column(length: 20)]
     #[Assert\NotBlank(message: 'Le telephone est requis')]
-    #[Assert\Regex(pattern: '/^[0-9+\s\-()]+$/', message: 'Le telephone n\'est pas valide')]
     private ?string $telephone = null;
 
     #[ORM\Column(length: 255)]
@@ -37,9 +36,16 @@ class Specialiste
     private ?string $disponibilite = null;
 
     /**
+     * LOGIN ACCOUNT LINK
+     */
+    #[ORM\OneToOne(inversedBy: 'specialiste')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Utilisateur $utilisateur = null;
+
+    /**
      * @var Collection<int, RendezVous>
      */
-    #[ORM\OneToMany(targetEntity: RendezVous::class, mappedBy: 'specialiste', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: RendezVous::class, mappedBy: 'specialiste')]
     private Collection $rendezVous;
 
     public function __construct()
@@ -96,6 +102,20 @@ class Specialiste
         return $this;
     }
 
+    /*
+     * UTILISATEUR RELATION
+     */
+    public function getUtilisateur(): ?Utilisateur
+    {
+        return $this->utilisateur;
+    }
+
+    public function setUtilisateur(?Utilisateur $utilisateur): static
+    {
+        $this->utilisateur = $utilisateur;
+        return $this;
+    }
+
     /**
      * @return Collection<int, RendezVous>
      */
@@ -104,20 +124,20 @@ class Specialiste
         return $this->rendezVous;
     }
 
-    public function addRendezVou(RendezVous $rendezVou): static
+    public function addRendezVous(RendezVous $rendezVous): static
     {
-        if (!$this->rendezVous->contains($rendezVou)) {
-            $this->rendezVous->add($rendezVou);
-            $rendezVou->setSpecialiste($this);
+        if (!$this->rendezVous->contains($rendezVous)) {
+            $this->rendezVous->add($rendezVous);
+            $rendezVous->setSpecialiste($this->utilisateur);
         }
         return $this;
     }
 
-    public function removeRendezVou(RendezVous $rendezVou): static
+    public function removeRendezVous(RendezVous $rendezVous): static
     {
-        if ($this->rendezVous->removeElement($rendezVou)) {
-            if ($rendezVou->getSpecialiste() === $this) {
-                $rendezVou->setSpecialiste(null);
+        if ($this->rendezVous->removeElement($rendezVous)) {
+            if ($rendezVous->getSpecialiste() === $this->utilisateur) {
+                $rendezVous->setSpecialiste(null);
             }
         }
         return $this;

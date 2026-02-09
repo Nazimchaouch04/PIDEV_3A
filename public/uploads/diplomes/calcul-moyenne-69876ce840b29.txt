@@ -1,0 +1,257 @@
+// Script à exécuter dans la console du site web pour calculer les moyennes
+
+(function() {
+    // Fonction pour calculer la moyenne selon le nombre de notes
+    function calculerMoyenne(notes) {
+        // Filtrer les notes vides et convertir en nombres
+        const notesValides = notes.filter(n => n !== '' && !isNaN(parseFloat(n)))
+                                 .map(n => parseFloat(n.replace(',', '.')));
+        
+        if (notesValides.length === 2) {
+            // 2 notes: note1 * 0.4 + note_exam * 0.6
+            return (notesValides[0] * 0.4) + (notesValides[1] * 0.6);
+        } else if (notesValides.length === 3) {
+            // 3 notes: note1 * 0.2 + note2 * 0.3 + note_exam * 0.5
+            return (notesValides[0] * 0.2) + (notesValides[1] * 0.3) + (notesValides[2] * 0.5);
+        } else if (notesValides.length === 1) {
+            // Cas où seule la note d'examen existe
+            return notesValides[0];
+        } else {
+            return null;
+        }
+    }
+    
+    // Fonction pour obtenir la couleur et le symbole selon la moyenne
+    function getStyleMoyenne(moyenne) {
+        if (moyenne >= 16) {
+            return {
+                backgroundColor: '#d4edda',
+                color: '#155724',
+                symbole: ''
+            };
+        } else if (moyenne >= 10) {
+            return {
+                backgroundColor: '#fff3cd',
+                color: '#856404',
+                symbole: ''
+            };
+        } else if (moyenne >= 8) {
+            return {
+                backgroundColor: '#f8d7da',
+                color: '#721c24',
+                symbole: ''
+            };
+        } else {
+            return {
+                backgroundColor: '#f8d7da',
+                color: '#721c24',
+                symbole: ' ⚠️'
+            };
+        }
+    }
+    
+    // Trouver le tableau principal
+    let tableau = document.querySelector('table');
+    
+    if (!tableau) {
+        // Chercher parmi plusieurs tableaux
+        const tableaux = document.querySelectorAll('table');
+        tableau = tableaux[0];
+        
+        if (!tableau) {
+            console.error('Aucun tableau trouvé sur la page');
+            return;
+        }
+    }
+    
+    console.log('Tableau trouvé, début du traitement...');
+    
+    // Récupérer toutes les lignes du tableau (sauf l'en-tête)
+    const lignes = tableau.querySelectorAll('tr');
+    if (lignes.length < 2) {
+        console.error('Le tableau ne contient pas de données');
+        return;
+    }
+    
+    // Trouver les indices des colonnes
+    const ligneEntete = lignes[0];
+    const cellulesEntete = ligneEntete.querySelectorAll('th, td');
+    
+    let indexNoteCC = -1, indexNoteTP = -1, indexNoteExam = -1;
+    let indexCoefficient = -1;
+    
+    cellulesEntete.forEach((cellule, index) => {
+        const texte = cellule.textContent.trim().toUpperCase();
+        
+        if (texte.includes('NOTE_CC') || texte.includes('CC')) {
+            indexNoteCC = index;
+        } else if (texte.includes('NOTE_TP') || texte.includes('TP')) {
+            indexNoteTP = index;
+        } else if (texte.includes('NOTE_EXAM') || texte.includes('EXAM')) {
+            indexNoteExam = index;
+        } else if (texte.includes('COEF') || texte.includes('COEFFICIENT')) {
+            indexCoefficient = index;
+        }
+    });
+    
+    // Vérifier que les colonnes nécessaires existent
+    if (indexNoteExam === -1) {
+        console.error('Colonne NOTE_EXAM non trouvée');
+        return;
+    }
+    
+    // Ajouter une colonne pour les moyennes dans l'en-tête
+    const celluleMoyenneEntete = document.createElement('th');
+    celluleMoyenneEntete.textContent = 'MOYENNE';
+    celluleMoyenneEntete.style.backgroundColor = '#f0f0f0';
+    celluleMoyenneEntete.style.padding = '8px';
+    celluleMoyenneEntete.style.border = '1px solid #ddd';
+    celluleMoyenneEntete.style.textAlign = 'center';
+    ligneEntete.appendChild(celluleMoyenneEntete);
+    
+    // Variables pour la moyenne générale pondérée
+    let sommeMoyennesPonderees = 0;
+    let sommeCoefficients = 0;
+    let matieresTraitees = 0;
+    let matieresEnDanger = 0;
+    
+    // Traiter chaque ligne de données
+    for (let i = 1; i < lignes.length; i++) {
+        const ligne = lignes[i];
+        const cellules = ligne.querySelectorAll('td');
+        
+        if (cellules.length === 0) continue;
+        
+        // Récupérer les notes
+        const noteCC = indexNoteCC !== -1 && cellules[indexNoteCC] 
+            ? cellules[indexNoteCC].textContent.trim() 
+            : '';
+        const noteTP = indexNoteTP !== -1 && cellules[indexNoteTP] 
+            ? cellules[indexNoteTP].textContent.trim() 
+            : '';
+        const noteExam = cellules[indexNoteExam].textContent.trim();
+        
+        // Créer un tableau de notes
+        const notes = [];
+        if (noteCC) notes.push(noteCC);
+        if (noteTP) notes.push(noteTP);
+        if (noteExam) notes.push(noteExam);
+        
+        // Calculer la moyenne
+        const moyenne = calculerMoyenne(notes);
+        
+        // Ajouter une cellule pour afficher la moyenne
+        const celluleMoyenne = document.createElement('td');
+        celluleMoyenne.style.padding = '8px';
+        celluleMoyenne.style.border = '1px solid #ddd';
+        celluleMoyenne.style.textAlign = 'center';
+        celluleMoyenne.style.fontWeight = 'bold';
+        
+        if (moyenne !== null) {
+            const style = getStyleMoyenne(moyenne);
+            celluleMoyenne.textContent = moyenne.toFixed(2) + style.symbole;
+            celluleMoyenne.style.backgroundColor = style.backgroundColor;
+            celluleMoyenne.style.color = style.color;
+            
+            // Ajouter un tooltip pour expliquer le symbole
+            if (moyenne < 8) {
+                celluleMoyenne.title = 'Attention : Moyenne inférieure à 8/20';
+                matieresEnDanger++;
+            }
+            
+            // Calculer la moyenne pondérée si on a le coefficient
+            if (indexCoefficient !== -1 && cellules[indexCoefficient]) {
+                const coefficient = parseFloat(cellules[indexCoefficient].textContent.trim().replace(',', '.')) || 1;
+                sommeMoyennesPonderees += moyenne * coefficient;
+                sommeCoefficients += coefficient;
+                matieresTraitees++;
+            } else {
+                // Par défaut, coefficient = 1
+                sommeMoyennesPonderees += moyenne;
+                sommeCoefficients += 1;
+                matieresTraitees++;
+            }
+        } else {
+            celluleMoyenne.textContent = 'N/A';
+            celluleMoyenne.style.backgroundColor = '#f8f9fa';
+            celluleMoyenne.style.color = '#6c757d';
+        }
+        
+        ligne.appendChild(celluleMoyenne);
+    }
+    
+    // Afficher les statistiques dans la console
+    console.log('=== CALCUL DES MOYENNES TERMINÉ ===');
+    console.log(`Nombre de matières traitées: ${matieresTraitees}`);
+    
+    if (matieresEnDanger > 0) {
+        console.warn(`⚠️  Attention: ${matieresEnDanger} matière(s) avec moyenne < 8/20`);
+    }
+    
+    if (matieresTraitees > 0) {
+        const moyenneGenerale = sommeMoyennesPonderees / sommeCoefficients;
+        console.log(`Moyenne générale pondérée: ${moyenneGenerale.toFixed(2)}`);
+        
+        // Ajouter une ligne pour la moyenne générale
+        const ligneMoyenneGenerale = document.createElement('tr');
+        ligneMoyenneGenerale.style.backgroundColor = '#e9ecef';
+        ligneMoyenneGenerale.style.fontWeight = 'bold';
+        
+        const celluleVide = document.createElement('td');
+        celluleVide.colSpan = cellulesEntete.length; // Utiliser le nombre de colonnes original
+        celluleVide.textContent = 'MOYENNE GÉNÉRALE';
+        celluleVide.style.textAlign = 'right';
+        celluleVide.style.padding = '8px';
+        
+        const celluleMoyenneGen = document.createElement('td');
+        const styleMoyenneGen = getStyleMoyenne(moyenneGenerale);
+        celluleMoyenneGen.textContent = moyenneGenerale.toFixed(2);
+        celluleMoyenneGen.style.padding = '8px';
+        celluleMoyenneGen.style.textAlign = 'center';
+        celluleMoyenneGen.style.fontWeight = 'bold';
+        celluleMoyenneGen.style.backgroundColor = styleMoyenneGen.backgroundColor;
+        celluleMoyenneGen.style.color = styleMoyenneGen.color;
+        
+        // Ajouter un symbole d'attention si la moyenne générale est < 10
+        if (moyenneGenerale < 10) {
+            celluleMoyenneGen.textContent += ' ⚠️';
+            celluleMoyenneGen.title = 'Attention : Moyenne générale inférieure à 10/20';
+        }
+        
+        ligneMoyenneGenerale.appendChild(celluleVide);
+        ligneMoyenneGenerale.appendChild(celluleMoyenneGen);
+        tableau.appendChild(ligneMoyenneGenerale);
+    }
+    
+    // Ajouter une légende pour les couleurs et symboles
+    const ligneLegende = document.createElement('tr');
+    const celluleLegende = document.createElement('td');
+    celluleLegende.colSpan = cellulesEntete.length + 1; // +1 pour la colonne moyenne ajoutée
+    celluleLegende.style.padding = '10px';
+    celluleLegende.style.fontSize = '12px';
+    celluleLegende.style.borderTop = '2px solid #333';
+    
+    celluleLegende.innerHTML = `
+        <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+            <div><span style="display: inline-block; width: 15px; height: 15px; background-color: #d4edda; margin-right: 5px; border: 1px solid #ccc;"></span> ≥ 16/20</div>
+            <div><span style="display: inline-block; width: 15px; height: 15px; background-color: #fff3cd; margin-right: 5px; border: 1px solid #ccc;"></span> ≥ 10/20</div>
+            <div><span style="display: inline-block; width: 15px; height: 15px; background-color: #f8d7da; margin-right: 5px; border: 1px solid #ccc;"></span> 8-10/20</div>
+            <div><span style="display: inline-block; width: 15px; height: 15px; background-color: #f8d7da; margin-right: 5px; border: 1px solid #ccc;"></span> < 8/20 ⚠️</div>
+        </div>
+    `;
+    
+    ligneLegende.appendChild(celluleLegende);
+    tableau.appendChild(ligneLegende);
+    
+    console.log('✅ Une colonne "MOYENNE" a été ajoutée au tableau.');
+    console.log('✅ La moyenne générale apparaît en bas du tableau.');
+    console.log('✅ Légende des couleurs ajoutée.');
+    
+    // Afficher un résumé
+    if (matieresTraitees > 0) {
+        console.log('\n📊 RÉSUMÉ :');
+        console.log(`   - Matières traitées : ${matieresTraitees}`);
+        console.log(`   - Moyenne générale : ${(sommeMoyennesPonderees / sommeCoefficients).toFixed(2)}/20`);
+        console.log(`   - Matières en difficulté (< 8/20) : ${matieresEnDanger}`);
+    }
+})();

@@ -1,0 +1,248 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}New Meal - BioSync{% endblock %}
+
+{% block body %}
+<div class="app-layout">
+    {% include 'partials/_sidebar.html.twig' with {'active': 'repas'} %}
+
+    <main class="main-content">
+        <div class="page-header flex-between">
+            <div>
+                <h1 class="page-title">New Meal</h1>
+                <p class="page-subtitle">Add a new meal to your nutrition tracking</p>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+                <a href="{{ path('app_repas_index') }}" class="btn btn-primary">Back to List</a>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: center; align-items: center; min-height: 70vh; padding: 20px;">
+            <div style="max-width: 800px; width: 100%;">
+                <div class="card" style="box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-radius: 12px;">
+                    <div class="card-header" style="padding: 24px 32px; border-bottom: 1px solid #e5e7eb;">
+                        <h3 class="card-title" style="font-size: 1.5rem; font-weight: 600; color: #1f2937; margin: 0;">Meal Information</h3>
+                    </div>
+                    <div class="card-content" style="padding: 32px;">
+                        {{ form_start(form, {'attr': {'class': 'form', 'novalidate': 'novalidate'}}) }}
+                            <div class="grid grid-cols-2 gap-8">
+                                <div class="form-group">
+                                    {{ form_label(form.titreRepas) }}
+                                    {{ form_widget(form.titreRepas, {'attr': {'id': 'titreRepas', 'class': 'form-control'}}) }}
+                                    {{ form_errors(form.titreRepas) }}
+                                </div>
+
+                                <div class="form-group">
+                                    {{ form_label(form.typeMoment) }}
+                                    {{ form_widget(form.typeMoment, {'attr': {'id': 'typeMoment', 'class': 'form-control'}}) }}
+                                    {{ form_errors(form.typeMoment) }}
+                                </div>
+
+                                <div class="form-group">
+                                    {{ form_label(form.dateConsommation) }}
+                                    {{ form_widget(form.dateConsommation, {'attr': {'id': 'dateConsommation', 'class': 'form-control'}}) }}
+                                    {{ form_errors(form.dateConsommation) }}
+                                </div>
+                            </div>
+
+                            <div class="form-actions" style="margin-top: 32px; display: flex; gap: 12px; justify-content: flex-end;">
+                                <button type="submit" class="btn btn-success" style="padding: 12px 24px; font-size: 1rem; font-weight: 500;">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 18px; height: 18px; margin-right: 8px;">
+                                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                                        <polyline points="17 21 17 13 7 13 7 21"/>
+                                        <polyline points="7 3 7 8 15 8"/>
+                                    </svg>
+                                    Create Meal
+                                </button>
+                                <a href="{{ path('app_repas_index') }}" class="btn btn-secondary" style="padding: 12px 24px; font-size: 1rem; font-weight: 500;">Cancel</a>
+                            </div>
+                        {{ form_end(form) }}
+
+                        <script>
+console.log('🚀 Script chargé');
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ DOM prêt');
+    
+    const titreField = document.getElementById('titreRepas');
+    const typeMomentField = document.getElementById('typeMoment');
+    const dateField = document.getElementById('dateConsommation');
+    
+    console.log('Champs trouvés:', titreField, typeMomentField, dateField);
+    
+    // Créer les conteneurs d'erreurs
+    function createErrorContainer(fieldId) {
+        const errorDiv = document.createElement('div');
+        errorDiv.id = 'error-' + fieldId;
+        errorDiv.className = 'field-error';
+        errorDiv.style.cssText = `
+            color: #dc2626;
+            font-size: 0.875rem;
+            margin-top: 4px;
+            display: none;
+            font-weight: 500;
+            line-height: 1.4;
+            padding: 8px 12px;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 6px;
+        `;
+        
+        const field = document.getElementById(fieldId);
+        if (field && field.parentNode) {
+            field.parentNode.appendChild(errorDiv);
+        }
+        return errorDiv;
+    }
+    
+    // Créer les conteneurs d'erreurs
+    const titreError = createErrorContainer('titreRepas');
+    const typeMomentError = createErrorContainer('typeMoment');
+    const dateError = createErrorContainer('dateConsommation');
+    
+    // Fonctions pour afficher/masquer les erreurs
+    function showError(field, message) {
+        const errorContainer = document.getElementById('error-' + field.id);
+        if (errorContainer) {
+            errorContainer.textContent = message;
+            errorContainer.style.display = 'block';
+        }
+        field.style.borderColor = '#dc2626';
+        field.style.boxShadow = '0 0 0 3px rgba(220, 38, 38, 0.1)';
+    }
+    
+    function hideError(field) {
+        const errorContainer = document.getElementById('error-' + field.id);
+        if (errorContainer) {
+            errorContainer.style.display = 'none';
+        }
+        field.style.borderColor = '#e5e7eb';
+        field.style.boxShadow = 'none';
+    }
+    
+    // Validation du titre
+    function validateTitre(value) {
+        if (!value || value.trim().length < 2) {
+            return '❌ Le titre doit contenir au moins 2 caractères';
+        }
+        if (value.trim().length > 100) {
+            return '❌ Le titre ne peut pas dépasser 100 caractères';
+        }
+        return null;
+    }
+    
+    // Validation du type de moment
+    function validateTypeMoment(value) {
+        if (!value) {
+            return '❌ Veuillez sélectionner un type de repas';
+        }
+        return null;
+    }
+    
+    // Validation de la date
+    function validateDate(value) {
+        if (!value) {
+            return '❌ Veuillez sélectionner une date';
+        }
+        
+        // Autoriser toutes les dates
+        return null;
+    }
+    
+    // Validation complète
+    function validateField(field) {
+        const value = field.value;
+        let error = null;
+        
+        if (field.id === 'titreRepas') {
+            error = validateTitre(value);
+        } else if (field.id === 'typeMoment') {
+            error = validateTypeMoment(value);
+        } else if (field.id === 'dateConsommation') {
+            error = validateDate(value);
+        }
+        
+        if (error) {
+            showError(field, error);
+            return false;
+        } else {
+            hideError(field);
+            return true;
+        }
+    }
+    
+    // Ajouter les écouteurs d'événements
+    [titreField, typeMomentField, dateField].forEach(field => {
+        if (!field) return;
+        
+        // Validation en temps réel pendant la saisie
+        let timeout;
+        field.addEventListener('input', function() {
+            clearTimeout(timeout);
+            hideError(this);
+            
+            timeout = setTimeout(() => {
+                validateField(this);
+            }, 500);
+        });
+        
+        // Validation immédiate à la perte de focus
+        field.addEventListener('blur', function() {
+            clearTimeout(timeout);
+            validateField(this);
+        });
+        
+        // Validation finale au changement
+        field.addEventListener('change', function() {
+            validateField(this);
+        });
+    });
+    
+    // Validation du formulaire complet avant soumission
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            let isValid = true;
+            const fields = [titreField, typeMomentField, dateField];
+            
+            // Valider chaque champ
+            fields.forEach(field => {
+                if (field && !validateField(field)) {
+                    isValid = false;
+                }
+            });
+            
+            // BLOQUER la soumission si erreurs, sinon autoriser
+            if (isValid) {
+                // Soumettre le formulaire immédiatement
+                form.submit();
+            } else {
+                // Afficher un message d'erreur général
+                const errorMessage = document.createElement('div');
+                errorMessage.textContent = '❌ Veuillez corriger les erreurs avant de soumettre le formulaire';
+                errorMessage.style.cssText = `
+                    background: #dc2626;
+                    color: white;
+                    padding: 12px 20px;
+                    border-radius: 8px;
+                    margin-bottom: 16px;
+                    font-weight: 600;
+                    text-align: center;
+                `;
+                
+                const submitBtn = form.querySelector('button[type="submit"]');
+                submitBtn.parentNode.insertBefore(errorMessage, submitBtn);
+            }
+        });
+    }
+});
+</script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

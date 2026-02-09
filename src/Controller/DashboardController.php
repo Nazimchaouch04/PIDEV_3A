@@ -46,7 +46,11 @@ class DashboardController extends AbstractController
         // Chargement des données du dashboard (Code existant)
         $todayRepas = $repasRepository->findTodayByUtilisateur($user);
         $weekSeances = $seanceSportRepository->findThisWeekByUtilisateur($user);
-        $upcomingRdv = $rendezVousRepository->findUpcomingByUtilisateur($user);
+        $upcomingRdv = $rendezVousRepository->findBy(
+            ['patient' => $user],
+            ['dateHeure' => 'ASC'],
+            5
+        );
 
         $totalCaloriesToday = 0;
         foreach ($todayRepas as $repas) {

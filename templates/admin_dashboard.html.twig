@@ -54,7 +54,7 @@
                 <tr>
                     <td>{{ user.nomComplet }}</td>
                     <td>{{ user.email }}</td>
-                    <td><span class="badge">{{ user.roles[0] }}</span></td>
+                    <td><span class="badge">{{ user.roles|first }}</span></td>
                 </tr>
                 {% endfor %}
             </tbody>

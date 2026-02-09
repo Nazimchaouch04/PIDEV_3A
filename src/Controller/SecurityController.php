@@ -19,10 +19,8 @@ class SecurityController extends AbstractController
     {
         // Rediriger si l'utilisateur est déjà connecté
         if ($this->getUser()) {
-            $user = $this->getUser();
-            
             // Si l'utilisateur est admin, rediriger vers le dashboard admin
-            if (in_array('ROLE_ADMIN', $user->getRoles())) {
+            if ($this->isGranted('ROLE_ADMIN')) {
                 return $this->redirectToRoute('app_admin_dashboard');
             }
             
@@ -84,6 +82,10 @@ class SecurityController extends AbstractController
         }
         
         // Si déjà connecté, rediriger vers certification
+        // Si l'utilisateur est admin, rediriger vers le dashboard admin
+        if ($this->isGranted('ROLE_ADMIN')) {
+            return $this->redirectToRoute('app_admin_dashboard');
+        }
         return $this->redirectToRoute('app_certification');
     }
 
@@ -95,6 +97,10 @@ class SecurityController extends AbstractController
     ): Response {
         // Empêcher un utilisateur connecté de s'inscrire à nouveau
         if ($this->getUser()) {
+            // Si l'utilisateur est admin, rediriger vers le dashboard admin
+            if ($this->isGranted('ROLE_ADMIN')) {
+                return $this->redirectToRoute('app_admin_dashboard');
+            }
             return $this->redirectToRoute('app_dashboard');
         }
 
