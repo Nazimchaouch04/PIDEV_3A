@@ -1,0 +1,13 @@
+{% extends 'base_back.html.twig' %}
+{% block title %}Nouveau rendez-vous{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+
+<h2 class="mb-3">Nouveau rendez-vous</h2>
+<p class="text-muted">Planifiez un rendez-vous avec un spécialiste.</p>
+
+{{ include('rendez_vous/_form.html.twig') }}
+
+</div>
+{% endblock %}

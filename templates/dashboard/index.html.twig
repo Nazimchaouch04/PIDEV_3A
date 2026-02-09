@@ -1,0 +1,144 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Dashboard - BioSync{% endblock %}
+
+{% block body %}
+<div class="page-header">
+            <h1 class="page-title">Bonjour, {{ user.nomComplet|split(' ')|first }} !</h1>
+            <p class="page-subtitle">Voici un apercu de votre sante aujourd'hui.</p>
+        </div>
+
+        {# Stats Cards #}
+        <div class="grid grid-cols-4 gap-4 mb-8">
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div class="stat-card-icon primary">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 8h1a4 4 0 0 1 0 8h-1"/>
+                            <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="stat-card-value">{{ totalCaloriesToday }}</div>
+                <div class="stat-card-label">Calories aujourd'hui</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div class="stat-card-icon secondary">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="stat-card-value">{{ totalMinutesSport }}</div>
+                <div class="stat-card-label">Minutes de sport cette semaine</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div class="stat-card-icon warning">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="stat-card-label">Rendez-vous a venir</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div class="stat-card-icon primary">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="stat-card-value">{{ user.scoreGlobal }}</div>
+                <div class="stat-card-label">Points accumules</div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-6">
+            {# Repas du jour #}
+            <div class="card">
+                <div class="card-header flex-between">
+                    <div>
+                        <h4 class="card-title">Repas du jour</h4>
+                        <p class="card-subtitle">{{ todayRepas|length }} repas enregistres</p>
+                    </div>
+                    <a href="{{ path('app_nutrition_new') }}" class="btn btn-sm btn-primary">+ Ajouter</a>
+                </div>
+                {% if todayRepas|length > 0 %}
+                    {% for repas in todayRepas %}
+                        <div class="list-item">
+                            <div class="list-item-icon" style="background: rgba(110, 197, 166, 0.1); color: var(--primary);">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M18 8h1a4 4 0 0 1 0 8h-1"/>
+                                    <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>
+                                </svg>
+                            </div>
+                            <div class="list-item-content">
+                                <div class="list-item-title">{{ repas.titreRepas }}</div>
+                                <div class="list-item-subtitle">{{ repas.typeMoment.label }} - {{ repas.totalCalories }} cal</div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <p class="text-gray">Aucun repas enregistre aujourd'hui</p>
+                        <a href="{{ path('app_nutrition_new') }}" class="btn btn-sm btn-outline-primary mt-4">Ajouter un repas</a>
+                    </div>
+                {% endif %}
+            </div>
+
+            {# Seances de la semaine #}
+            <div class="card">
+                <div class="card-header flex-between">
+                    <div>
+                        <h4 class="card-title">Sport cette semaine</h4>
+                        <p class="card-subtitle">{{ weekSeances|length }} seances</p>
+                    </div>
+                    <a href="{{ path('app_sports_new') }}" class="btn btn-sm btn-secondary">+ Ajouter</a>
+                </div>
+                {% if weekSeances|length > 0 %}
+                    {% for seance in weekSeances|slice(0, 3) %}
+                        <div class="list-item">
+                            <div class="list-item-icon" style="background: rgba(54, 124, 254, 0.1); color: var(--secondary);">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <polyline points="12 6 12 12 16 14"/>
+                                </svg>
+                            </div>
+                            <div class="list-item-content">
+                                <div class="list-item-title">{{ seance.nomSeance }}</div>
+                                <div class="list-item-subtitle">{{ seance.dateSeance|date('d/m') }} - {{ seance.dureeMinutes }} min</div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <p class="text-gray">Aucune seance cette semaine</p>
+                        <a href="{{ path('app_sports_new') }}" class="btn btn-sm btn-outline-secondary mt-4">Planifier une seance</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+       
+        {# Quick Actions #}
+        <div class="gradient-card mt-6">
+            <div class="flex-between">
+                <div>
+                    <h3>Acces rapide</h3>
+                    <p style="opacity: 0.9;">Naviguez rapidement vers vos modules preferes</p>
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <a href="{{ path('app_nutrition') }}" class="btn" style="background: white; color: var(--secondary);">Nutrition</a>
+                    <a href="{{ path('app_sports') }}" class="btn" style="background: white; color: var(--secondary);">Sport</a>
+                    <a href="{{ path('app_mental') }}" class="btn" style="background: white; color: var(--secondary);">Mental</a>
+                </div>
+            </div>
+        </div>
+{% endblock %}

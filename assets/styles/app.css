@@ -1,0 +1,158 @@
+/* GLOBAL */
+body{
+    background:#f5f7fb;
+    font-family: 'Inter', Arial, sans-serif;
+}
+
+/* CONTAINER */
+.container{
+    max-width:1100px;
+    margin:auto;
+}
+
+/* CARDS */
+.card,
+.rdv-card,
+.consultation-card,
+.prescription-card,
+.medical-card{
+    background:white;
+    padding:28px;
+    border-radius:16px;
+    box-shadow:0 4px 18px rgba(0,0,0,0.07);
+}
+
+/* TITLES */
+.section-title{
+    background:#58b6b1;
+    color:white;
+    padding:10px 16px;
+    border-radius:8px;
+    font-weight:600;
+    margin-bottom:22px;
+}
+
+/* FORMS */
+.form-control,
+input,
+select,
+textarea{
+    width:100%;
+    padding:10px;
+    border-radius:10px;
+    border:1px solid #ddd;
+    background:white;
+}
+
+textarea{
+    min-height:120px;
+}
+
+/* GRID FORMS */
+.form-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+.form-field.full{
+    grid-column:1 / -1;
+}
+
+/* BUTTONS */
+.btn{
+    border-radius:10px;
+    padding:10px 18px;
+    font-weight:600;
+    transition:0.2s;
+}
+
+.btn-primary{
+    background:#4c7cf3;
+    border:none;
+    color:white;
+}
+
+.btn-primary:hover{
+    background:#355fe0;
+}
+
+.btn-success{
+    background:#28a745;
+    color:white;
+    border:none;
+}
+
+.btn-danger{
+    background:#e74c3c;
+    color:white;
+    border:none;
+}
+
+/* TABLES */
+.rdv-table,
+.prescription-table,
+.consultation-table{
+    width:100%;
+    border-collapse:collapse;
+    background:white;
+    border-radius:14px;
+    overflow:hidden;
+    box-shadow:0 2px 10px rgba(0,0,0,0.05);
+}
+
+.rdv-table th,
+.prescription-table th,
+.consultation-table th{
+    background:#f4f6f9;
+    padding:14px;
+    text-align:left;
+    font-weight:600;
+}
+
+.rdv-table td,
+.prescription-table td,
+.consultation-table td{
+    padding:14px;
+    border-top:1px solid #eee;
+}
+
+/* BADGES */
+.badge{
+    padding:6px 12px;
+    border-radius:10px;
+    font-size:12px;
+    color:white;
+    font-weight:600;
+}
+
+.bg-success{ background:#28a745; }
+.bg-warning{ background:#f39c12; }
+.bg-danger{ background:#e74c3c; }
+.bg-primary{ background:#4c7cf3; }
+
+/* RADIO GROUP */
+input[type="radio"]{
+    margin-right:6px;
+}
+
+/* RDV FORM SPECIAL */
+.rdv-form-container{
+    background:white;
+    padding:30px;
+    border-radius:16px;
+    box-shadow:0 4px 18px rgba(0,0,0,0.08);
+    max-width:900px;
+    margin:auto;
+}
+
+/* SPACING */
+.mb-3{ margin-bottom:18px; }
+.mt-3{ margin-top:18px; }
+.mt-4{ margin-top:24px; }
+
+/* HOVER EFFECT TABLE */
+.rdv-table tbody tr:hover,
+.prescription-table tbody tr:hover{
+    background:#fafafa;
+}

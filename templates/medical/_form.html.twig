@@ -1,0 +1,33 @@
+{{ form_start(form) }}
+
+<div class="mb-3">
+    {{ form_label(form.specialiste) }}
+    {{ form_widget(form.specialiste, {'attr': {'class':'form-control'}}) }}
+</div>
+
+<div class="mb-3">
+    {{ form_label(form.dateHeure) }}
+    {{ form_widget(form.dateHeure, {'attr': {'class':'form-control'}}) }}
+</div>
+
+<div class="mb-3">
+    {{ form_label(form.motif) }}
+    {{ form_widget(form.motif, {'attr': {'class':'form-control'}}) }}
+</div>
+
+<div class="mb-3">
+    {{ form_label(form.mode) }}
+    {{ form_widget(form.mode) }}
+</div>
+
+<div class="mt-4 d-flex gap-2">
+    <button class="btn btn-primary">
+        Confirmer le RDV
+    </button>
+
+    <a href="{{ path('app_specialiste') }}" class="btn btn-secondary">
+        Annuler
+    </a>
+</div>
+
+{{ form_end(form) }}

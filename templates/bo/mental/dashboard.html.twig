@@ -1,0 +1,155 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Backoffice Mental - BioSync Admin{% endblock %}
+
+{% block body %}
+<div class="bo-mental-dashboard">
+    {# Header #}
+    <div class="page-header flex-between">
+        <div>
+            <h1 class="page-title">Backoffice Mental Wellness</h1>
+            <p class="page-subtitle">Gérer les quiz, questions et assessments</p>
+        </div>
+    </div>
+
+    {# Stats Cards #}
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="16" x2="12" y2="12"/>
+                    <line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">{{ totalQuestions }}</div>
+                <div class="stat-label">Questions disponibles</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                </svg>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">{{ totalQuizzes }}</div>
+                <div class="stat-label">Quiz créés</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon orange">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                </svg>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">{{ totalUsers }}</div>
+                <div class="stat-label">Utilisateurs actifs</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon purple">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">{{ totalMedailles }}</div>
+                <div class="stat-label">Médailles attribuées</div>
+            </div>
+        </div>
+    </div>
+
+    {# Actions Rapides #}
+    <div class="quick-actions-grid">
+        <a href="{{ path('app_mental_admin_question_new') }}" class="action-card blue">
+            <div class="action-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+            </div>
+            <h3 class="action-title">Créer une question</h3>
+            <p class="action-desc">Ajouter une nouvelle question au pool</p>
+        </a>
+
+        <a href="{{ path('app_mental_admin_questions') }}" class="action-card green">
+            <div class="action-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <line x1="8" y1="6" x2="21" y2="6"/>
+                    <line x1="8" y1="12" x2="21" y2="12"/>
+                    <line x1="8" y1="18" x2="21" y2="18"/>
+                    <line x1="3" y1="6" x2="3.01" y2="6"/>
+                    <line x1="3" y1="12" x2="3.01" y2="12"/>
+                    <line x1="3" y1="18" x2="3.01" y2="18"/>
+                </svg>
+            </div>
+            <h3 class="action-title">Gérer les questions</h3>
+            <p class="action-desc">Voir, modifier, supprimer les questions</p>
+        </a>
+
+        <a href="{{ path('app_mental_admin_quiz_list') }}" class="action-card orange">
+            <div class="action-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                </svg>
+            </div>
+            <h3 class="action-title">Gérer les quiz</h3>
+            <p class="action-desc">Voir tous les quiz utilisateurs</p>
+        </a>
+
+        <a href="{{ path('app_mental') }}" class="action-card purple">
+            <div class="action-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+            </div>
+            <h3 class="action-title">Vue utilisateur</h3>
+            <p class="action-desc">Voir l'interface utilisateur</p>
+        </a>
+    </div>
+
+    {# Dernières Questions #}
+    {% if recentQuestions|length > 0 %}
+    <div class="card mt-4">
+        <div class="card-header flex-between">
+            <h4 class="card-title">Dernières questions ajoutées</h4>
+            <a href="{{ path('app_mental_admin_questions') }}" class="btn btn-sm btn-secondary">Voir tout</a>
+        </div>
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Énoncé</th>
+                        <th style="width: 150px;">Points</th>
+                        <th style="width: 150px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for question in recentQuestions %}
+                    <tr>
+                        <td>{{ question.enonce|slice(0, 100) }}...</td>
+                        <td><strong>{{ question.pointsValeur }}</strong></td>
+                        <td>
+                            <a href="{{ path('app_mental_admin_question_edit', {id: question.id}) }}" class="btn btn-sm btn-secondary">
+                                Modifier
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

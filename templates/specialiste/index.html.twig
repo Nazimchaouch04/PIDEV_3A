@@ -1,0 +1,84 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Dashboard Spécialiste{% endblock %}
+
+{% block body %}
+
+<div class="page-header flex-between">
+    <div>
+        <h1 class="page-title">Rendez-vous du médecin</h1>
+        <p class="page-subtitle">Gestion des consultations et rendez-vous patients</p>
+    </div>
+</div>
+
+<div class="rdv-card">
+
+<table class="rdv-table">
+    <thead>
+        <tr>
+            <th>Patient</th>
+            <th>Date</th>
+            <th>Motif</th>
+            <th>Statut</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+    {% for rdv in rendezVous %}
+        <tr>
+            <td>{{ rdv.patient.NomComplet }}</td>
+            <td>{{ rdv.dateHeure|date('d/m/Y H:i') }}</td>
+            <td>{{ rdv.motif }}</td>
+
+            <td>
+                <span class="badge bg-success">
+                    {{ rdv.statut }}
+                </span>
+            </td>
+
+                 <td>
+
+                    {% if rdv.statut == 'DEMANDE' %}
+
+                        <a class="btn btn-success btn-sm"
+                        href="{{ path('app_rendezvous_confirmer', {id: rdv.id}) }}">
+                            Confirmer
+                        </a>
+
+                        <a class="btn btn-danger btn-sm"
+                        href="{{ path('app_rendezvous_annuler', {id: rdv.id}) }}">
+                            Annuler
+                        </a>
+
+                    {% elseif rdv.statut == 'CONFIRME' and not rdv.consultation %}
+
+                        <a class="btn btn-primary btn-sm"
+                      href="{{ path('app_consultation_new', {id: rdv.id}) }}">
+                            Commencer consultation
+                        </a>
+
+                    {% elseif rdv.consultation %}
+
+                        <a class="btn btn-primary btn-sm"
+                        href="{{ path('app_consultation_show', {id: rdv.consultation.id}) }}">
+                            Voir consultation
+                        </a>
+
+                    {% else %}
+                        <span class="text-muted">—</span>
+                    {% endif %}
+
+                    </td>
+
+
+        </tr>
+    {% endfor %}
+    </tbody>
+
+</table>
+
+</div>
+</div>
+
+{% endblock %}

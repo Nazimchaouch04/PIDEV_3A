@@ -1,0 +1,27 @@
+{{ form_start(form) }}
+
+<div class="mb-3">
+    {{ form_label(form.dateConsultation) }}
+    {{ form_widget(form.dateConsultation, {'attr': {'class': 'form-control'}}) }}
+</div>
+
+<div class="mb-3">
+    {{ form_label(form.symptomes) }}
+    {{ form_widget(form.symptomes, {'attr': {'class': 'form-control', 'rows':5}}) }}
+</div>
+
+<div class="mb-3">
+    {{ form_label(form.diagnostic) }}
+    {{ form_widget(form.diagnostic, {'attr': {'class': 'form-control', 'rows':5}}) }}
+</div>
+
+<div class="mb-3">
+    {{ form_label(form.recommandations) }}
+    {{ form_widget(form.recommandations, {'attr': {'class': 'form-control', 'rows':5}}) }}
+</div>
+
+<button class="btn btn-main">
+    {{ button_label|default('Save') }}
+</button>
+
+{{ form_end(form) }}

@@ -1,0 +1,37 @@
+<div class="rdv-form-container">
+
+<h3 class="section-title">Informations du rendez-vous</h3>
+
+{{ form_start(form) }}
+
+<div class="form-grid">
+
+    <div class="form-field full">
+        {{ form_label(form.specialiste) }}
+        {{ form_widget(form.specialiste) }}
+    </div>
+
+    <div class="form-field half">
+        {{ form_label(form.dateHeure) }}
+        {{ form_widget(form.dateHeure) }}
+    </div>
+
+    <div class="form-field half">
+        {{ form_label(form.mode) }}
+        {{ form_widget(form.mode) }}
+    </div>
+
+    <div class="form-field full">
+        {{ form_label(form.motif) }}
+        {{ form_widget(form.motif) }}
+    </div>
+
+</div>
+
+<button class="btn btn-primary mt-4">
+    {{ button_label|default('Confirmer le rendez-vous') }}
+</button>
+
+{{ form_end(form) }}
+
+</div>
