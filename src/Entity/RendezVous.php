@@ -2,13 +2,13 @@
 
 namespace App\Entity;
 
-use App\Repository\RendezVousRepository;
-use Doctrine\DBAL\Types\Types;
+use App\Entity\Utilisateur;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\RendezVousRepository;
+use App\Entity\Consultation;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: RendezVousRepository::class)]
-#[ORM\Table(name: 'rendez_vous')]
 class RendezVous
 {
     #[ORM\Id]
@@ -16,39 +16,58 @@ class RendezVous
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Assert\NotNull(message: 'La date et heure du rendez-vous sont requises')]
-    #[Assert\GreaterThan('now', message: 'Le rendez-vous doit etre dans le futur')]
-    private ?\DateTimeInterface $dateHeureRdv = null;
+    #[ORM\Column]
+    #[Assert\NotBlank(message: "La date et l'heure sont obligatoires")]
+    #[Assert\GreaterThan("today", message: "La date du rendez-vous doit être dans le futur")]
+    private ?\DateTime $dateHeure = null;
 
-    #[ORM\Column(type: Types::TEXT)]
-    #[Assert\NotBlank(message: 'Le motif est requis')]
+    #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: "Le motif est obligatoire")]
+    #[Assert\Length(min: 5, max: 255, minMessage: "Le motif doit faire au moins 5 caractères", maxMessage: "Le motif ne doit pas dépasser 255 caractères")]
+    #[Assert\Regex(pattern: "/^[a-zA-Z0-9\s\-àâäéèêëïîôöùûç]+$/", message: "Le motif ne peut contenir que des lettres, chiffres et espaces")]
     private ?string $motif = null;
 
-    #[ORM\Column]
-    private bool $estHonore = false;
+    #[ORM\Column(length: 50)]
+    #[Assert\Choice(choices: ['DEMANDE', 'CONFIRME', 'REALISE', 'ANNULE'], message: "Le statut doit être l'une des valeurs valides")]
+    private string $statut = 'DEMANDE';
 
-    #[ORM\ManyToOne(inversedBy: 'rendezVous')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Specialiste $specialiste = null;
+    #[ORM\Column(length: 50)]
+    #[Assert\NotBlank(message: "Le mode de consultation est obligatoire")]
+    #[Assert\Choice(choices: ['PRESENTIEL', 'TELECONSULTATION'], message: "Le mode doit être 'Présentiel' ou 'Téléconsultation'")]
+    private string $mode;
 
-    #[ORM\ManyToOne(inversedBy: 'rendezVous')]
+    // PATIENT
+    #[ORM\ManyToOne(inversedBy: 'rendezVousPatient')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Utilisateur $utilisateur = null;
+    private ?Utilisateur $patient = null;
+
+    // DOCTOR ACCOUNT (Utilisateur ROLE_MEDECIN)
+    #[ORM\ManyToOne(inversedBy: 'rendezVousSpecialiste')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Utilisateur $specialiste = null;
+
+    // CONSULTATION
+    #[ORM\OneToOne(mappedBy: 'rendezVous', cascade: ['persist', 'remove'])]
+    private ?Consultation $consultation = null;
+
+    public function __construct()
+    {
+        $this->statut = 'DEMANDE';
+    }
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getDateHeureRdv(): ?\DateTimeInterface
+    public function getDateHeure(): ?\DateTime
     {
-        return $this->dateHeureRdv;
+        return $this->dateHeure;
     }
 
-    public function setDateHeureRdv(\DateTimeInterface $dateHeureRdv): static
+    public function setDateHeure(\DateTime $dateHeure): static
     {
-        $this->dateHeureRdv = $dateHeureRdv;
+        $this->dateHeure = $dateHeure;
         return $this;
     }
 
@@ -63,41 +82,89 @@ class RendezVous
         return $this;
     }
 
-    public function isEstHonore(): bool
+    public function getStatut(): ?string
     {
-        return $this->estHonore;
+        return $this->statut;
     }
 
-    public function setEstHonore(bool $estHonore): static
+    public function setStatut(string $statut): static
     {
-        $this->estHonore = $estHonore;
+        $this->statut = strtoupper($statut);
         return $this;
     }
 
-    public function getSpecialiste(): ?Specialiste
+    public function getMode(): ?string
+    {
+        return $this->mode;
+    }
+
+    public function setMode(string $mode): static
+    {
+        $this->mode = $mode;
+        return $this;
+    }
+
+    public function getPatient(): ?Utilisateur
+    {
+        return $this->patient;
+    }
+
+    public function setPatient(?Utilisateur $patient): static
+    {
+        $this->patient = $patient;
+        return $this;
+    }
+
+    public function getSpecialiste(): ?Utilisateur
     {
         return $this->specialiste;
     }
 
-    public function setSpecialiste(?Specialiste $specialiste): static
+    public function setSpecialiste(?Utilisateur $specialiste): static
     {
         $this->specialiste = $specialiste;
         return $this;
     }
 
-    public function getUtilisateur(): ?Utilisateur
+    public function getConsultation(): ?Consultation
     {
-        return $this->utilisateur;
+        return $this->consultation;
     }
 
-    public function setUtilisateur(?Utilisateur $utilisateur): static
+    public function setConsultation(?Consultation $consultation): static
     {
-        $this->utilisateur = $utilisateur;
+        if ($consultation && $consultation->getRendezVous() !== $this) {
+            $consultation->setRendezVous($this);
+        }
+
+        $this->consultation = $consultation;
         return $this;
     }
 
+    /* LOGIC */
+
     public function isPassed(): bool
     {
-        return $this->dateHeureRdv < new \DateTime();
+        return $this->dateHeure < new \DateTime();
+    }
+
+    public function isDemande(): bool
+    {
+        return $this->statut === 'DEMANDE';
+    }
+
+    public function isConfirme(): bool
+    {
+        return $this->statut === 'CONFIRME';
+    }
+
+    public function isAnnule(): bool
+    {
+        return $this->statut === 'ANNULE';
+    }
+
+    public function isRealise(): bool
+    {
+        return $this->statut === 'REALISE';
     }
 }

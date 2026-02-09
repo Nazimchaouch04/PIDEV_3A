@@ -1,0 +1,64 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Modifier Consultation{% endblock %}
+
+{% block stylesheets %}
+
+<style>
+.consult-card{
+    max-width:700px;
+    margin:40px auto;
+    background:#ffffff;
+    padding:30px;
+    border-radius:14px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.08);
+}
+
+.consult-card h1{
+    margin-bottom:25px;
+    font-weight:700;
+}
+
+.consult-card textarea,
+.consult-card input{
+    border-radius:8px;
+    padding:10px;
+    border:1px solid #dcdcdc;
+}
+
+.btn-main{
+    background:#4f8cff;
+    color:white;
+    border:none;
+    padding:10px 18px;
+    border-radius:8px;
+    font-weight:600;
+}
+
+.btn-secondary{
+    margin-left:10px;
+}
+</style>
+
+{% endblock %}
+
+{% block body %}
+
+<div class="consult-card">
+
+
+<h1>Modifier Consultation</h1>
+
+{{ include('consultation/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
+
+<br>
+
+<a class="btn btn-secondary"
+   href="{{ path('app_specialiste') }}">
+   Retour dashboard médecin
+</a>
+
+
+</div>
+
+{% endblock %}

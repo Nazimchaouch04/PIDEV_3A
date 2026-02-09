@@ -21,17 +21,20 @@ class Repas
 
     #[ORM\Column(length: 50)]
     #[Assert\NotBlank(message: 'Le titre du repas est requis')]
-    #[Assert\Length(max: 50)]
+    #[Assert\Length(min: 3, minMessage: 'Le titre doit contenir au moins {{ limit }} caractères', max: 50, maxMessage: 'Le titre ne peut pas dépasser {{ limit }} caractères')]
     private ?string $titreRepas = null;
 
     #[ORM\Column(type: 'string', enumType: TypeMoment::class)]
+    #[Assert\NotNull(message: 'Le moment est obligatoire')]
     private ?TypeMoment $typeMoment = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Assert\NotNull(message: 'La date de consommation est requise')]
+    #[Assert\LessThanOrEqual('today', message: 'La date ne peut pas être dans le futur')]
     private ?\DateTimeInterface $dateConsommation = null;
 
     #[ORM\Column]
+    #[Assert\PositiveOrZero(message: 'Les points doivent être supérieurs ou égaux à 0')]
     private int $pointsGagnes = 0;
 
     #[ORM\ManyToOne(inversedBy: 'repas')]
@@ -142,6 +145,33 @@ class Repas
         $total = 0;
         foreach ($this->aliments as $aliment) {
             $total += $aliment->getCalories();
+        }
+        return $total;
+    }
+
+    public function getTotalProteines(): int
+    {
+        $total = 0;
+        foreach ($this->aliments as $aliment) {
+            $total += $aliment->getProteines() ?? 0;
+        }
+        return $total;
+    }
+
+    public function getTotalGlucides(): int
+    {
+        $total = 0;
+        foreach ($this->aliments as $aliment) {
+            $total += $aliment->getGlucides() ?? 0;
+        }
+        return $total;
+    }
+
+    public function getTotalLipides(): int
+    {
+        $total = 0;
+        foreach ($this->aliments as $aliment) {
+            $total += $aliment->getLipides() ?? 0;
         }
         return $total;
     }

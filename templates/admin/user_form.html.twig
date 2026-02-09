@@ -28,6 +28,11 @@
         {% if form.plainPassword is defined %}
         <div class="form-group">
             {{ form_label(form.plainPassword) }}
+            {% if user.id %}
+                <small style="color: var(--text-secondary); display: block; margin-bottom: 0.5rem;">
+                    Laissez vide pour conserver le mot de passe actuel
+                </small>
+            {% endif %}
             {{ form_widget(form.plainPassword) }}
             {{ form_errors(form.plainPassword) }}
         </div>

@@ -1,6 +1,6 @@
-{% extends 'base.html.twig' %}
+{% extends 'base_back.html.twig' %}
 
-{% block title %}RDV - {{ rdv.specialiste.nomDocteur }} - BioSync{% endblock %}
+{% block title %}RDV - Dr. {{ rdv.specialiste.nomComplet }} - BioSync{% endblock %}
 
 {% block body %}
 <div class="app-layout">
@@ -10,41 +10,49 @@
         <div class="page-header flex-between">
             <div>
                 <h1 class="page-title">Rendez-vous</h1>
-                <p class="page-subtitle">Dr. {{ rdv.specialiste.nomDocteur }} - {{ rdv.dateHeureRdv|date('d/m/Y H:i') }}</p>
+                <p class="page-subtitle">
+                    Dr. {{ rdv.specialiste.nomComplet }} —
+                    {{ rdv.dateHeure|date('d/m/Y H:i') }}
+                </p>
             </div>
             <div style="display: flex; gap: 0.5rem;">
-                {% if not rdv.isPassed and not rdv.estHonore %}
-                    <a href="{{ path('app_medical_edit', {id: rdv.id}) }}" class="btn btn-ghost">Modifier</a>
-                {% endif %}
                 <a href="{{ path('app_medical') }}" class="btn btn-primary">Retour</a>
             </div>
         </div>
 
         <div class="grid grid-cols-2 gap-6">
+            <!-- RDV DETAILS -->
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title">Details du rendez-vous</h4>
+                    <h4 class="card-title">Détails du rendez-vous</h4>
                 </div>
+
                 <div class="list-item">
                     <div class="list-item-content">
                         <div class="list-item-subtitle">Date et heure</div>
-                        <div class="list-item-title">{{ rdv.dateHeureRdv|date('d/m/Y a H:i') }}</div>
+                        <div class="list-item-title">
+                            {{ rdv.dateHeure|date('d/m/Y H:i') }}
+                        </div>
                     </div>
                 </div>
+
                 <div class="list-item">
                     <div class="list-item-content">
                         <div class="list-item-subtitle">Statut</div>
                         <div class="list-item-title">
-                            {% if rdv.estHonore %}
-                                <span class="badge badge-success">Honore</span>
-                            {% elseif rdv.isPassed %}
-                                <span class="badge badge-danger">Manque</span>
+                            {% if rdv.statut == 'REALISE' %}
+                                <span class="badge badge-success">Réalisé</span>
+                            {% elseif rdv.statut == 'ANNULE' %}
+                                <span class="badge badge-danger">Annulé</span>
+                            {% elseif rdv.statut == 'CONFIRME' %}
+                                <span class="badge badge-primary">Confirmé</span>
                             {% else %}
-                                <span class="badge badge-warning">A venir</span>
+                                <span class="badge badge-warning">Demandé</span>
                             {% endif %}
                         </div>
                     </div>
                 </div>
+
                 <div class="list-item">
                     <div class="list-item-content">
                         <div class="list-item-subtitle">Motif</div>
@@ -52,40 +60,27 @@
                     </div>
                 </div>
 
-                {% if not rdv.estHonore and rdv.isPassed %}
-                    <form action="{{ path('app_medical_honor', {id: rdv.id}) }}" method="post" class="mt-4">
-                        <input type="hidden" name="_token" value="{{ csrf_token('honor' ~ rdv.id) }}">
-                        <button type="submit" class="btn btn-primary w-full">Marquer comme honore</button>
+                {% if rdv.statut == 'CONFIRME' %}
+                    <form action="{{ path('app_medical_realise', {id: rdv.id}) }}" method="post" class="mt-4">
+                        <button type="submit" class="btn btn-success w-full">
+                            Marquer comme réalisé
+                        </button>
                     </form>
                 {% endif %}
             </div>
 
+            <!-- DOCTOR -->
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title">Specialiste</h4>
+                    <h4 class="card-title">Spécialiste</h4>
                 </div>
-                <div class="list-item">
-                    <div class="list-item-icon" style="background: rgba(54, 124, 254, 0.1); color: var(--secondary);">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                            <circle cx="12" cy="7" r="4"/>
-                        </svg>
-                    </div>
-                    <div class="list-item-content">
-                        <div class="list-item-title">Dr. {{ rdv.specialiste.nomDocteur }}</div>
-                        <div class="list-item-subtitle">{{ rdv.specialiste.specialite }}</div>
-                    </div>
-                </div>
+
                 <div class="list-item">
                     <div class="list-item-content">
-                        <div class="list-item-subtitle">Telephone</div>
-                        <div class="list-item-title">{{ rdv.specialiste.telephone }}</div>
-                    </div>
-                </div>
-                <div class="list-item">
-                    <div class="list-item-content">
-                        <div class="list-item-subtitle">Disponibilite</div>
-                        <div class="list-item-title">{{ rdv.specialiste.disponibilite }}</div>
+                        <div class="list-item-title">
+                            Dr. {{ rdv.specialiste.nomComplet }}
+                        </div>
+                        
                     </div>
                 </div>
             </div>

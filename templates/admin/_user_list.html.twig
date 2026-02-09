@@ -1,0 +1,72 @@
+{# templates/admin/_user_list.html.twig #}
+{% for user in users %}
+    <tr style="border-bottom: 1px solid var(--border-light);">
+        <td style="padding: 12px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary-color); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                    {{ user.nomComplet|slice(0, 2)|upper }}
+                </div>
+                <div>
+                    <div style="font-weight: 600;">{{ user.nomComplet }}</div>
+                    <div style="font-size: 12px; color: var(--text-secondary);">{{ user.email }}</div>
+                </div>
+            </div>
+        </td>
+        <td style="padding: 12px;">
+            {% if 'ROLE_ADMIN' in user.roles %}
+                <span class="badge" style="background: var(--danger-color);">Admin</span>
+            {% elseif 'ROLE_COACH' in user.roles %}
+                <span class="badge" style="background: var(--warning-color);">Coach</span>
+            {% elseif 'ROLE_SPECIALISTE' in user.roles %}
+                <span class="badge" style="background: var(--success-color);">Spécialiste</span>
+            {% else %}
+                <span class="badge" style="background: var(--secondary-color);">Utilisateur</span>
+            {% endif %}
+        </td>
+        <td style="padding: 12px;">{{ user.dateInscription ? user.dateInscription|date('d/m/Y') : '-' }}</td>
+        <td style="padding: 12px;">{{ user.scoreGlobal ?? 0 }}</td>
+        <td style="padding: 12px; display: flex; gap: 8px;">
+            <a href="{{ path('app_admin_user_show', {id: user.id}) }}" class="btn btn-outline btn-sm">Voir</a>
+            <a href="{{ path('app_admin_user_edit', {id: user.id}) }}" class="btn btn-outline btn-sm">Modifier</a>
+            <form method="post" action="{{ path('app_admin_user_delete', {id: user.id}) }}" onsubmit="return confirm('Supprimer cet utilisateur ?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                <button class="btn btn-outline btn-sm" style="color: #EF4444; border-color: #EF4444;">Supprimer</button>
+            </form>
+        </td>
+    </tr>
+{% else %}
+    <tr>
+        <td colspan="5" style="padding: 30px; text-align: center; color: var(--text-secondary);">
+            {% if current_q %}
+                Aucun utilisateur trouvé pour "{{ current_q }}"
+            {% else %}
+                Aucun utilisateur trouvé
+            {% endif %}
+        </td>
+    </tr>
+{% endfor %}
+
+<style>
+.badge {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    color: white;
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-outline:hover {
+    background: rgba(0, 123, 255, 0.1);
+}
+</style>

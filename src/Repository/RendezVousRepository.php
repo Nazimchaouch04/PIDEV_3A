@@ -3,7 +3,6 @@
 namespace App\Repository;
 
 use App\Entity\RendezVous;
-use App\Entity\Utilisateur;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -17,31 +16,28 @@ class RendezVousRepository extends ServiceEntityRepository
         parent::__construct($registry, RendezVous::class);
     }
 
-    /**
-     * @return RendezVous[]
-     */
-    public function findByUtilisateur(Utilisateur $utilisateur): array
-    {
-        return $this->createQueryBuilder('r')
-            ->andWhere('r.utilisateur = :user')
-            ->setParameter('user', $utilisateur)
-            ->orderBy('r.dateHeureRdv', 'DESC')
-            ->getQuery()
-            ->getResult();
-    }
+//    /**
+//     * @return RendezVous[] Returns an array of RendezVous objects
+//     */
+//    public function findByExampleField($value): array
+//    {
+//        return $this->createQueryBuilder('r')
+//            ->andWhere('r.exampleField = :val')
+//            ->setParameter('val', $value)
+//            ->orderBy('r.id', 'ASC')
+//            ->setMaxResults(10)
+//            ->getQuery()
+//            ->getResult()
+//        ;
+//    }
 
-    /**
-     * @return RendezVous[]
-     */
-    public function findUpcomingByUtilisateur(Utilisateur $utilisateur): array
-    {
-        return $this->createQueryBuilder('r')
-            ->andWhere('r.utilisateur = :user')
-            ->andWhere('r.dateHeureRdv > :now')
-            ->setParameter('user', $utilisateur)
-            ->setParameter('now', new \DateTime())
-            ->orderBy('r.dateHeureRdv', 'ASC')
-            ->getQuery()
-            ->getResult();
-    }
+//    public function findOneBySomeField($value): ?RendezVous
+//    {
+//        return $this->createQueryBuilder('r')
+//            ->andWhere('r.exampleField = :val')
+//            ->setParameter('val', $value)
+//            ->getQuery()
+//            ->getOneOrNullResult()
+//        ;
+//    }
 }

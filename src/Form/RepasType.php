@@ -10,9 +10,6 @@ use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Component\Validator\Constraints\Type;
 
 class RepasType extends AbstractType
 {
@@ -25,10 +22,6 @@ class RepasType extends AbstractType
                     'class' => 'form-control',
                     'placeholder' => 'Ex: Petit-dejeuner equilibre',
                 ],
-                'constraints' => [
-                    new NotBlank(['message' => 'Le titre du repas est requis.']),
-                    new Length(['min' => 2, 'minMessage' => 'Le titre doit contenir au moins {{ limit }} caracteres.']),
-                ],
             ])
             ->add('typeMoment', EnumType::class, [
                 'class' => TypeMoment::class,
@@ -40,10 +33,6 @@ class RepasType extends AbstractType
                 'label' => 'Date et heure',
                 'widget' => 'single_text',
                 'attr' => ['class' => 'form-control'],
-                'constraints' => [
-                    new NotBlank(['message' => 'La date de consommation est requise.']),
-                    new Type(['type' => '\\DateTimeInterface', 'message' => 'La valeur doit être une date valide.']),
-                ],
             ]);
     }
 

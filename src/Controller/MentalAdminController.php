@@ -10,10 +10,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
 #[Route('/bo/mental')]
-#[IsGranted('ROLE_ADMIN')]
 class MentalAdminController extends AbstractController
 {
     #[Route('', name: 'app_mental_admin_dashboard')]
@@ -21,6 +21,11 @@ class MentalAdminController extends AbstractController
         QuestionRepository $questionRepository,
         EntityManagerInterface $em
     ): Response {
+        // Vérification manuelle pour autoriser les coaches ET les admins
+        if (!$this->isGranted('ROLE_ADMIN') && !$this->isGranted('ROLE_COACH')) {
+            throw $this->createAccessDeniedException('Accès réservé aux administrateurs et coaches.');
+        }
+        
         $totalQuestions = $questionRepository->count([]);
         $totalQuizzes = $em->getRepository(QuizMental::class)->count([]);
         $totalUsers = $em->getRepository(\App\Entity\Utilisateur::class)->count([]);
@@ -226,5 +231,71 @@ class MentalAdminController extends AbstractController
 
         $this->addFlash('success', 'Question supprimée avec succès !');
         return $this->redirectToRoute('app_mental_admin_questions');
+    }
+
+    #[Route('/quiz/export-pdf', name: 'app_mental_admin_quiz_export_pdf')]
+    public function exportQuizPdf(EntityManagerInterface $em): Response
+    {
+        // Récupérer tous les quiz avec leurs utilisateurs et questions
+        $quizzes = $em->getRepository(QuizMental::class)
+            ->createQueryBuilder('q')
+            ->leftJoin('q.utilisateur', 'u')
+            ->leftJoin('q.questions', 'qs')
+            ->addSelect('q', 'u', 'COUNT(qs.id) as nbQuestions')
+            ->groupBy('q.id', 'u.id')
+            ->orderBy('q.dateQuiz', 'DESC')
+            ->getQuery()
+            ->getResult();
+        
+        // Transformer le résultat pour avoir accès à nbQuestions comme propriété
+        $formattedQuizzes = [];
+        foreach ($quizzes as $quizData) {
+            $quiz = $quizData[0] ?? null;
+            $utilisateur = $quizData[1] ?? null;
+            
+            if ($quiz && $utilisateur) {
+                $formattedQuizzes[] = (object) [
+                    'id' => $quiz->getId(),
+                    'titre' => $quiz->getTitre(),
+                    'dateQuiz' => $quiz->getDateQuiz(),
+                    'niveauStressCible' => $quiz->getNiveauStressCible(),
+                    'scoreResultat' => $quiz->getScoreResultat(),
+                    'medailleQuiz' => $quiz->getMedailleQuiz(),
+                    'statut' => $quiz->getStatut(),
+                    'utilisateur' => $utilisateur,
+                    'nbQuestions' => $quizData['nbQuestions'] ?? 0,
+                ];
+            }
+        }
+
+        // Configuration DomPDF
+        $options = new Options();
+        $options->set('defaultFont', 'Arial');
+        $options->set('isRemoteEnabled', true);
+        $options->set('isJavascriptEnabled', true);
+
+        // Créer le HTML
+        $html = $this->renderView('bo/mental/quiz/export_pdf.html.twig', [
+            'quizzes' => $formattedQuizzes,
+            'dateExport' => new \DateTime(),
+        ]);
+
+        // Générer le PDF
+        $dompdf = new Dompdf($options);
+        $dompdf->loadHtml($html);
+        $dompdf->render();
+
+        // Nom du fichier
+        $filename = 'quiz_mental_export_' . date('Y-m-d_H-i-s') . '.pdf';
+
+        // Response PDF
+        $response = new Response($dompdf->output());
+        $response->headers->set('Content-Type', 'application/pdf');
+        $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');
+        $response->headers->set('Cache-Control', 'private, max-age=0, must-revalidate');
+        $response->headers->set('Pragma', 'no-cache');
+        $response->headers->set('Expires', '0');
+
+        return $response;
     }
 }

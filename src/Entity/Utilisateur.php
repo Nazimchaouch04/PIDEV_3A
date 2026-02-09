@@ -30,6 +30,14 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         minMessage: 'Le nom doit contenir au moins {{ limit }} caractères',
         maxMessage: 'Le nom ne peut pas dépasser {{ limit }} caractères'
     )]
+    #[Assert\Regex(
+        pattern: '/^[a-zA-ZÀ-ÿ\s\-]+$/',
+        message: 'Le nom ne peut contenir que des lettres, des espaces et des tirets'
+    )]
+    #[Assert\Regex(
+        pattern: '/^[a-zA-ZÀ-ÿ]/',
+        message: 'Le nom doit commencer par une lettre'
+    )]
     private ?string $nomComplet = null;
 
     #[ORM\Column(length: 100, unique: true)]
@@ -69,34 +77,55 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
     /**
      * @var Collection<int, QuizMental>
+     * Collection des quiz mentaux passés par l'utilisateur
+     * Relation OneToMany : un utilisateur peut passer plusieurs quiz mentaux
      */
     #[ORM\OneToMany(targetEntity: QuizMental::class, mappedBy: 'utilisateur', orphanRemoval: true)]
     private Collection $quizMentaux;
 
     /**
      * @var Collection<int, RendezVous>
+     * Collection des rendez-vous médicaux de l'utilisateur (comme patient)
+     * Relation OneToMany : un utilisateur peut avoir plusieurs rendez-vous
      */
-    #[ORM\OneToMany(targetEntity: RendezVous::class, mappedBy: 'utilisateur', orphanRemoval: true)]
-    private Collection $rendezVous;
+    #[ORM\OneToMany(targetEntity: RendezVous::class, mappedBy: 'patient', orphanRemoval: true)]
+    private Collection $rendezVousPatient;
+
+    /**
+     * @var Collection<int, RendezVous>
+     * Collection des rendez-vous médicaux de l'utilisateur (comme spécialiste)
+     * Relation OneToMany : un spécialiste peut avoir plusieurs rendez-vous
+     */
+    #[ORM\OneToMany(targetEntity: RendezVous::class, mappedBy: 'specialiste', orphanRemoval: true)]
+    private Collection $rendezVousSpecialiste;
 
     /**
      * @var Collection<int, MembreGroupe>
+     * Collection des groupes de soutien auxquels l'utilisateur est inscrit
+     * Relation OneToMany : un utilisateur peut rejoindre plusieurs groupes
      */
     #[ORM\OneToMany(targetEntity: MembreGroupe::class, mappedBy: 'utilisateur', orphanRemoval: true)]
     private Collection $membresGroupes;
 
+    /**
+     * Constructeur de l'entité Utilisateur
+     * Initialise les valeurs par défaut et les collections vides
+     */
     public function __construct()
     {
-        $this->dateInscription = new \DateTime();
-        $this->roles = ['ROLE_USER'];
-        $this->repas = new ArrayCollection();
-        $this->seancesSport = new ArrayCollection();
-        $this->quizMentaux = new ArrayCollection();
-        $this->rendezVous = new ArrayCollection();
-        $this->membresGroupes = new ArrayCollection();
+        $this->dateInscription = new \DateTime();  // Date d'inscription automatique
+        $this->roles = ['ROLE_USER'];              // Rôle par défaut
+        $this->repas = new ArrayCollection();           // Initialisation collection repas
+        $this->seancesSport = new ArrayCollection();     // Initialisation collection séances sport
+        $this->quizMentaux = new ArrayCollection();   // Initialisation collection quiz mentaux
+        $this->rendezVousPatient = new ArrayCollection();     // Initialisation collection rendez-vous patient
+        $this->rendezVousSpecialiste = new ArrayCollection();  // Initialisation collection rendez-vous spécialiste
+        $this->membresGroupes = new ArrayCollection();  // Initialisation collection groupes
     }
 
-    // --- GETTERS ET SETTERS ---
+    // =========================================================================
+    // SECTION : GETTERS ET SETTERS
+    // =========================================================================
 
     public function getId(): ?int
     {
@@ -268,10 +297,54 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     {
         return $this->quizMentaux;
     }
-    public function getRendezVous(): Collection
+    public function getRendezVousPatient(): Collection
     {
-        return $this->rendezVous;
+        return $this->rendezVousPatient;
     }
+    
+    public function addRendezVousPatient(RendezVous $rendezVous): static
+    {
+        if (!$this->rendezVousPatient->contains($rendezVous)) {
+            $this->rendezVousPatient->add($rendezVous);
+            $rendezVous->setPatient($this);
+        }
+        return $this;
+    }
+    
+    public function removeRendezVousPatient(RendezVous $rendezVous): static
+    {
+        if ($this->rendezVousPatient->removeElement($rendezVous)) {
+            if ($rendezVous->getPatient() === $this) {
+                $rendezVous->setPatient(null);
+            }
+        }
+        return $this;
+    }
+
+    public function getRendezVousSpecialiste(): Collection
+    {
+        return $this->rendezVousSpecialiste;
+    }
+    
+    public function addRendezVousSpecialiste(RendezVous $rendezVous): static
+    {
+        if (!$this->rendezVousSpecialiste->contains($rendezVous)) {
+            $this->rendezVousSpecialiste->add($rendezVous);
+            $rendezVous->setSpecialiste($this);
+        }
+        return $this;
+    }
+    
+    public function removeRendezVousSpecialiste(RendezVous $rendezVous): static
+    {
+        if ($this->rendezVousSpecialiste->removeElement($rendezVous)) {
+            if ($rendezVous->getSpecialiste() === $this) {
+                $rendezVous->setSpecialiste(null);
+            }
+        }
+        return $this;
+    }
+
     public function getMembresGroupes(): Collection
     {
         return $this->membresGroupes;

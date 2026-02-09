@@ -3,52 +3,63 @@
 namespace App\Form;
 
 use App\Entity\RendezVous;
-use App\Entity\Specialiste;
+use App\Entity\Utilisateur;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Component\Validator\Constraints\Type;
 
 class RendezVousType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
+            ->add('patient', EntityType::class, [
+                'class' => Utilisateur::class,
+                'choice_label' => 'nomComplet',
+                'label' => 'Patient',
+                'query_builder' => function (\Doctrine\ORM\EntityRepository $er) {
+                    return $er->createQueryBuilder('u')
+                        ->where('u.roles NOT LIKE :specialiste')
+                        ->andWhere('u.roles NOT LIKE :admin')
+                        ->setParameter('specialiste', '%ROLE_SPECIALISTE%')
+                        ->setParameter('admin', '%ROLE_ADMIN%')
+                        ->orderBy('u.nomComplet', 'ASC');
+                },
+            ])
+
             ->add('specialiste', EntityType::class, [
-                'class' => Specialiste::class,
-                'choice_label' => fn(Specialiste $s) => 'Dr. ' . $s->getNomDocteur() . ' - ' . $s->getSpecialite(),
-                'label' => 'Specialiste',
-                'attr' => ['class' => 'form-control'],
-                'placeholder' => 'Selectionnez un specialiste',
-                'constraints' => [
-                    new NotBlank(['message' => 'Veuillez selectionner un specialiste.']),
-                ],
+                'class' => Utilisateur::class,
+                'choice_label' => 'nomComplet',
+                'label' => 'Spécialiste',
+                'query_builder' => function (\Doctrine\ORM\EntityRepository $er) {
+                    return $er->createQueryBuilder('u')
+                        ->where('u.roles LIKE :role')
+                        ->setParameter('role', '%ROLE_SPECIALISTE%')
+                        ->orderBy('u.nomComplet', 'ASC');
+                },
             ])
-            ->add('dateHeureRdv', DateTimeType::class, [
-                'label' => 'Date et heure du rendez-vous',
+
+            ->add('dateHeure', DateTimeType::class, [
                 'widget' => 'single_text',
-                'attr' => ['class' => 'form-control'],
-                'constraints' => [
-                    new NotBlank(['message' => 'La date et l\'heure sont requises.']),
-                    new Type(['type' => '\\DateTimeInterface', 'message' => 'La valeur doit être une date valide.']),
-                ],
+                'label' => 'Date et heure',
             ])
+
             ->add('motif', TextareaType::class, [
-                'label' => 'Motif de la consultation',
-                'attr' => [
-                    'class' => 'form-control',
-                    'rows' => 4,
-                    'placeholder' => 'Decrivez le motif de votre rendez-vous...',
+                'label' => 'Motif',
+            ])
+
+            ->add('mode', ChoiceType::class, [
+                'choices' => [
+                    'Présentiel' => 'PRESENTIEL',
+                    'Téléconsultation' => 'TELECONSULTATION',
                 ],
-                'constraints' => [
-                    new NotBlank(['message' => 'Le motif est requis.']),
-                    new Length(['min' => 10, 'minMessage' => 'Le motif doit contenir au moins {{ limit }} caracteres.']),
-                ],
+                'expanded' => true,   
+                'multiple' => false,
+                'label' => 'Mode de consultation',
             ]);
     }
 

@@ -17,24 +17,45 @@ class Aliment
 
     #[ORM\Column(length: 100)]
     #[Assert\NotBlank(message: 'Le nom de l\'aliment est requis')]
-    #[Assert\Length(max: 100)]
+    #[Assert\Length(min: 3, minMessage: 'Le nom doit contenir au moins {{ limit }} caractères', max: 100, maxMessage: 'Le nom ne peut pas dépasser {{ limit }} caractères')]
     private ?string $nomAliment = null;
 
     #[ORM\Column]
     #[Assert\NotNull(message: 'Les calories sont requises')]
-    #[Assert\Positive(message: 'Les calories doivent etre positives')]
+    #[Assert\PositiveOrZero(message: 'Les calories doivent être supérieures ou égales à 0')]
     private ?int $calories = null;
 
-    #[ORM\Column]
-    #[Assert\Range(min: 0, max: 100, notInRangeMessage: 'L\'index glycemique doit etre entre {{ min }} et {{ max }}')]
+    #[ORM\Column(nullable: true)]
+    #[Assert\Range(min: 0, max: 100, notInRangeMessage: 'L\'index glycémique doit être entre {{ min }} et {{ max }}')]
     private ?int $indexGlycemique = null;
 
     #[ORM\Column]
     private bool $estExcitant = false;
 
     #[ORM\ManyToOne(inversedBy: 'aliments')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?Repas $repas = null;
+
+    #[ORM\Column(length: 50, nullable: true)]
+    private ?string $typeAliment = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $multiScore = null;
+
+    #[ORM\Column(length: 1, nullable: true)]
+    private ?string $nutriScore = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Assert\PositiveOrZero(message: 'Les protéines doivent être supérieures ou égales à 0')]
+    private ?float $proteines = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Assert\PositiveOrZero(message: 'Les glucides doivent être supérieurs ou égaux à 0')]
+    private ?float $glucides = null;
+
+    #[ORM\Column(nullable: true)]
+    #[Assert\PositiveOrZero(message: 'Les lipides doivent être supérieurs ou égaux à 0')]
+    private ?float $lipides = null;
 
     public function getId(): ?int
     {
@@ -93,6 +114,78 @@ class Aliment
     public function setRepas(?Repas $repas): static
     {
         $this->repas = $repas;
+        return $this;
+    }
+
+    public function getTypeAliment(): ?string
+    {
+        return $this->typeAliment;
+    }
+
+    public function setTypeAliment(string $typeAliment): static
+    {
+        $this->typeAliment = $typeAliment;
+
+        return $this;
+    }
+
+    public function getMultiScore(): ?float
+    {
+        return $this->multiScore;
+    }
+
+    public function setMultiScore(float $multiScore): static
+    {
+        $this->multiScore = $multiScore;
+
+        return $this;
+    }
+
+    public function getNutriScore(): ?string
+    {
+        return $this->nutriScore;
+    }
+
+    public function setNutriScore(?string $nutriScore): static
+    {
+        $this->nutriScore = $nutriScore;
+
+        return $this;
+    }
+
+    public function getProteines(): ?float
+    {
+        return $this->proteines;
+    }
+
+    public function setProteines(?float $proteines): static
+    {
+        $this->proteines = $proteines;
+
+        return $this;
+    }
+
+    public function getGlucides(): ?float
+    {
+        return $this->glucides;
+    }
+
+    public function setGlucides(?float $glucides): static
+    {
+        $this->glucides = $glucides;
+
+        return $this;
+    }
+
+    public function getLipides(): ?float
+    {
+        return $this->lipides;
+    }
+
+    public function setLipides(?float $lipides): static
+    {
+        $this->lipides = $lipides;
+
         return $this;
     }
 }

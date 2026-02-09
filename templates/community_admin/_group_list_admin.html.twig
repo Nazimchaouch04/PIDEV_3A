@@ -1,0 +1,16 @@
+{# templates/community_admin/_group_list_admin.html.twig #}
+{% for group in groupes %}
+    <div class="group-card">
+        <div class="group-content">
+            <h3 class="group-title">{{ group.nomGroupe }}</h3>
+            <span class="badge badge-mental-health">{{ group.thematique }}</span>
+            <div style="display: flex; gap: 8px; margin-top: 15px;">
+                <a href="{{ path('app_admin_group_edit', {id: group.id}) }}" class="btn btn-outline btn-sm">Modifier</a>
+                <form method="post" action="{{ path('app_admin_group_delete', {id: group.id}) }}" onsubmit="return confirm('Supprimer ?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ group.id) }}">
+                    <button class="btn btn-outline btn-sm" style="color: #EF4444; border-color: #EF4444;">Supprimer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endfor %}
