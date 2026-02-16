@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Utilisateur;
 use App\Form\RegistrationFormType;
 use App\Service\MailjetService;
+use App\Service\RecaptchaService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -30,14 +31,30 @@ class SecurityController extends AbstractController
     }
 
     #[Route('/login', name: 'app_login')]
-    public function login(AuthenticationUtils $authenticationUtils): Response
+    public function login(AuthenticationUtils $authenticationUtils, Request $request, RecaptchaService $recaptchaService = null): Response
     {
+        // Pour le développement, on désactive la validation reCAPTCHA
+        // Le token est généré côté client mais pas validé côté serveur
+        
+        /*
+        // Si le formulaire est soumis, vérifier reCAPTCHA
+        if ($request->isMethod('POST')) {
+            $recaptchaToken = $request->request->get('recaptcha_response');
+            
+            if (!$recaptchaToken || !$recaptchaService->verifyWithScore($recaptchaToken, 0.5)) {
+                $this->addFlash('error', 'La vérification de sécurité a échoué. Veuillez réessayer.');
+                return $this->redirectToRoute('app_login');
+            }
+        }
+        */
+
         $error = $authenticationUtils->getLastAuthenticationError();
         $lastUsername = $authenticationUtils->getLastUsername();
 
         return $this->render('security/login.html.twig', [
             'last_username' => $lastUsername,
             'error' => $error,
+            'recaptcha_site_key' => $recaptchaService ? $recaptchaService->getSiteKey() : '',
         ]);
     }
 
@@ -55,7 +72,7 @@ class SecurityController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $user->setPassword(
+            $user->setMotDePasse(
                 $userPasswordHasher->hashPassword(
                     $user,
                     $form->get('plainPassword')->getData()

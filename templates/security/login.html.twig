@@ -43,6 +43,9 @@
 
             {# HTML5 validation disabled - using Symfony validators instead #}
             <form method="post" action="{{ path('app_login') }}" class="modern-auth-form" novalidate>
+                <!-- Champ caché pour reCAPTCHA -->
+                <input type="hidden" id="recaptcha-response" name="recaptcha_response">
+                
                 {# Email #}
                 <div class="modern-form-group">
                     <label for="_username" class="modern-form-label">Adresse email</label>
@@ -248,6 +251,130 @@ document.getElementById('toggle-password').addEventListener('click', function() 
     color: white;
     text-decoration: none;
 }
+
+/* Forcer l'affichage du badge reCAPTCHA v3 */
+.grecaptcha-badge {
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Position personnalisée du badge */
+.grecaptcha-badge {
+    bottom: 20px !important;
+    right: 20px !important;
+    z-index: 1000 !important;
+}
 </style>
 
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<!-- reCAPTCHA v3 -->
+<script src="https://www.google.com/recaptcha/api.js?render={{ recaptcha_site_key }}"></script>
+<script>
+// reCAPTCHA v3 - Logs détaillés pour le debug
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🔒 reCAPTCHA Debug Mode Activé');
+    console.log('📍 Site Key:', '{{ recaptcha_site_key }}');
+    console.log('🌐 Hostname:', window.location.hostname);
+    console.log('🔗 Full URL:', window.location.href);
+    
+    // Attendre que reCAPTCHA soit prêt
+    if (typeof grecaptcha !== 'undefined') {
+        console.log('⏳ reCAPTCHA script chargé, attente de ready...');
+        
+        grecaptcha.ready(function() {
+            console.log('✅ reCAPTCHA is ready!');
+            
+            // Exécuter reCAPTCHA au chargement
+            grecaptcha.execute('{{ recaptcha_site_key }}', {action: 'page_load'}).then(function(token) {
+                console.log('🎯 Token généré (page_load):', token.substring(0, 30) + '...');
+                console.log('📊 Longueur du token:', token.length);
+                
+                // Mettre le token dans le champ caché
+                const recaptchaResponse = document.getElementById('recaptcha-response');
+                if (recaptchaResponse) {
+                    recaptchaResponse.value = token;
+                    console.log('💾 Token stocké dans le champ caché');
+                }
+            }).catch(function(error) {
+                console.error('❌ Erreur génération token (page_load):', error);
+            });
+        });
+    } else {
+        console.log('❌ reCAPTCHA script non trouvé');
+    }
+    
+    // Intercepter la soumission du formulaire
+    const form = document.querySelector('.modern-auth-form');
+    if (form) {
+        console.log('📝 Formulaire trouvé, ajout de l\'écouteur d\'événement');
+        
+        form.addEventListener('submit', function(e) {
+            console.log('🚀 Soumission du formulaire détectée');
+            e.preventDefault();
+            
+            if (typeof grecaptcha !== 'undefined') {
+                console.log('🔄 Génération d\'un nouveau token pour la soumission...');
+                
+                grecaptcha.ready(function() {
+                    grecaptcha.execute('{{ recaptcha_site_key }}', {action: 'form_submit'}).then(function(token) {
+                        console.log('✅ Token généré (form_submit):', token.substring(0, 30) + '...');
+                        console.log('📊 Longueur du token:', token.length);
+                        
+                        // Mettre le token dans le champ caché
+                        const recaptchaResponse = document.getElementById('recaptcha-response');
+                        if (recaptchaResponse) {
+                            recaptchaResponse.value = token;
+                            console.log('💾 Token mis à jour pour la soumission');
+                            console.log('🔍 Valeur du champ caché:', recaptchaResponse.value.substring(0, 30) + '...');
+                        }
+                        
+                        console.log('📤 Envoi du formulaire...');
+                        form.submit();
+                    }).catch(function(error) {
+                        console.error('❌ Erreur génération token (form_submit):', error);
+                        console.log('⚠️ Envoi du formulaire sans reCAPTCHA (fallback)');
+                        form.submit();
+                    });
+                });
+            } else {
+                console.log('⚠️ reCAPTCHA non disponible, envoi direct');
+                form.submit();
+            }
+        });
+    } else {
+        console.log('❌ Formulaire non trouvé');
+    }
+    
+    // Fonction de test manuel
+    window.testRecaptchaDebug = function() {
+        console.log('🧪 === Test reCAPTCHA Debug ===');
+        console.log('📍 Site Key:', '{{ recaptcha_site_key }}');
+        console.log('🌐 Hostname:', window.location.hostname);
+        console.log('🔗 grecaptcha object:', typeof grecaptcha);
+        console.log('🔧 grecaptcha.execute:', typeof grecaptcha?.execute);
+        
+        if (typeof grecaptcha !== 'undefined') {
+            grecaptcha.ready(function() {
+                console.log('✅ reCAPTCHA ready pour test');
+                
+                grecaptcha.execute('{{ recaptcha_site_key }}', {action: 'manual_test'}).then(function(token) {
+                    console.log('🎯 Token généré (manuel):', token);
+                    console.log('📊 Longueur:', token.length);
+                    console.log('🔍 Premier caractères:', token.substring(0, 10) + '...');
+                    console.log('🔍 Dernier caractères:', '...' + token.substring(token.length - 10));
+                }).catch(function(error) {
+                    console.error('❌ Erreur test manuel:', error);
+                });
+            });
+        } else {
+            console.log('❌ reCAPTCHA non disponible pour test');
+        }
+    };
+    
+    console.log('💡 Tapez testRecaptchaDebug() dans la console pour tester manuellement');
+});
+</script>
 {% endblock %}
