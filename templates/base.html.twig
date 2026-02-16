@@ -37,14 +37,17 @@
 
     {# Script pour masquer automatiquement les flashs après 5 secondes #}
     <script>
-        setTimeout(() => {
+        // Utiliser une fonction anonyme standard au lieu de setTimeout avec string
+        (function() {
             const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(alert => {
+            alerts.forEach(function(alert) {
                 alert.style.transition = "opacity 0.5s ease";
                 alert.style.opacity = "0";
-                setTimeout(() => alert.remove(), 500);
+                setTimeout(function() {
+                    alert.remove();
+                }, 500);
             });
-        }, 5000);
+        })();
     </script>
 
     {% block javascripts %}{% endblock %}

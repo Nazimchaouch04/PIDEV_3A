@@ -1,4 +1,4 @@
-{% extends 'base_front.html.twig' %}
+{% extends 'base.html.twig' %}
 
 {% block title %}Connexion - BioSync{% endblock %}
 
@@ -21,7 +21,7 @@
         <div class="modern-auth-card">
             <h2 class="modern-auth-form-title">Connexion</h2>
 
-            {% if premium_flow %}
+            {% if premium_flow is defined and premium_flow %}
                 <div class="modern-premium-alert">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 20px; height: 20px; margin-right: 8px;">
                         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
@@ -42,10 +42,10 @@
             {% endif %}
 
             {# HTML5 validation disabled - using Symfony validators instead #}
-            <form method="post" class="modern-auth-form" novalidate>
+            <form method="post" action="{{ path('app_login') }}" class="modern-auth-form" novalidate>
                 {# Email #}
                 <div class="modern-form-group">
-                    <label class="modern-form-label">Adresse email</label>
+                    <label for="_username" class="modern-form-label">Adresse email</label>
                     <div class="modern-input-wrapper">
                         <svg class="modern-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                             <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
@@ -53,19 +53,20 @@
                         </svg>
                         {# HTML5 validation disabled - using Symfony validators instead #}
                         {# HTML5 type=email disabled - using Symfony Email validator instead #}
-                        <input type="text" name="_username" value="{{ last_username }}" class="modern-input" placeholder="votre@email.com" {# required autofocus #}>
+                        <input type="text" id="_username" name="_username" value="{{ last_username }}" class="modern-input" placeholder="votre@email.com" {# required autofocus #}>
                     </div>
                 </div>
 
                 {# Mot de passe #}
                 <div class="modern-form-group">
-                    <label class="modern-form-label">Mot de passe</label>
+                    <label for="_password" class="modern-form-label">Mot de passe</label>
                     <div class="modern-input-wrapper">
                         <svg class="modern-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                             <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                            <circle cx="12" cy="16" r="1"/>
                         </svg>
-                        <input type="password" name="_password" id="password-input" class="modern-input" placeholder="••••••••" {# required #}>
+                        <input type="password" id="_password" name="_password" class="modern-input" placeholder="Votre mot de passe" {# required #}>
                         <button type="button" id="toggle-password" class="password-toggle">
                             <svg id="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 20px; height: 20px;">
                                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
@@ -99,10 +100,22 @@
                 Pas encore de compte? <a href="{{ path('app_register') }}">S'inscrire</a>
             </div>
             
+            {# Lien mot de passe oublié #}
+            <div class="modern-forgot-password">
+                <a href="{{ path('app_forgot_password') }}" class="forgot-password-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                        <circle cx="12" cy="16" r="1"/>
+                    </svg>
+                    Mot de passe oublié?
+                </a>
+            </div>
+            
             {# Lien Premium Member #}
             <div class="modern-premium-link">
                 <span class="premium-text">Devenez</span>
-                <a href="{{ path('app_premium_flow') }}" class="premium-badge">
+                <a href="#" class="premium-badge">
                     <svg viewBox="0 0 24 24" fill="currentColor" style="width: 16px; height: 16px; margin-right: 4px;">
                         <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                     </svg>
@@ -118,7 +131,7 @@
     </div>
 </div>
 
-{% if auto_login %}
+{% if auto_login is defined and auto_login %}
 <script>
     // Auto-connexion pour le flux de certification
     document.addEventListener('DOMContentLoaded', function() {
@@ -143,7 +156,7 @@
 <script>
 // Toggle mot de passe
 document.getElementById('toggle-password').addEventListener('click', function() {
-    const passwordInput = document.getElementById('password-input');
+    const passwordInput = document.getElementById('_password');
     const eyeIcon = document.getElementById('eye-icon');
     const eyeOffIcon = document.getElementById('eye-off-icon');
     
