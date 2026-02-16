@@ -57,6 +57,12 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::JSON)]
     private array $roles = [];
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $resetToken = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $resetTokenExpiresAt = null;
+
     #[ORM\OneToOne(mappedBy: 'utilisateur', targetEntity: ProfilSante::class, cascade: ['persist', 'remove'])]
     private ?ProfilSante $profilSante = null;
 
@@ -350,15 +356,39 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->membresGroupes;
     }
 
+    public function getResetToken(): ?string
+    {
+        return $this->resetToken;
+    }
+
+    public function setResetToken(?string $resetToken): static
+    {
+        $this->resetToken = $resetToken;
+        return $this;
+    }
+
+    public function getResetTokenExpiresAt(): ?\DateTimeInterface
+    {
+        return $this->resetTokenExpiresAt;
+    }
+
+    public function setResetTokenExpiresAt(?\DateTimeInterface $resetTokenExpiresAt): static
+    {
+        $this->resetTokenExpiresAt = $resetTokenExpiresAt;
+        return $this;
+    }
+
     public function getInitials(): string
     {
-        $parts = explode(' ', $this->nomComplet ?? '');
+        $names = explode(' ', $this->nomComplet);
         $initials = '';
-        foreach ($parts as $part) {
-            if (!empty($part)) {
-                $initials .= strtoupper($part[0]);
+        
+        foreach ($names as $name) {
+            if (!empty($name)) {
+                $initials .= strtoupper(substr($name, 0, 1));
             }
         }
-        return substr($initials, 0, 2);
+        
+        return $initials;
     }
 }
