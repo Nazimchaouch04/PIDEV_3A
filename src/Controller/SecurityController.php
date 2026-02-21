@@ -21,13 +21,23 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
 
 
+use App\Service\ActivityLogger;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+
 class SecurityController extends AbstractController
 {
     private $passwordHasher;
+    private ActivityLogger $activityLogger;
+    private TokenStorageInterface $tokenStorage;
 
-    public function __construct(UserPasswordHasherInterface $passwordHasher)
-    {
+    public function __construct(
+        UserPasswordHasherInterface $passwordHasher,
+        ActivityLogger $activityLogger,
+        TokenStorageInterface $tokenStorage
+    ) {
         $this->passwordHasher = $passwordHasher;
+        $this->activityLogger = $activityLogger;
+        $this->tokenStorage = $tokenStorage;
     }
 
     #[Route('/login', name: 'app_login')]
@@ -61,7 +71,13 @@ class SecurityController extends AbstractController
     #[Route('/logout', name: 'app_logout')]
     public function logout(): void
     {
-        throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
+        // Log the logout event before the user is logged out
+        $token = $this->tokenStorage->getToken();
+        if ($token && $token->getUser() instanceof Utilisateur) {
+            $this->activityLogger->log('Déconnexion', $token->getUser());
+        }
+        
+        throw new \LogicException('This method will be intercepted by the logout key on your firewall.');
     }
 
     #[Route('/register', name: 'app_register')]

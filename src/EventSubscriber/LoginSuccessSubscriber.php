@@ -2,6 +2,8 @@
 
 namespace App\EventSubscriber;
 
+use App\Service\ActivityLogger;
+use App\Entity\Utilisateur;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -21,7 +23,10 @@ class LoginSuccessSubscriber implements EventSubscriberInterface
 {
     use TargetPathTrait;
 
-    public function __construct(private UrlGeneratorInterface $urlGenerator) {}
+    public function __construct(
+        private UrlGeneratorInterface $urlGenerator,
+        private ActivityLogger $activityLogger
+    ) {}
 
     public static function getSubscribedEvents(): array
     {
@@ -33,7 +38,13 @@ class LoginSuccessSubscriber implements EventSubscriberInterface
     public function onLoginSuccess(LoginSuccessEvent $event): void
     {
         $request = $event->getRequest();
-        
+        $user = $event->getUser();
+
+        // Log the successful login attempt
+        if ($user instanceof Utilisateur) {
+            $this->activityLogger->log('Connexion réussie', $user);
+        }
+
         // Check if there is a target path saved in the session for the 'main' firewall
         $targetPath = $this->getTargetPath($request->getSession(), 'main');
         if ($targetPath) {
@@ -41,7 +52,6 @@ class LoginSuccessSubscriber implements EventSubscriberInterface
             return;
         }
 
-        $user = $event->getUser();
         $roles = $user->getRoles();
 
         if (in_array('ROLE_ADMIN', $roles, true)) {

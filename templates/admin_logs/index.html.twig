@@ -1,0 +1,144 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Historique des Activités{% endblock %}
+
+{% block body %}
+<div class="bo-mental-dashboard">
+    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h1 class="page-title">Historique des Logs</h1>
+            <p class="page-subtitle">Suivi complet de l'activité sur l'application BioSync</p>
+        </div>
+        <div>
+            <a href="{{ path('app_admin_logs_pdf') }}" class="btn btn-primary" style="background-color: #6C5CE7; border-color: #6C5CE7; display: flex; align-items: center; gap: 8px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Exporter en PDF
+            </a>
+        </div>
+    </div>
+
+    {# Recherche Dynamique #}
+    <div class="search-bar-container" style="margin-bottom: 25px; display: flex; align-items: center; background: white; padding: 10px 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a0aec0" stroke-width="2" style="margin-right: 10px;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" id="logSearchInput" placeholder="Rechercher par utilisateur, email ou action..." style="border: none; outline: none; width: 100%; font-size: 15px; background: transparent;">
+    </div>
+
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table" id="logsTable">
+                <thead>
+                    <tr>
+                        <th style="cursor: pointer;" onclick="sortTable(0)">Date & Heure ↕</th>
+                        <th style="cursor: pointer;" onclick="sortTable(1)">Utilisateur ↕</th>
+                        <th style="cursor: pointer;" onclick="sortTable(2)">Rôle ↕</th>
+                        <th style="cursor: pointer;" onclick="sortTable(3)">Action ↕</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr class="log-row">
+                        <td class="log-date">{{ log.createdAt|date('d/m/Y H:i:s') }}</td>
+                        <td class="log-user">
+                            {% if log.utilisateur %}
+                                <strong>{{ log.utilisateur.nomComplet }}</strong><br>
+                                <small style="color: #718096;">{{ log.utilisateur.email }}</small>
+                            {% else %}
+                                <span style="color: #a0aec0; font-style: italic;">Système / Anonyme</span>
+                            {% endif %}
+                        </td>
+                        <td class="log-role">
+                            {% if log.utilisateur and log.utilisateur.roles|length > 0 %}
+                                <span class="badge" style="background: #EBF4FF; color: #4299E1;">{{ log.utilisateur.roles|first }}</span>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td class="log-action" style="font-weight: 500; color: #2D3748;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                {% if 'Connexion' in log.action %}
+                                    <span style="color: #48BB78;">🟢</span>
+                                {% elseif 'Suppression' in log.action or 'Refusé' in log.action %}
+                                    <span style="color: #F56565;">🔴</span>
+                                {% else %}
+                                    <span style="color: #4299E1;">🔵</span>
+                                {% endif %}
+                                {{ log.action }}
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: 30px; color: #718096;">Aucun journal d'activité trouvé.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Filtrage dynamique (Recherche)
+    document.getElementById('logSearchInput').addEventListener('keyup', function() {
+        let filter = this.value.toLowerCase();
+        let rows = document.querySelectorAll('.log-row');
+
+        rows.forEach(row => {
+            let userText = row.querySelector('.log-user').textContent.toLowerCase();
+            let actionText = row.querySelector('.log-action').textContent.toLowerCase();
+            
+            if (userText.includes(filter) || actionText.includes(filter)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+
+    // Tri dynamique du tableau par clic sur les en-têtes
+    function sortTable(columnIndex) {
+        var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+        table = document.getElementById("logsTable");
+        switching = true;
+        // Direction du tri (croissant par défaut)
+        dir = "asc"; 
+        
+        while (switching) {
+            switching = false;
+            rows = table.rows;
+            
+            for (i = 1; i < (rows.length - 1); i++) {
+                shouldSwitch = false;
+                x = rows[i].getElementsByTagName("TD")[columnIndex];
+                y = rows[i + 1].getElementsByTagName("TD")[columnIndex];
+                
+                // Extraire le texte pour la comparaison
+                let valX = x.textContent.trim().toLowerCase();
+                let valY = y.textContent.trim().toLowerCase();
+
+                if (dir == "asc") {
+                    if (valX > valY) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                } else if (dir == "desc") {
+                    if (valX < valY) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                }
+            }
+            if (shouldSwitch) {
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+                switchcount ++;      
+            } else {
+                if (switchcount == 0 && dir == "asc") {
+                    dir = "desc";
+                    switching = true;
+                }
+            }
+        }
+    }
+</script>
+{% endblock %}

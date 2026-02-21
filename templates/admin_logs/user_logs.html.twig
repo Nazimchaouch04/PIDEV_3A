@@ -1,0 +1,162 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Logs de {{ user.nomComplet }} - BioSync{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .logs-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .user-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+        .user-header h1 {
+            margin: 0 0 10px 0;
+        }
+        .user-header p {
+            margin: 5px 0;
+            opacity: 0.9;
+        }
+        .logs-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .logs-table th {
+            background: #2D3748;
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+        .logs-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #E2E8F0;
+        }
+        .logs-table tr:hover {
+            background: #F7FAFC;
+        }
+        .timestamp {
+            color: #718096;
+            font-size: 0.9em;
+        }
+        .action-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+        .action-login {
+            background: #C6F6D5;
+            color: #22543D;
+        }
+        .action-logout {
+            background: #FED7D7;
+            color: #742A2A;
+        }
+        .action-default {
+            background: #EBF4FF;
+            color: #2C5282;
+        }
+        .back-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #4299E1;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        .back-btn:hover {
+            background: #3182CE;
+        }
+        .filter-links {
+            margin-bottom: 20px;
+        }
+        .filter-links a {
+            display: inline-block;
+            margin-right: 15px;
+            padding: 8px 16px;
+            background: white;
+            border: 1px solid #4299E1;
+            color: #4299E1;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        .filter-links a:hover, .filter-links a.active {
+            background: #4299E1;
+            color: white;
+        }
+        .no-logs {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+            font-style: italic;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="logs-container">
+        <div class="user-header">
+            <h1>📋 Historique d'activité</h1>
+            <p><strong>Nom:</strong> {{ user.nomComplet }}</p>
+            <p><strong>Email:</strong> {{ user.email }}</p>
+            <p><strong>Rôle:</strong> {{ user.roles|first }}</p>
+        </div>
+
+        <div class="filter-links">
+            <a href="{{ path('app_admin_logs_user', {id: user.id}) }}" class="active">Tous les logs</a>
+            <a href="{{ path('app_admin_logs_user_login_logout', {id: user.id}) }}">Connexion/Déconnexion uniquement</a>
+        </div>
+
+        {% if logs is empty %}
+            <div class="no-logs">
+                Aucun log trouvé pour cet utilisateur.
+            </div>
+        {% else %}
+            <table class="logs-table">
+                <thead>
+                    <tr>
+                        <th>Date et Heure</th>
+                        <th>Action</th>
+                        <th>Utilisateur</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                        <tr>
+                            <td class="timestamp">
+                                {{ log.createdAt|date('d/m/Y H:i:s') }}
+                            </td>
+                            <td>
+                                {% if 'Connexion' in log.action %}
+                                    <span class="action-badge action-login">🟢 {{ log.action }}</span>
+                                {% elseif 'Déconnexion' in log.action %}
+                                    <span class="action-badge action-logout">🔴 {{ log.action }}</span>
+                                {% else %}
+                                    <span class="action-badge action-default">{{ log.action }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ log.utilisateur ? log.utilisateur.nomComplet : 'Système' }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+
+        <a href="{{ path('app_admin_logs_index') }}" class="back-btn">← Retour à tous les logs</a>
+    </div>
+{% endblock %}

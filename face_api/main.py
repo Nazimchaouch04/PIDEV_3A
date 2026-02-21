@@ -1,10 +1,14 @@
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-import face_recognition
+import face_recognition #Elle génère un vecteur numérique de 128 dimensions représentant un visage.
 import numpy as np
 import json
-import io
+import io #lire image depuis mémoire
 from typing import List, Any, Dict
+
+
+
+
 
 app = FastAPI(title="BioSync Face Recognition API", version="1.0.0")
 
