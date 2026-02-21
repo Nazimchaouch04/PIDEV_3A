@@ -3,9 +3,22 @@
 {% block title %}Dashboard - BioSync{% endblock %}
 
 {% block body %}
-<div class="page-header">
-            <h1 class="page-title">Bonjour, {{ user.nomComplet|split(' ')|first }} !</h1>
-            <p class="page-subtitle">Voici un apercu de votre sante aujourd'hui.</p>
+        <div class="page-header flex-between mb-8" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1 class="page-title">Bonjour, {{ user.nomComplet|split(' ')|first }} !</h1>
+                <p class="page-subtitle">Voici un apercu de votre sante aujourd'hui.</p>
+            </div>
+            
+            {% if 'ROLE_COACH' not in user.roles and 'ROLE_SPECIALISTE' not in user.roles and 'ROLE_ADMIN' not in user.roles and not user.certification %}
+            <div>
+                <a href="{{ path('app_certification') }}" class="btn btn-primary" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; padding: 10px 20px; border-radius: 20px; color: white; font-weight: 600; display: inline-flex; align-items: center; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
+                    <svg viewBox="0 0 24 24" fill="currentColor" style="width: 18px; height: 18px; margin-right: 8px;">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    Devenir Spécialiste / Coach
+                </a>
+            </div>
+            {% endif %}
         </div>
 
         {# Stats Cards #}

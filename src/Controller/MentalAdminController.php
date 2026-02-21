@@ -21,9 +21,9 @@ class MentalAdminController extends AbstractController
         QuestionRepository $questionRepository,
         EntityManagerInterface $em
     ): Response {
-        // Vérification manuelle pour autoriser les coaches ET les admins
-        if (!$this->isGranted('ROLE_ADMIN') && !$this->isGranted('ROLE_COACH')) {
-            throw $this->createAccessDeniedException('Accès réservé aux administrateurs et coaches.');
+        // Vérification manuelle pour autoriser les spécialistes ET les admins
+        if (!$this->isGranted('ROLE_ADMIN') && !$this->isGranted('ROLE_SPECIALISTE')) {
+            throw $this->createAccessDeniedException('Accès réservé aux administrateurs et spécialistes.');
         }
         
         $totalQuestions = $questionRepository->count([]);

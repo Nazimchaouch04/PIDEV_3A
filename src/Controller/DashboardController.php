@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Repository\CertificationRepository;
 use App\Repository\RepasRepository;
 use App\Repository\RendezVousRepository;
 use App\Repository\SeanceSportRepository;
@@ -16,8 +15,7 @@ class DashboardController extends AbstractController
     public function index(
         RepasRepository $repasRepository,
         SeanceSportRepository $seanceSportRepository,
-        RendezVousRepository $rendezVousRepository,
-        CertificationRepository $certificationRepository // Injection du repo
+        RendezVousRepository $rendezVousRepository
     ): Response {
         /** @var \App\Entity\Utilisateur $user */
         $user = $this->getUser();
@@ -26,22 +24,7 @@ class DashboardController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
-        // --- SÉCURITÉ : VÉRIFICATION DU STATUT DE CERTIFICATION ---
-        // On cherche si cet utilisateur a une demande en attente
-        $pendingCert = $certificationRepository->findOneBy([
-            'utilisateur' => $user,
-            'statut' => 'PENDING'
-        ]);
 
-        if ($pendingCert) {
-            // Option 1 : Afficher une page d'attente (Recommandé)
-            return $this->render('certification/waiting.html.twig');
-
-            // Option 2 : Le déconnecter de force (Alternative)
-            // $this->addFlash('warning', 'Votre compte est en attente de validation.');
-            // return $this->redirectToRoute('app_logout');
-        }
-        // -----------------------------------------------------------
 
         // Chargement des données du dashboard (Code existant)
         $todayRepas = $repasRepository->findTodayByUtilisateur($user);
