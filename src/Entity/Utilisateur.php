@@ -70,6 +70,13 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     private ?Certification $certification = null;
 
     /**
+     * Vecteur d'encodage facial moyen (128 valeurs float) issu de face_recognition.
+     * Null si l'utilisateur n'a pas encore configuré le Face ID.
+     */
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $faceEncoding = null;
+
+    /**
      * @var Collection<int, Repas>
      */
     #[ORM\OneToMany(targetEntity: Repas::class, mappedBy: 'utilisateur', orphanRemoval: true)]
@@ -390,5 +397,16 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         }
         
         return $initials;
+    }
+
+    public function getFaceEncoding(): ?array
+    {
+        return $this->faceEncoding;
+    }
+
+    public function setFaceEncoding(?array $faceEncoding): static
+    {
+        $this->faceEncoding = $faceEncoding;
+        return $this;
     }
 }

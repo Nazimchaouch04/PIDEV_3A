@@ -35,6 +35,11 @@ security:
         - { path: ^/forgot-password, roles: PUBLIC_ACCESS }
         - { path: ^/reset-password, roles: PUBLIC_ACCESS }
         - { path: ^/certification, roles: PUBLIC_ACCESS }
+        # Face ID routes callable from the login page (before authentication)
+        - { path: ^/api/face/status, roles: PUBLIC_ACCESS }
+        - { path: ^/api/face/generate-embedding, roles: PUBLIC_ACCESS }
+        - { path: ^/api/face/register-face, roles: PUBLIC_ACCESS }
+        - { path: ^/api/face/login, roles: PUBLIC_ACCESS }
         - { path: ^/, roles: ROLE_USER }
 
 when@test:
