@@ -9,6 +9,7 @@ parameters:
     google_recaptcha_site_key: '%env(GOOGLE_RECAPTCHA_SITE_KEY)%'
     app.recaptcha_site_key: '%env(RECAPTCHA_SITE_KEY)%'
     app.recaptcha_secret_key: '%env(RECAPTCHA_SECRET_KEY)%'
+    photos_directory: '%kernel.project_dir%/public/uploads/photos'
 
 services:
     _defaults:

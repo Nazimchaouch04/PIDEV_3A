@@ -208,7 +208,11 @@
     <div class="sidebar-footer">
         <div class="user-profile">
             <div class="user-avatar">
-                {{ app.user.nomComplet|slice(0, 2)|upper }}
+                {% if app.user.photo %}
+                    <img src="{{ asset('uploads/photos/' ~ app.user.photo) }}" alt="{{ app.user.nomComplet }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                {% else %}
+                    {{ app.user.nomComplet|slice(0, 2)|upper }}
+                {% endif %}
             </div>
             <div class="user-info">
                 <div class="user-name">{{ app.user.nomComplet }}</div>

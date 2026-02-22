@@ -76,6 +76,9 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::JSON, nullable: true)]
     private ?array $faceEncoding = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $photo = null;
+
     /**
      * @var Collection<int, Repas>
      */
@@ -407,6 +410,17 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function setFaceEncoding(?array $faceEncoding): static
     {
         $this->faceEncoding = $faceEncoding;
+        return $this;
+    }
+
+    public function getPhoto(): ?string
+    {
+        return $this->photo;
+    }
+
+    public function setPhoto(?string $photo): static
+    {
+        $this->photo = $photo;
         return $this;
     }
 }
