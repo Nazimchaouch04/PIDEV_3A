@@ -18,7 +18,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 #[Route('/api/face')]
 class FaceLoginController extends AbstractController
 {
-    private const PYTHON_API_URL = 'http://127.0.0.1:8001';
+    private const PYTHON_API_URL = 'http://127.0.0.1:8003';
 
     public function __construct(
         private HttpClientInterface $httpClient,
@@ -71,6 +71,10 @@ class FaceLoginController extends AbstractController
 
             if (isset($data['error'])) {
                 return $this->json(['error' => $data['error']], 422);
+            }
+
+            if (!isset($data['encoding'])) {
+                return $this->json(['error' => 'No encoding returned from Face API'], 422);
             }
 
             return $this->json(['encoding' => $data['encoding']]);

@@ -10,6 +10,7 @@ parameters:
     app.recaptcha_site_key: '%env(RECAPTCHA_SITE_KEY)%'
     app.recaptcha_secret_key: '%env(RECAPTCHA_SECRET_KEY)%'
     mistral_api_key: '%env(MISTRAL_API_KEY)%'
+    mental_ai_url: '%env(MENTAL_AI_URL)%'
     photos_directory: '%kernel.project_dir%/public/uploads/photos'
 
 services:

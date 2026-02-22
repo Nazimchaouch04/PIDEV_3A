@@ -100,6 +100,12 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $quizMentaux;
 
     /**
+     * @var Collection<int, MentalCheckIn>
+     */
+    #[ORM\OneToMany(targetEntity: MentalCheckIn::class, mappedBy: 'utilisateur', orphanRemoval: true)]
+    private Collection $mentalCheckIns;
+
+    /**
      * @var Collection<int, RendezVous>
      * Collection des rendez-vous médicaux de l'utilisateur (comme patient)
      * Relation OneToMany : un utilisateur peut avoir plusieurs rendez-vous
@@ -137,6 +143,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         $this->repas = new ArrayCollection();           // Initialisation collection repas
         $this->seancesSport = new ArrayCollection();     // Initialisation collection séances sport
         $this->quizMentaux = new ArrayCollection();   // Initialisation collection quiz mentaux
+        $this->mentalCheckIns = new ArrayCollection(); // Initialisation collection mental check-ins
         $this->rendezVousPatient = new ArrayCollection();     // Initialisation collection rendez-vous patient
         $this->rendezVousSpecialiste = new ArrayCollection();  // Initialisation collection rendez-vous spécialiste
         $this->membresGroupes = new ArrayCollection();  // Initialisation collection groupes

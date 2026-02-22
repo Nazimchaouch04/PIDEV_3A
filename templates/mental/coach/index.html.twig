@@ -1,0 +1,137 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}BioSync AI Coach - Mental Wellness{% endblock %}
+
+{% block body %}
+<div class="coach-dashboard p-4">
+    <div class="header-section mb-5">
+        <h1 class="display-5 font-weight-bold text-gradient">🤖 BioSync AI Coach</h1>
+        <p class="lead text-muted">Analyse cognitive par IA et coaching personnalisé basé sur vos performances.</p>
+    </div>
+
+    <div class="row mb-5">
+        {# Fatigue Meter (Python CV Analysis) #}
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow border-0 rounded-xl overflow-hidden glass-card">
+                <div class="card-header bg-dark text-white p-4">
+                    <h5 class="m-0"><i class="fas fa-microchip mr-2 text-primary"></i>Analyse de Fatigue Cognitive</h5>
+                </div>
+                <div class="card-body text-center py-5">
+                    <div class="fatigue-gauge-container mb-4">
+                        <div class="gauge-value display-3 font-weight-bold {{ fatigue.level == 'fatigue_haute' ? 'text-danger' : (fatigue.level == 'fatigue_moderee' ? 'text-warning' : 'text-success') }}">
+                            {% if fatigue.level == 'fatigue_haute' %}Haut{% elseif fatigue.level == 'fatigue_moderee' %}Moyen{% else %}Bas{% endif %}
+                        </div>
+                        <div class="jitter-score text-muted small">Score Jitter (CV): {{ fatigue.cv_score|default('--') }}</div>
+                    </div>
+                    <div class="fatigue-indicator-bar progress mb-3" style="height: 10px;">
+                        <div class="progress-bar {{ fatigue.level == 'fatigue_haute' ? 'bg-danger' : (fatigue.level == 'fatigue_moderee' ? 'bg-warning' : 'bg-success') }}" 
+                             style="width: {{ fatigue.cv_score * 200 }}%"></div>
+                    </div>
+                    <p class="card-text px-4 font-italic">{{ fatigue.message }}</p>
+                </div>
+            </div>
+        </div>
+
+        {# Performance Predictor (Python ML Analysis) #}
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow border-0 rounded-xl glass-card">
+                <div class="card-header bg-dark text-white p-4">
+                    <h5 class="m-0"><i class="fas fa-chart-line mr-2 text-info"></i>Prédiction de Performance</h5>
+                </div>
+                <div class="card-body text-center py-5">
+                    <h6 class="text-uppercase text-muted silver-text mb-2">Prochain Score Prévu</h6>
+                    <div class="prediction-value display-2 font-weight-bold text-info mb-3">
+                        {{ prediction.next_predicted_score|default('--') }}<span class="h4">/100</span>
+                    </div>
+                    <div class="trend-indicator py-2 px-4 rounded-pill d-inline-block {{ prediction.trend == 'upward' ? 'bg-success-light text-success' : 'bg-warning-light text-warning' }}">
+                        <i class="fas {{ prediction.trend == 'upward' ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down' }} mr-2"></i>
+                        Tendance : {{ prediction.trend == 'upward' ? 'À la hausse' : 'En baisse' }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Coach Chat Interface #}
+    <div class="row">
+        <div class="col-xl-8 mx-auto">
+            <div class="card shadow chat-card rounded-xl">
+                <div class="card-header py-3 bg-primary text-white d-flex align-items-center">
+                    <img src="https://ui-avatars.com/api/?name=AI+Coach&background=0D6EFD&color=fff" class="rounded-circle mr-3" width="40" alt="Bot">
+                    <div>
+                        <h6 class="m-0 font-weight-bold">Coach Mental BioSync</h6>
+                        <small class="opacity-75">Connecté à OpenAI GPT-4o</small>
+                    </div>
+                </div>
+                <div class="card-body chat-history p-4" id="chatContainer">
+                    {% for checkin in checkins|reverse %}
+                        <div class="message-user text-right mb-4">
+                            <div class="message-bubble bg-light d-inline-block p-3 rounded-left-xl rounded-top-xl shadow-sm">
+                                <small class="d-block text-muted mb-1">{{ checkin.dateCheckIn|date('H:i') }} - {{ checkin.humeur|capitalize }}</small>
+                                {{ checkin.notePersonnelle ?: "Check-in rapide" }}
+                            </div>
+                        </div>
+                        {% if checkin.reponseCoach %}
+                        <div class="message-ai text-left mb-4">
+                            <div class="message-bubble bg-primary text-white d-inline-block p-3 rounded-right-xl rounded-top-xl shadow">
+                                <i class="fas fa-robot mr-2"></i>
+                                {{ checkin.reponseCoach }}
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="card-footer bg-white p-4">
+                    <form action="{{ path('app_mental_coach_checkin') }}" method="POST">
+                        <div class="form-row mb-3">
+                            <div class="col-md-6 mb-2">
+                                <select name="humeur" class="form-control rounded-pill border-2">
+                                    <option value="calme">🧘 Calme / Serein</option>
+                                    <option value="heureux">😊 Heureux / Énergique</option>
+                                    <option value="fatigue">🔋 Fatigué / Faible</option>
+                                    <option value="stressé">⚡ Stressé / Anxieux</option>
+                                    <option value="triste">😔 Triste / Déprimé</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="range" name="energie" min="1" max="10" step="1" class="custom-range" value="5">
+                                <small class="text-muted d-block text-center">Niveau d'énergie : 1 - 10</small>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <input type="text" name="note" class="form-control rounded-left-pill border-2" placeholder="Que ressentez-vous actuellement ?">
+                            <div class="input-group-append">
+                                <button type="submit" class="btn btn-primary rounded-right-pill px-4">
+                                    <i class="fas fa-paper-plane"></i> Envoyer
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .text-gradient { background: linear-gradient(45deg, #0d6efd, #0dcaf0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .glass-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); }
+    .rounded-xl { border-radius: 20px !important; }
+    .rounded-left-xl { border-top-left-radius: 20px !important; border-bottom-left-radius: 20px !important; }
+    .rounded-right-xl { border-top-right-radius: 20px !important; border-bottom-right-radius: 20px !important; border-top-left-radius: 20px !important; }
+    .chat-history { height: 400px; overflow-y: auto; background-color: #f8f9fa; }
+    .bg-success-light { background-color: #d1e7dd; }
+    .bg-warning-light { background-color: #fff3cd; }
+    .bg-primary { background-color: #0d6efd !important; }
+    .btn-primary { background-color: #0d6efd !important; border: none; }
+    .chat-card { border: none; transition: transform 0.3s ease; }
+    .chat-card:hover { transform: translateY(-5px); }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const container = document.getElementById('chatContainer');
+        container.scrollTop = container.scrollHeight;
+    });
+</script>
+{% endblock %}

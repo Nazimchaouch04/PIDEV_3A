@@ -10,9 +10,14 @@
             <h1 class="page-title-mental">Mental Wellness</h1>
             <p class="page-subtitle-mental">Choisissez un quiz thématique pour évaluer votre bien-être mental</p>
         </div>
-        <a href="{{ path('app_mental_portrait') }}" class="btn btn-outline-primary btn-sm rounded-pill px-4 shadow-sm">
-            <i class="fas fa-id-badge mr-2"></i>Mon Portrait Mental
-        </a>
+        <div class="header-actions">
+            <a href="{{ path('app_mental_portrait') }}" class="btn btn-outline-primary btn-sm rounded-pill px-4 shadow-sm mr-2">
+                <i class="fas fa-id-badge mr-2"></i>Mon Portrait
+            </a>
+            <a href="{{ path('app_mental_coach') }}" class="btn btn-primary btn-sm rounded-pill px-4 shadow-sm">
+                <i class="fas fa-robot mr-2"></i>Coach IA
+            </a>
+        </div>
     </div>
 
     {# Moment Zen #}
