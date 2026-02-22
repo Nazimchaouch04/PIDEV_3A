@@ -1,0 +1,176 @@
+{% extends 'base.html.twig' %}
+{% block title %}Statistiques Coach{% endblock %}
+
+{% block stylesheets %}{{ parent() }}
+<style>
+.stats-page { padding: 2rem; }
+.page-header { margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; }
+.page-header h1 { font-size: 1.8rem; font-weight: 700; color: #1e293b; }
+.page-header p  { color: #64748b; margin-top: 0.25rem; }
+.btn-back { background: #f1f5f9; color: #475569; border: none; padding: 0.5rem 1.2rem; border-radius: 8px; text-decoration: none; font-size: 0.9rem; }
+.btn-back:hover { background: #e2e8f0; }
+.btn-objectif { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border: none; padding: 0.5rem 1.2rem; border-radius: 8px; text-decoration: none; font-size: 0.9rem; font-weight: 600; }
+.btn-objectif:hover { opacity: 0.9; color: white; }
+
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+.kpi-card { background: #fff; border-radius: 12px; padding: 1.25rem 1.5rem; box-shadow: 0 1px 4px rgba(0,0,0,0.08); border-left: 4px solid transparent; }
+.kpi-card.blue   { border-color: #6366f1; }
+.kpi-card.green  { border-color: #10b981; }
+.kpi-card.orange { border-color: #f59e0b; }
+.kpi-card.red    { border-color: #ef4444; }
+.kpi-card.purple { border-color: #8b5cf6; }
+.kpi-card.teal   { border-color: #14b8a6; }
+.kpi-card.pink   { border-color: #ec4899; }
+.kpi-card.indigo { border-color: #3b82f6; }
+.kpi-icon  { font-size: 1.4rem; margin-bottom: 0.4rem; }
+.kpi-value { font-size: 1.9rem; font-weight: 700; color: #1e293b; line-height: 1.1; }
+.kpi-label { font-size: 0.75rem; color: #94a3b8; margin-top: 0.3rem; text-transform: uppercase; letter-spacing: 0.04em; }
+
+.ia-section { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); border-radius: 16px; padding: 2rem; color: white; margin-bottom: 2rem; }
+.ia-section h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem; }
+.ia-conseil { background: rgba(255,255,255,0.15); border-radius: 10px; padding: 1rem 1.25rem; line-height: 1.7; white-space: pre-line; font-size: 0.95rem; }
+
+.charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+.chart-card { background: #fff; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+.chart-card h3 { font-size: 1rem; font-weight: 600; color: #1e293b; margin-bottom: 1rem; }
+.chart-card canvas { max-height: 250px; }
+
+.details-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+.detail-card { background: #fff; border-radius: 12px; padding: 1.25rem 1.5rem; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+.detail-card h4 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 0.75rem; }
+.detail-item { display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
+.detail-item:last-child { border-bottom: none; }
+.detail-item .label { color: #64748b; }
+.detail-item .value { font-weight: 600; color: #1e293b; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="stats-page">
+
+    <div class="page-header">
+        <div>
+            <h1>📊 Statistiques Globales — Coach</h1>
+            <p>Vue d'ensemble de toutes les séances et exercices</p>
+        </div>
+        {# ── Boutons navigation ── #}
+        <div style="display:flex; gap:10px; align-items:center;">
+            <a href="{{ path('app_seance_sport_objectif') }}" class="btn-objectif">🎯 Prédiction Objectif</a>
+            <a href="{{ path('app_seance_sport_index') }}" class="btn-back">← Retour aux séances</a>
+        </div>
+    </div>
+
+    {# ── KPI ── #}
+    <div class="kpi-grid">
+        <div class="kpi-card blue">
+            <div class="kpi-icon">🏋️</div>
+            <div class="kpi-value">{{ totalSeances }}</div>
+            <div class="kpi-label">Séances totales</div>
+        </div>
+        <div class="kpi-card green">
+            <div class="kpi-icon">📅</div>
+            <div class="kpi-value">{{ seanceCetteSemaine }}</div>
+            <div class="kpi-label">Cette semaine</div>
+        </div>
+        <div class="kpi-card orange">
+            <div class="kpi-icon">🗓️</div>
+            <div class="kpi-value">{{ seanceCeMois }}</div>
+            <div class="kpi-label">Ce mois</div>
+        </div>
+        <div class="kpi-card purple">
+            <div class="kpi-icon">⏱️</div>
+            <div class="kpi-value">{{ dureeTotal }}</div>
+            <div class="kpi-label">Minutes totales</div>
+        </div>
+        <div class="kpi-card teal">
+            <div class="kpi-icon">⚡</div>
+            <div class="kpi-value">{{ dureeMoyenne }}</div>
+            <div class="kpi-label">Min/séance moy.</div>
+        </div>
+        <div class="kpi-card red">
+            <div class="kpi-icon">🔥</div>
+            <div class="kpi-value">{{ caloriesTotales|number_format(0, '.', ' ') }}</div>
+            <div class="kpi-label">Calories brûlées</div>
+        </div>
+        <div class="kpi-card pink">
+            <div class="kpi-icon">🏅</div>
+            <div class="kpi-value">{{ totalMedailles }}</div>
+            <div class="kpi-label">Médailles</div>
+        </div>
+        <div class="kpi-card indigo">
+            <div class="kpi-icon">👤</div>
+            <div class="kpi-value">{{ userLePlusActif ? userLePlusActif.id : '—' }}</div>
+            <div class="kpi-label">User le + actif</div>
+        </div>
+    </div>
+
+    {# ── IA Coach ── #}
+    <div class="ia-section">
+        <h2>🤖 Analyse IA de votre groupe (Groq)</h2>
+        <div class="ia-conseil">{{ conseilIA }}</div>
+    </div>
+
+    {# ── Graphiques ── #}
+    <div class="charts-grid">
+        <div class="chart-card">
+            <h3>📈 Séances par semaine</h3>
+            <canvas id="chartSeancesSemaine"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3>⏱️ Durée par mois (minutes)</h3>
+            <canvas id="chartDureeMois"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3>🎯 Répartition par intensité</h3>
+            <canvas id="chartIntensite"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3>🏆 Top 5 exercices pratiqués</h3>
+            <canvas id="chartTop5"></canvas>
+        </div>
+    </div>
+
+    {# ── Détails ── #}
+    <div class="details-grid">
+        <div class="detail-card">
+            <h4>📊 Détails Séances</h4>
+            <div class="detail-item"><span class="label">Séance la plus longue</span><span class="value">{{ seancePlusLongue }} min</span></div>
+            <div class="detail-item"><span class="label">Séance la plus courte</span><span class="value">{{ seancePlusCourte }} min</span></div>
+            <div class="detail-item"><span class="label">Durée moyenne</span><span class="value">{{ dureeMoyenne }} min</span></div>
+            <div class="detail-item"><span class="label">Médailles attribuées</span><span class="value">{{ totalMedailles }} 🏅</span></div>
+        </div>
+        <div class="detail-card">
+            <h4>📅 Activité</h4>
+            <div class="detail-item"><span class="label">Cette semaine</span><span class="value">{{ seanceCetteSemaine }} séances</span></div>
+            <div class="detail-item"><span class="label">Ce mois</span><span class="value">{{ seanceCeMois }} séances</span></div>
+            <div class="detail-item"><span class="label">Calories totales</span><span class="value">{{ caloriesTotales|number_format(1) }} kcal</span></div>
+            <div class="detail-item"><span class="label">User le plus actif</span><span class="value">{{ userLePlusActif ? '#' ~ userLePlusActif.id : '—' }}</span></div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block javascripts %}{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const C = { blue:'rgba(99,102,241,.85)', green:'rgba(16,185,129,.85)', orange:'rgba(245,158,11,.85)', red:'rgba(239,68,68,.85)', purple:'rgba(139,92,246,.85)', teal:'rgba(20,184,166,.85)' };
+
+new Chart(document.getElementById('chartSeancesSemaine'), {
+    type:'line', data:{ labels:{{ seancesParSemaineLabels|raw }}, datasets:[{ label:'Séances', data:{{ seancesParSemaineData|raw }}, borderColor:C.blue, backgroundColor:'rgba(99,102,241,.1)', borderWidth:2.5, fill:true, tension:0.4, pointRadius:5 }] },
+    options:{ responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true, ticks:{stepSize:1}}} }
+});
+new Chart(document.getElementById('chartDureeMois'), {
+    type:'bar', data:{ labels:{{ dureeParMoisLabels|raw }}, datasets:[{ label:'Minutes', data:{{ dureeParMoisData|raw }}, backgroundColor:C.green, borderRadius:6 }] },
+    options:{ responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
+});
+new Chart(document.getElementById('chartIntensite'), {
+    type:'doughnut', data:{ labels:{{ intensiteLabels|raw }}, datasets:[{ data:{{ intensiteData|raw }}, backgroundColor:[C.green,C.orange,C.red,C.purple], borderWidth:2, borderColor:'#fff' }] },
+    options:{ responsive:true, cutout:'62%', plugins:{legend:{position:'bottom'}} }
+});
+new Chart(document.getElementById('chartTop5'), {
+    type:'bar', data:{ labels:{{ top5Labels|raw }}, datasets:[{ label:'Fois', data:{{ top5Data|raw }}, backgroundColor:[C.purple,C.blue,C.teal,C.green,C.orange], borderRadius:6 }] },
+    options:{ indexAxis:'y', responsive:true, plugins:{legend:{display:false}}, scales:{x:{beginAtZero:true, ticks:{stepSize:1}}} }
+});
+</script>
+{% endblock %}

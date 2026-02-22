@@ -1,0 +1,276 @@
+{% extends 'base.html.twig' %}
+{% block title %}Défis Hebdomadaires — Médailles{% endblock %}
+
+{% block stylesheets %}{{ parent() }}
+<style>
+/* ═══════════════════════════════════════
+   BASE
+═══════════════════════════════════════ */
+.defis-page { padding: 2rem; max-width: 1000px; margin: 0 auto; }
+
+/* ═══════════════════════════════════════
+   HERO
+═══════════════════════════════════════ */
+.hero-header {
+    background: linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #ec4899 100%);
+    border-radius: 20px;
+    padding: 2.5rem 2rem;
+    color: white;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.hero-header::before {
+    content: ''; position: absolute; top: -60px; right: -60px;
+    width: 220px; height: 220px; background: rgba(255,255,255,0.08); border-radius: 50%;
+}
+.hero-header::after {
+    content: ''; position: absolute; bottom: -40px; left: 30%;
+    width: 140px; height: 140px; background: rgba(255,255,255,0.06); border-radius: 50%;
+}
+.hero-title { font-size: 2rem; font-weight: 800; margin-bottom: 0.3rem; position: relative; z-index: 1; }
+.hero-sub   { font-size: 0.95rem; opacity: 0.85; position: relative; z-index: 1; }
+.hero-right { display: flex; flex-direction: column; align-items: flex-end; gap: .6rem; z-index: 1; }
+.btn-back {
+    background: rgba(255,255,255,0.18); color: white;
+    border: 1px solid rgba(255,255,255,0.3); padding: 0.55rem 1.3rem;
+    border-radius: 10px; text-decoration: none; font-size: 0.88rem; font-weight: 600;
+    backdrop-filter: blur(6px); transition: background 0.2s; white-space: nowrap;
+}
+.btn-back:hover { background: rgba(255,255,255,0.28); color: white; }
+.semaine-badge {
+    background: rgba(255,255,255,0.2); border-radius: 8px;
+    padding: .3rem .8rem; font-size: .78rem; font-weight: 600;
+}
+
+/* ═══════════════════════════════════════
+   KPI SEMAINE
+═══════════════════════════════════════ */
+.kpi-semaine {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+@media(max-width:600px){ .kpi-semaine { grid-template-columns: 1fr 1fr; } }
+
+.kpi-card {
+    border-radius: 16px; padding: 1.25rem; text-align: center;
+    color: white; position: relative; overflow: hidden;
+}
+.kpi-card::after {
+    content: ''; position: absolute; bottom: -20px; right: -20px;
+    width: 70px; height: 70px; background: rgba(255,255,255,0.1); border-radius: 50%;
+}
+.kpi-card.k1 { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.kpi-card.k2 { background: linear-gradient(135deg, #10b981, #059669); }
+.kpi-card.k3 { background: linear-gradient(135deg, #6366f1, #4f46e5); }
+.kpi-card .val { font-size: 1.8rem; font-weight: 800; position: relative; z-index: 1; }
+.kpi-card .lbl { font-size: 0.7rem; opacity: 0.85; text-transform: uppercase; letter-spacing: .05em; margin-top: .3rem; position: relative; z-index: 1; }
+
+/* ═══════════════════════════════════════
+   MESSAGE GROQ
+═══════════════════════════════════════ */
+.groq-message {
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    border-radius: 16px; padding: 1.5rem 2rem;
+    color: #e2e8f0; margin-bottom: 2rem;
+    border-left: 4px solid #f59e0b;
+}
+.groq-message .groq-header {
+    display: flex; align-items: center; gap: .6rem;
+    margin-bottom: .75rem; color: #fbbf24; font-weight: 700; font-size: .95rem;
+}
+.groq-message p { line-height: 1.7; font-size: .93rem; margin: 0; }
+
+/* ═══════════════════════════════════════
+   MÉDAILLES OBTENUES
+═══════════════════════════════════════ */
+.medailles-section { margin-bottom: 2rem; }
+.medailles-section h2 { font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 1rem; }
+.medailles-flex { display: flex; gap: .75rem; flex-wrap: wrap; }
+.medaille-chip {
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    color: white; border-radius: 30px; padding: .5rem 1.2rem;
+    font-size: .9rem; font-weight: 700;
+    box-shadow: 0 4px 12px rgba(245,158,11,0.3);
+    animation: popIn .3s ease;
+}
+@keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.no-medaille { color: #94a3b8; font-size: .9rem; font-style: italic; }
+
+/* ═══════════════════════════════════════
+   DÉFIS GRID
+═══════════════════════════════════════ */
+.defis-section h2 { font-size: 1.1rem; font-weight: 700; color: #1e293b; margin-bottom: 1rem; }
+.defis-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+}
+.defi-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    border: 2px solid #f1f5f9;
+    transition: transform .15s, box-shadow .15s;
+    position: relative;
+    overflow: hidden;
+}
+.defi-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+.defi-card.atteint {
+    border-color: transparent;
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(135deg, #f59e0b, #ef4444) border-box;
+}
+.defi-card.atteint::before {
+    content: '✅'; position: absolute; top: .75rem; right: .75rem; font-size: 1.2rem;
+}
+
+/* Couleurs barre selon défi */
+.defi-card.gold    .defi-fill { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.defi-card.silver  .defi-fill { background: linear-gradient(90deg, #94a3b8, #cbd5e1); }
+.defi-card.bronze  .defi-fill { background: linear-gradient(90deg, #d97706, #f59e0b); }
+.defi-card.fire    .defi-fill { background: linear-gradient(90deg, #ef4444, #f97316); }
+.defi-card.teal    .defi-fill { background: linear-gradient(90deg, #14b8a6, #06b6d4); }
+.defi-card.purple  .defi-fill { background: linear-gradient(90deg, #8b5cf6, #6366f1); }
+
+.defi-top { display: flex; align-items: center; gap: .75rem; margin-bottom: 1rem; }
+.defi-icon {
+    width: 48px; height: 48px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; flex-shrink: 0;
+}
+.gold   .defi-icon { background: #fef3c7; }
+.silver .defi-icon { background: #f1f5f9; }
+.bronze .defi-icon { background: #fef9c3; }
+.fire   .defi-icon { background: #fee2e2; }
+.teal   .defi-icon { background: #ccfbf1; }
+.purple .defi-icon { background: #ede9fe; }
+
+.defi-titre       { font-weight: 700; color: #1e293b; font-size: .95rem; }
+.defi-description { font-size: .78rem; color: #94a3b8; margin-top: .15rem; }
+.defi-medaille    { font-size: .8rem; color: #475569; margin-top: .1rem; }
+
+.defi-progress-info {
+    display: flex; justify-content: space-between;
+    font-size: .78rem; color: #64748b; margin-bottom: .4rem;
+}
+.defi-progress-bar {
+    height: 10px; background: #f1f5f9; border-radius: 99px; overflow: hidden;
+}
+.defi-fill {
+    height: 100%; border-radius: 99px;
+    transition: width .8s cubic-bezier(.4,0,.2,1);
+}
+.defi-pct { font-weight: 700; color: #1e293b; }
+
+.defi-atteint-label {
+    margin-top: .75rem; font-size: .8rem; font-weight: 700;
+    color: #059669; text-align: center;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="defis-page">
+
+    {# ── Hero ── #}
+    <div class="hero-header">
+        <div>
+            <div class="hero-title">🏅 Défis Hebdomadaires</div>
+            <div class="hero-sub">Relevez les défis, gagnez vos médailles !</div>
+        </div>
+        <div class="hero-right">
+            <a href="{{ path('app_seance_sport_index') }}" class="btn-back">← Retour aux séances</a>
+            <div class="semaine-badge">
+                📅 {{ debutSemaine|date('d/m') }} → {{ finSemaine|date('d/m/Y') }}
+            </div>
+        </div>
+    </div>
+
+    {# ── KPI semaine ── #}
+    <div class="kpi-semaine">
+        <div class="kpi-card k1">
+            <div class="val">{{ nbSeancesSemaine }}</div>
+            <div class="lbl">Séances cette semaine</div>
+        </div>
+        <div class="kpi-card k2">
+            <div class="val">{{ medaillesObtenues|length }}</div>
+            <div class="lbl">Médailles obtenues</div>
+        </div>
+        <div class="kpi-card k3">
+            <div class="val">{{ defis|filter(d => d.atteint)|length }} / {{ defis|length }}</div>
+            <div class="lbl">Défis complétés</div>
+        </div>
+    </div>
+
+    {# ── Message Groq ── #}
+    {% if messageGroq %}
+    <div class="groq-message">
+        <div class="groq-header">🤖 Coach IA — Félicitations !</div>
+        <p>{{ messageGroq }}</p>
+    </div>
+    {% endif %}
+
+    {# ── Médailles obtenues cette semaine ── #}
+    <div class="medailles-section">
+        <h2>🏅 Médailles obtenues cette semaine</h2>
+        <div class="medailles-flex">
+            {% if medaillesObtenues|length > 0 %}
+                {% for m in medaillesObtenues %}
+                    <div class="medaille-chip">{{ m }}</div>
+                {% endfor %}
+            {% else %}
+                <span class="no-medaille">Aucune médaille encore… Ajoutez des séances pour en gagner !</span>
+            {% endif %}
+        </div>
+    </div>
+
+    {# ── Défis ── #}
+    <div class="defis-section">
+        <h2>⚡ Vos défis de la semaine</h2>
+        <div class="defis-grid">
+            {% for defi in defis %}
+            <div class="defi-card {{ defi.couleur }} {% if defi.atteint %}atteint{% endif %}">
+                <div class="defi-top">
+                    <div class="defi-icon">{{ defi.icone }}</div>
+                    <div>
+                        <div class="defi-titre">{{ defi.titre }}</div>
+                        <div class="defi-description">{{ defi.description }}</div>
+                        <div class="defi-medaille">🏅 {{ defi.medaille }}</div>
+                    </div>
+                </div>
+
+                <div class="defi-progress-info">
+                    <span>
+                        {% if defi.condition == 'seances_semaine' %}
+                            {{ defi.valeurActuelle }} / {{ defi.valeur }} séances
+                        {% elseif defi.condition == 'calories_seance' %}
+                            {{ defi.valeurActuelle }} / {{ defi.valeur }} kcal
+                        {% elseif defi.condition == 'duree_seance' %}
+                            {{ defi.valeurActuelle }} / {{ defi.valeur }} min
+                        {% elseif defi.condition == 'intensite_semaine' %}
+                            {{ defi.valeurActuelle }} / {{ defi.valeur }} séances élevées
+                        {% endif %}
+                    </span>
+                    <span class="defi-pct">{{ defi.progression }}%</span>
+                </div>
+                <div class="defi-progress-bar">
+                    <div class="defi-fill" style="width: {{ defi.progression }}%"></div>
+                </div>
+
+                {% if defi.atteint %}
+                    <div class="defi-atteint-label">🎉 Défi accompli ! Médaille débloquée !</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

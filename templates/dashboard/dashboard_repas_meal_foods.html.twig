@@ -1,0 +1,49 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Admin - Aliments du repas{% endblock %}
+
+{% block body %}
+<div class="page-header flex-between">
+  <div>
+    <h1 class="page-title">Aliments du repas</h1>
+    <p class="page-subtitle">{{ repas.titreRepas }} — {{ repas.dateConsommation ? repas.dateConsommation|date('d/m/Y H:i') : '' }}</p>
+  </div>
+  <div style="display:flex; gap:8px;">
+    <a class="btn btn-outline" href="{{ path('admin_user_meals', {'id': repas.utilisateur.id}) }}">Retour aux repas</a>
+    <a class="btn btn-primary" href="{{ path('app_aliment_new', {'repas_id': repas.id}) }}">Ajouter un aliment</a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-content">
+    <div style="overflow-x: auto;">
+      <table style="width:100%; border-collapse: collapse;">
+        <thead>
+          <tr style="text-align: left; border-bottom: 1px solid var(--border-color);">
+            <th style="padding: 12px;">Nom</th>
+            <th style="padding: 12px;">Calories</th>
+            <th style="padding: 12px; text-align: right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for aliment in aliments %}
+          <tr style="border-bottom: 1px solid var(--border-light);">
+            <td style="padding: 12px; font-weight: 600;">{{ aliment.nomAliment }}</td>
+            <td style="padding: 12px;">{{ aliment.calories }}</td>
+            <td style="padding: 12px; text-align: right; display:flex; gap:8px; justify-content:flex-end;">
+              <a class="btn btn-primary" href="{{ path('app_aliment_edit', {'id': aliment.id, 'repas_id': repas.id}) }}">Modifier</a>
+              <form method="post" action="{{ path('app_aliment_delete', {'id': aliment.id, 'redirect_to': 'admin_meal_foods', 'repas_id': repas.id}) }}" onsubmit="return confirm('Confirmer la suppression de cet aliment ?');" style="display:inline-block;">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ aliment.id) }}">
+                <button class="btn" style="color:#EF4444; border:1px solid #FECACA; background:#FEF2F2;">Supprimer</button>
+              </form>
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="3" style="padding: 16px; color: var(--text-secondary);">Aucun aliment trouvé.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

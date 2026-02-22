@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Historique des Logs</title>
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; color: #333; }
+        h1 { color: #6C5CE7; text-align: center; margin-bottom: 20px; }
+        .header-info { text-align: right; margin-bottom: 30px; font-style: italic; color: #666; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+        th { background-color: #f8f9fa; color: #4a5568; font-weight: bold; }
+        tr:nth-child(even) { background-color: #fcfcfc; }
+        .success { color: #38a169; }
+        .danger { color: #e53e3e; }
+        .info { color: #3182ce; }
+    </style>
+</head>
+<body>
+    <h1>Administration BioSync - Historique des Activités</h1>
+    
+    <div class="header-info">
+        Généré le: {{ "now"|date("d/m/Y à H:i") }}
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Date & Heure</th>
+                <th>Action</th>
+                <th>Utilisateur (Email)</th>
+                <th>Rôle Principal</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+            <tr>
+                <td>{{ log.createdAt|date('d/m/Y H:i:s') }}</td>
+                <td>
+                    {% if 'Connexion' in log.action %}
+                        <strong class="success">{{ log.action }}</strong>
+                    {% elseif 'Suppression' in log.action or 'Refusé' in log.action %}
+                        <strong class="danger">{{ log.action }}</strong>
+                    {% else %}
+                        <strong class="info">{{ log.action }}</strong>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if log.utilisateur %}
+                        {{ log.utilisateur.nomComplet }}<br>
+                        <small>{{ log.utilisateur.email }}</small>
+                    {% else %}
+                        Système / Anonyme
+                    {% endif %}
+                </td>
+                <td>
+                    {% if log.utilisateur and log.utilisateur.roles|length > 0 %}
+                        {{ log.utilisateur.roles|first }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

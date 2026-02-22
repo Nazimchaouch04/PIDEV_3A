@@ -1,0 +1,774 @@
+-- phpMyAdmin SQL Dump
+-- version 5.2.1
+-- https://www.phpmyadmin.net/
+--
+-- Hôte : 127.0.0.1
+-- Généré le : jeu. 19 fév. 2026 à 22:31
+-- Version du serveur : 10.4.32-MariaDB
+-- Version de PHP : 8.2.12
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Base de données : `biosync`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `aliment`
+--
+
+CREATE TABLE `aliment` (
+  `id` int(11) NOT NULL,
+  `nom_aliment` varchar(100) NOT NULL,
+  `calories` int(11) NOT NULL,
+  `index_glycemique` int(11) DEFAULT NULL,
+  `est_excitant` tinyint(4) NOT NULL,
+  `repas_id` int(11) DEFAULT NULL,
+  `type_aliment` varchar(50) DEFAULT NULL,
+  `multi_score` double DEFAULT NULL,
+  `nutri_score` varchar(1) DEFAULT NULL,
+  `proteines` double DEFAULT NULL,
+  `glucides` double DEFAULT NULL,
+  `lipides` double DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Déchargement des données de la table `aliment`
+--
+
+INSERT INTO `aliment` (`id`, `nom_aliment`, `calories`, `index_glycemique`, `est_excitant`, `repas_id`, `type_aliment`, `multi_score`, `nutri_score`, `proteines`, `glucides`, `lipides`) VALUES
+(3, 'mloukhiaaa', 400, NULL, 0, 2, NULL, NULL, NULL, 5, 6, 111),
+(4, 'bortouu9ala', 50, NULL, 0, 2, NULL, NULL, NULL, 55, 77, 10),
+(5, 'laitue', 10, NULL, 0, 3, NULL, NULL, NULL, NULL, NULL, NULL),
+(6, 'tma', 12, NULL, 0, 3, NULL, NULL, NULL, NULL, NULL, NULL),
+(7, 'tomate', 10, NULL, 0, 4, NULL, NULL, NULL, NULL, NULL, NULL),
+(8, 'dhfr', 20, NULL, 0, 4, NULL, NULL, NULL, NULL, NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `certification`
+--
+
+CREATE TABLE `certification` (
+  `id` int(11) NOT NULL,
+  `specialite` varchar(100) NOT NULL,
+  `numero_enregistrement` varchar(100) NOT NULL,
+  `diplome_filename` varchar(255) NOT NULL,
+  `statut` varchar(20) NOT NULL,
+  `utilisateur_id` int(11) NOT NULL,
+  `type` varchar(20) NOT NULL,
+  `motivation` longtext NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Déchargement des données de la table `certification`
+--
+
+INSERT INTO `certification` (`id`, `specialite`, `numero_enregistrement`, `diplome_filename`, `statut`, `utilisateur_id`, `type`, `motivation`) VALUES
+(9, 'dzedcs', '45', 'utilisateurs-2026-02-14-19-12-42-699389e376a46.pdf', 'PENDING', 21, 'COACH', 'adczds');
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `consultation`
+--
+
+CREATE TABLE `consultation` (
+  `id` int(11) NOT NULL,
+  `date_consultation` datetime NOT NULL,
+  `symptomes` longtext DEFAULT NULL,
+  `diagnostic` longtext DEFAULT NULL,
+  `recommandations` longtext DEFAULT NULL,
+  `rendez_vous_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Déchargement des données de la table `consultation`
+--
+
+INSERT INTO `consultation` (`id`, `date_consultation`, `symptomes`, `diagnostic`, `recommandations`, `rendez_vous_id`) VALUES
+(1, '2026-02-09 13:22:00', 'zaeezfrg', 'arfzgrazer', 'aezfreg', 1),
+(2, '2026-02-08 14:30:00', 'azazazazazazazzaaz', 'azazzazzaz', 'azazazzazazazaza', 3);
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `doctrine_migration_versions`
+--
+
+CREATE TABLE `doctrine_migration_versions` (
+  `version` varchar(191) NOT NULL,
+  `executed_at` datetime DEFAULT NULL,
+  `execution_time` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Déchargement des données de la table `doctrine_migration_versions`
+--
+
+INSERT INTO `doctrine_migration_versions` (`version`, `executed_at`, `execution_time`) VALUES
+('DoctrineMigrations\\Version20260203232743', '2026-02-05 23:43:02', 1293),
+('DoctrineMigrations\\Version20260206132637', '2026-02-06 14:27:12', 160),
+('DoctrineMigrations\\Version20260206175623', '2026-02-06 18:56:30', 8),
+('DoctrineMigrations\\Version20260207163849', '2026-02-07 17:39:00', 61),
+('DoctrineMigrations\\Version20260208115005', '2026-02-08 12:50:37', 84),
+('DoctrineMigrations\\Version20260209115016', '2026-02-09 12:51:36', 834),
+('DoctrineMigrations\\Version20260214103223', '2026-02-14 11:32:34', 85);
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `evenement_sante`
+--
+
+CREATE TABLE `evenement_sante` (
+  `id` int(11) NOT NULL,
+  `titre_event` varchar(100) NOT NULL,
+  `date_event` datetime NOT NULL,
+  `points_participation` int(11) NOT NULL,
+  `groupe_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Déchargement des données de la table `evenement_sante`
+--
+
+INSERT INTO `evenement_sante` (`id`, `titre_event`, `date_event`, `points_participation`, `groupe_id`) VALUES
+(1, 'jaryet maa lfajr', '2026-02-18 23:41:00', 500, 1),
+(2, 'Pilates session', '2026-02-14 17:46:00', 100, 2);
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `exercice`
+--
+
+CREATE TABLE `exercice` (
+  `id` int(11) NOT NULL,
+  `nom_exercice` varchar(100) NOT NULL,
+  `intensite` varchar(255) NOT NULL,
+  `calories_par_minute` double NOT NULL,
+  `seance_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `groupe_soutien`
+--
+
+CREATE TABLE `groupe_soutien` (
+  `id` int(11) NOT NULL,
+  `nom_groupe` varchar(100) NOT NULL,
+  `thematique` varchar(50) NOT NULL,
+  `capacite_max` int(11) NOT NULL,
+  `description` longtext DEFAULT NULL,
+  `image` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Déchargement des données de la table `groupe_soutien`
+--
+
+INSERT INTO `groupe_soutien` (`id`, `nom_groupe`, `thematique`, `capacite_max`, `description`, `image`) VALUES
+(1, 'Let\'s get it..', 'Sport', 17, 'Naamlou jaryet', 'https://i.ytimg.com/vi/okYfHFV4LJg/maxresdefault.jpg'),
+(2, 'Pilates', 'Yoga', 18, 'Pilates sessions for all', 'https://th.bing.com/th/id/OIP.wzPEsnOrUdoQaC8SSaHDogHaEc?w=286&h=180&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3'),
+(3, 'Yoga', 'Stress', 19, 'we do yoga sessions', 'https://www.bing.com/th/id/OIP.tjRpMNItHwhzY9avOtz8SwHaEo?w=284&h=211&c=8&rs=1&qlt=90&o=6&dpr=1.3&pid=3.1&rm=2');
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `membre_groupe`
+--
+
+CREATE TABLE `membre_groupe` (
+  `id` int(11) NOT NULL,
+  `date_adhesion` datetime NOT NULL,
+  `role_membre` varchar(50) NOT NULL,
+  `utilisateur_id` int(11) NOT NULL,
+  `groupe_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Déchargement des données de la table `membre_groupe`
+--
+
+INSERT INTO `membre_groupe` (`id`, `date_adhesion`, `role_membre`, `utilisateur_id`, `groupe_id`) VALUES
+(1, '2026-02-07 18:09:35', 'Membre', 1, 2),
+(6, '2026-02-09 13:37:41', 'Membre', 15, 2),
+(7, '2026-02-09 15:26:48', 'Membre', 15, 1),
+(8, '2026-02-09 15:27:54', 'Membre', 15, 3);
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `messenger_messages`
+--
+
+CREATE TABLE `messenger_messages` (
+  `id` bigint(20) NOT NULL,
+  `body` longtext NOT NULL,
+  `headers` longtext NOT NULL,
+  `queue_name` varchar(190) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `available_at` datetime NOT NULL,
+  `delivered_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Déchargement des données de la table `messenger_messages`
+--
+
+INSERT INTO `messenger_messages` (`id`, `body`, `headers`, `queue_name`, `created_at`, `available_at`, `delivered_at`) VALUES
+(1, 'O:36:\\\"Symfony\\\\Component\\\\Messenger\\\\Envelope\\\":2:{s:44:\\\"\\0Symfony\\\\Component\\\\Messenger\\\\Envelope\\0stamps\\\";a:1:{s:46:\\\"Symfony\\\\Component\\\\Messenger\\\\Stamp\\\\BusNameStamp\\\";a:1:{i:0;O:46:\\\"Symfony\\\\Component\\\\Messenger\\\\Stamp\\\\BusNameStamp\\\":1:{s:55:\\\"\\0Symfony\\\\Component\\\\Messenger\\\\Stamp\\\\BusNameStamp\\0busName\\\";s:21:\\\"messenger.bus.default\\\";}}}s:45:\\\"\\0Symfony\\\\Component\\\\Messenger\\\\Envelope\\0message\\\";O:51:\\\"Symfony\\\\Component\\\\Mailer\\\\Messenger\\\\SendEmailMessage\\\":2:{s:60:\\\"\\0Symfony\\\\Component\\\\Mailer\\\\Messenger\\\\SendEmailMessage\\0message\\\";O:28:\\\"Symfony\\\\Component\\\\Mime\\\\Email\\\":6:{i:0;N;i:1;N;i:2;s:4297:\\\"<!DOCTYPE html>\n<html>\n<head>\n    <meta charset=\\\"utf-8\\\">\n    <title>Réinitialisation de votre mot de passe - BioSync</title>\n    <style>\n        body {\n            font-family: Arial, sans-serif;\n            line-height: 1.6;\n            color: #333;\n            max-width: 600px;\n            margin: 0 auto;\n            padding: 20px;\n            background-color: #f4f4f4;\n        }\n        .container {\n            background-color: white;\n            padding: 30px;\n            border-radius: 10px;\n            box-shadow: 0 2px 10px rgba(0,0,0,0.1);\n        }\n        .header {\n            text-align: center;\n            margin-bottom: 30px;\n            border-bottom: 2px solid #667eea;\n            padding-bottom: 20px;\n        }\n        .logo {\n            font-size: 28px;\n            font-weight: bold;\n            color: #667eea;\n            margin-bottom: 10px;\n        }\n        .title {\n            font-size: 20px;\n            color: #333;\n            margin: 0;\n        }\n        .content {\n            margin-bottom: 30px;\n        }\n        .button {\n            display: inline-block;\n            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n            color: white;\n            padding: 15px 30px;\n            text-decoration: none;\n            border-radius: 25px;\n            font-weight: bold;\n            text-align: center;\n            margin: 20px 0;\n        }\n        .button:hover {\n            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);\n        }\n        .footer {\n            text-align: center;\n            font-size: 12px;\n            color: #666;\n            border-top: 1px solid #eee;\n            padding-top: 20px;\n        }\n        .security-info {\n            background-color: #f8f9fa;\n            border-left: 4px solid #667eea;\n            padding: 15px;\n            margin: 20px 0;\n            font-size: 14px;\n        }\n        .user-info {\n            background-color: #e8f4fd;\n            padding: 15px;\n            border-radius: 8px;\n            margin: 20px 0;\n        }\n        .user-info strong {\n            color: #2c5aa0;\n        }\n    </style>\n</head>\n<body>\n    <div class=\\\"container\\\">\n        <div class=\\\"header\\\">\n            <div class=\\\"logo\\\">🏥 BioSync</div>\n            <h1 class=\\\"title\\\">Réinitialisation de votre mot de passe</h1>\n        </div>\n\n        <div class=\\\"content\\\">\n            <p>Bonjour hajouni mehdi,</p>\n            \n            <p>Vous avez demandé la réinitialisation de votre mot de passe pour votre compte BioSync.</p>\n            \n            <div class=\\\"user-info\\\">\n                <strong>Informations du compte :</strong><br>\n                Email : hajjounimehdi00@gmail.com<br>\n                Nom : hajouni mehdi\n            </div>\n\n            <p>Pour réinitialiser votre mot de passe, veuillez cliquer sur le bouton ci-dessous :</p>\n\n            <div style=\\\"text-align: center;\\\">\n                <a href=\\\"http://127.0.0.1:8000/reset-password/c299f8729d3c09e01736310effe3437847aa3d408799146345ae567e701cb73d\\\" class=\\\"button\\\">\n                    Réinitialiser mon mot de passe\n                </a>\n            </div>\n\n            <div class=\\\"security-info\\\">\n                <strong>⚠️ Informations de sécurité :</strong><br>\n                • Ce lien expirera dans 1 heure<br>\n                • Si vous n\\\'avez pas demandé cette réinitialisation, ignorez cet email<br>\n                • Ne partagez jamais ce lien avec d\\\'autres personnes<br>\n                • Le lien ne peut être utilisé qu\\\'une seule fois\n            </div>\n\n            <p>Si le bouton ci-dessus ne fonctionne pas, vous pouvez copier et coller ce lien dans votre navigateur :</p>\n            <p style=\\\"word-break: break-all; background-color: #f8f9fa; padding: 10px; border-radius: 5px; font-size: 12px;\\\">\n                http://127.0.0.1:8000/reset-password/c299f8729d3c09e01736310effe3437847aa3d408799146345ae567e701cb73d\n            </p>\n        </div>\n\n        <div class=\\\"footer\\\">\n            <p><strong>BioSync</strong> - Votre plateforme de santé et bien-être</p>\n            <p>Cet email a été envoyé automatiquement. Merci de ne pas répondre à cet email.</p>\n            <p>© 2026 BioSync - Tous droits réservés</p>\n        </div>\n    </div>\n</body>\n</html>\n\\\";i:3;s:5:\\\"utf-8\\\";i:4;a:0:{}i:5;a:2:{i:0;O:37:\\\"Symfony\\\\Component\\\\Mime\\\\Header\\\\Headers\\\":2:{s:46:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\Headers\\0headers\\\";a:3:{s:4:\\\"from\\\";a:1:{i:0;O:47:\\\"Symfony\\\\Component\\\\Mime\\\\Header\\\\MailboxListHeader\\\":5:{s:50:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0name\\\";s:4:\\\"From\\\";s:56:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0lineLength\\\";i:76;s:50:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0lang\\\";N;s:53:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0charset\\\";s:5:\\\"utf-8\\\";s:58:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\MailboxListHeader\\0addresses\\\";a:1:{i:0;O:30:\\\"Symfony\\\\Component\\\\Mime\\\\Address\\\":2:{s:39:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Address\\0address\\\";s:19:\\\"noreply@biosync.com\\\";s:36:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Address\\0name\\\";s:0:\\\"\\\";}}}}s:2:\\\"to\\\";a:1:{i:0;O:47:\\\"Symfony\\\\Component\\\\Mime\\\\Header\\\\MailboxListHeader\\\":5:{s:50:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0name\\\";s:2:\\\"To\\\";s:56:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0lineLength\\\";i:76;s:50:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0lang\\\";N;s:53:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0charset\\\";s:5:\\\"utf-8\\\";s:58:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\MailboxListHeader\\0addresses\\\";a:1:{i:0;O:30:\\\"Symfony\\\\Component\\\\Mime\\\\Address\\\":2:{s:39:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Address\\0address\\\";s:25:\\\"hajjounimehdi00@gmail.com\\\";s:36:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Address\\0name\\\";s:0:\\\"\\\";}}}}s:7:\\\"subject\\\";a:1:{i:0;O:48:\\\"Symfony\\\\Component\\\\Mime\\\\Header\\\\UnstructuredHeader\\\":5:{s:50:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0name\\\";s:7:\\\"Subject\\\";s:56:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0lineLength\\\";i:76;s:50:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0lang\\\";N;s:53:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0charset\\\";s:5:\\\"utf-8\\\";s:55:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\UnstructuredHeader\\0value\\\";s:49:\\\"Réinitialisation de votre mot de passe - BioSync\\\";}}}s:49:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\Headers\\0lineLength\\\";i:76;}i:1;N;}}s:61:\\\"\\0Symfony\\\\Component\\\\Mailer\\\\Messenger\\\\SendEmailMessage\\0envelope\\\";N;}}', '[]', 'default', '2026-02-14 18:14:37', '2026-02-14 18:14:37', NULL),
+(2, 'O:36:\\\"Symfony\\\\Component\\\\Messenger\\\\Envelope\\\":2:{s:44:\\\"\\0Symfony\\\\Component\\\\Messenger\\\\Envelope\\0stamps\\\";a:1:{s:46:\\\"Symfony\\\\Component\\\\Messenger\\\\Stamp\\\\BusNameStamp\\\";a:1:{i:0;O:46:\\\"Symfony\\\\Component\\\\Messenger\\\\Stamp\\\\BusNameStamp\\\":1:{s:55:\\\"\\0Symfony\\\\Component\\\\Messenger\\\\Stamp\\\\BusNameStamp\\0busName\\\";s:21:\\\"messenger.bus.default\\\";}}}s:45:\\\"\\0Symfony\\\\Component\\\\Messenger\\\\Envelope\\0message\\\";O:51:\\\"Symfony\\\\Component\\\\Mailer\\\\Messenger\\\\SendEmailMessage\\\":2:{s:60:\\\"\\0Symfony\\\\Component\\\\Mailer\\\\Messenger\\\\SendEmailMessage\\0message\\\";O:28:\\\"Symfony\\\\Component\\\\Mime\\\\Email\\\":6:{i:0;N;i:1;N;i:2;s:4297:\\\"<!DOCTYPE html>\n<html>\n<head>\n    <meta charset=\\\"utf-8\\\">\n    <title>Réinitialisation de votre mot de passe - BioSync</title>\n    <style>\n        body {\n            font-family: Arial, sans-serif;\n            line-height: 1.6;\n            color: #333;\n            max-width: 600px;\n            margin: 0 auto;\n            padding: 20px;\n            background-color: #f4f4f4;\n        }\n        .container {\n            background-color: white;\n            padding: 30px;\n            border-radius: 10px;\n            box-shadow: 0 2px 10px rgba(0,0,0,0.1);\n        }\n        .header {\n            text-align: center;\n            margin-bottom: 30px;\n            border-bottom: 2px solid #667eea;\n            padding-bottom: 20px;\n        }\n        .logo {\n            font-size: 28px;\n            font-weight: bold;\n            color: #667eea;\n            margin-bottom: 10px;\n        }\n        .title {\n            font-size: 20px;\n            color: #333;\n            margin: 0;\n        }\n        .content {\n            margin-bottom: 30px;\n        }\n        .button {\n            display: inline-block;\n            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n            color: white;\n            padding: 15px 30px;\n            text-decoration: none;\n            border-radius: 25px;\n            font-weight: bold;\n            text-align: center;\n            margin: 20px 0;\n        }\n        .button:hover {\n            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);\n        }\n        .footer {\n            text-align: center;\n            font-size: 12px;\n            color: #666;\n            border-top: 1px solid #eee;\n            padding-top: 20px;\n        }\n        .security-info {\n            background-color: #f8f9fa;\n            border-left: 4px solid #667eea;\n            padding: 15px;\n            margin: 20px 0;\n            font-size: 14px;\n        }\n        .user-info {\n            background-color: #e8f4fd;\n            padding: 15px;\n            border-radius: 8px;\n            margin: 20px 0;\n        }\n        .user-info strong {\n            color: #2c5aa0;\n        }\n    </style>\n</head>\n<body>\n    <div class=\\\"container\\\">\n        <div class=\\\"header\\\">\n            <div class=\\\"logo\\\">🏥 BioSync</div>\n            <h1 class=\\\"title\\\">Réinitialisation de votre mot de passe</h1>\n        </div>\n\n        <div class=\\\"content\\\">\n            <p>Bonjour hajouni mehdi,</p>\n            \n            <p>Vous avez demandé la réinitialisation de votre mot de passe pour votre compte BioSync.</p>\n            \n            <div class=\\\"user-info\\\">\n                <strong>Informations du compte :</strong><br>\n                Email : hajjounimehdi00@gmail.com<br>\n                Nom : hajouni mehdi\n            </div>\n\n            <p>Pour réinitialiser votre mot de passe, veuillez cliquer sur le bouton ci-dessous :</p>\n\n            <div style=\\\"text-align: center;\\\">\n                <a href=\\\"http://127.0.0.1:8000/reset-password/151ea526ab4b301e28d187720db4a27bb68d53c8048db39d5e83d9393f8195eb\\\" class=\\\"button\\\">\n                    Réinitialiser mon mot de passe\n                </a>\n            </div>\n\n            <div class=\\\"security-info\\\">\n                <strong>⚠️ Informations de sécurité :</strong><br>\n                • Ce lien expirera dans 1 heure<br>\n                • Si vous n\\\'avez pas demandé cette réinitialisation, ignorez cet email<br>\n                • Ne partagez jamais ce lien avec d\\\'autres personnes<br>\n                • Le lien ne peut être utilisé qu\\\'une seule fois\n            </div>\n\n            <p>Si le bouton ci-dessus ne fonctionne pas, vous pouvez copier et coller ce lien dans votre navigateur :</p>\n            <p style=\\\"word-break: break-all; background-color: #f8f9fa; padding: 10px; border-radius: 5px; font-size: 12px;\\\">\n                http://127.0.0.1:8000/reset-password/151ea526ab4b301e28d187720db4a27bb68d53c8048db39d5e83d9393f8195eb\n            </p>\n        </div>\n\n        <div class=\\\"footer\\\">\n            <p><strong>BioSync</strong> - Votre plateforme de santé et bien-être</p>\n            <p>Cet email a été envoyé automatiquement. Merci de ne pas répondre à cet email.</p>\n            <p>© 2026 BioSync - Tous droits réservés</p>\n        </div>\n    </div>\n</body>\n</html>\n\\\";i:3;s:5:\\\"utf-8\\\";i:4;a:0:{}i:5;a:2:{i:0;O:37:\\\"Symfony\\\\Component\\\\Mime\\\\Header\\\\Headers\\\":2:{s:46:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\Headers\\0headers\\\";a:3:{s:4:\\\"from\\\";a:1:{i:0;O:47:\\\"Symfony\\\\Component\\\\Mime\\\\Header\\\\MailboxListHeader\\\":5:{s:50:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0name\\\";s:4:\\\"From\\\";s:56:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0lineLength\\\";i:76;s:50:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0lang\\\";N;s:53:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0charset\\\";s:5:\\\"utf-8\\\";s:58:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\MailboxListHeader\\0addresses\\\";a:1:{i:0;O:30:\\\"Symfony\\\\Component\\\\Mime\\\\Address\\\":2:{s:39:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Address\\0address\\\";s:19:\\\"noreply@biosync.com\\\";s:36:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Address\\0name\\\";s:0:\\\"\\\";}}}}s:2:\\\"to\\\";a:1:{i:0;O:47:\\\"Symfony\\\\Component\\\\Mime\\\\Header\\\\MailboxListHeader\\\":5:{s:50:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0name\\\";s:2:\\\"To\\\";s:56:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0lineLength\\\";i:76;s:50:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0lang\\\";N;s:53:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0charset\\\";s:5:\\\"utf-8\\\";s:58:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\MailboxListHeader\\0addresses\\\";a:1:{i:0;O:30:\\\"Symfony\\\\Component\\\\Mime\\\\Address\\\":2:{s:39:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Address\\0address\\\";s:25:\\\"hajjounimehdi00@gmail.com\\\";s:36:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Address\\0name\\\";s:0:\\\"\\\";}}}}s:7:\\\"subject\\\";a:1:{i:0;O:48:\\\"Symfony\\\\Component\\\\Mime\\\\Header\\\\UnstructuredHeader\\\":5:{s:50:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0name\\\";s:7:\\\"Subject\\\";s:56:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0lineLength\\\";i:76;s:50:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0lang\\\";N;s:53:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0charset\\\";s:5:\\\"utf-8\\\";s:55:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\UnstructuredHeader\\0value\\\";s:49:\\\"Réinitialisation de votre mot de passe - BioSync\\\";}}}s:49:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\Headers\\0lineLength\\\";i:76;}i:1;N;}}s:61:\\\"\\0Symfony\\\\Component\\\\Mailer\\\\Messenger\\\\SendEmailMessage\\0envelope\\\";N;}}', '[]', 'default', '2026-02-14 18:16:00', '2026-02-14 18:16:00', NULL),
+(3, 'O:36:\\\"Symfony\\\\Component\\\\Messenger\\\\Envelope\\\":2:{s:44:\\\"\\0Symfony\\\\Component\\\\Messenger\\\\Envelope\\0stamps\\\";a:1:{s:46:\\\"Symfony\\\\Component\\\\Messenger\\\\Stamp\\\\BusNameStamp\\\";a:1:{i:0;O:46:\\\"Symfony\\\\Component\\\\Messenger\\\\Stamp\\\\BusNameStamp\\\":1:{s:55:\\\"\\0Symfony\\\\Component\\\\Messenger\\\\Stamp\\\\BusNameStamp\\0busName\\\";s:21:\\\"messenger.bus.default\\\";}}}s:45:\\\"\\0Symfony\\\\Component\\\\Messenger\\\\Envelope\\0message\\\";O:51:\\\"Symfony\\\\Component\\\\Mailer\\\\Messenger\\\\SendEmailMessage\\\":2:{s:60:\\\"\\0Symfony\\\\Component\\\\Mailer\\\\Messenger\\\\SendEmailMessage\\0message\\\";O:28:\\\"Symfony\\\\Component\\\\Mime\\\\Email\\\":6:{i:0;N;i:1;N;i:2;s:4297:\\\"<!DOCTYPE html>\n<html>\n<head>\n    <meta charset=\\\"utf-8\\\">\n    <title>Réinitialisation de votre mot de passe - BioSync</title>\n    <style>\n        body {\n            font-family: Arial, sans-serif;\n            line-height: 1.6;\n            color: #333;\n            max-width: 600px;\n            margin: 0 auto;\n            padding: 20px;\n            background-color: #f4f4f4;\n        }\n        .container {\n            background-color: white;\n            padding: 30px;\n            border-radius: 10px;\n            box-shadow: 0 2px 10px rgba(0,0,0,0.1);\n        }\n        .header {\n            text-align: center;\n            margin-bottom: 30px;\n            border-bottom: 2px solid #667eea;\n            padding-bottom: 20px;\n        }\n        .logo {\n            font-size: 28px;\n            font-weight: bold;\n            color: #667eea;\n            margin-bottom: 10px;\n        }\n        .title {\n            font-size: 20px;\n            color: #333;\n            margin: 0;\n        }\n        .content {\n            margin-bottom: 30px;\n        }\n        .button {\n            display: inline-block;\n            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n            color: white;\n            padding: 15px 30px;\n            text-decoration: none;\n            border-radius: 25px;\n            font-weight: bold;\n            text-align: center;\n            margin: 20px 0;\n        }\n        .button:hover {\n            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);\n        }\n        .footer {\n            text-align: center;\n            font-size: 12px;\n            color: #666;\n            border-top: 1px solid #eee;\n            padding-top: 20px;\n        }\n        .security-info {\n            background-color: #f8f9fa;\n            border-left: 4px solid #667eea;\n            padding: 15px;\n            margin: 20px 0;\n            font-size: 14px;\n        }\n        .user-info {\n            background-color: #e8f4fd;\n            padding: 15px;\n            border-radius: 8px;\n            margin: 20px 0;\n        }\n        .user-info strong {\n            color: #2c5aa0;\n        }\n    </style>\n</head>\n<body>\n    <div class=\\\"container\\\">\n        <div class=\\\"header\\\">\n            <div class=\\\"logo\\\">🏥 BioSync</div>\n            <h1 class=\\\"title\\\">Réinitialisation de votre mot de passe</h1>\n        </div>\n\n        <div class=\\\"content\\\">\n            <p>Bonjour hajouni mehdi,</p>\n            \n            <p>Vous avez demandé la réinitialisation de votre mot de passe pour votre compte BioSync.</p>\n            \n            <div class=\\\"user-info\\\">\n                <strong>Informations du compte :</strong><br>\n                Email : hajjounimehdi00@gmail.com<br>\n                Nom : hajouni mehdi\n            </div>\n\n            <p>Pour réinitialiser votre mot de passe, veuillez cliquer sur le bouton ci-dessous :</p>\n\n            <div style=\\\"text-align: center;\\\">\n                <a href=\\\"http://127.0.0.1:8000/reset-password/26b484298e574a480c398d65e00f1b2db49bf231f1b6ecbfee314056d765547a\\\" class=\\\"button\\\">\n                    Réinitialiser mon mot de passe\n                </a>\n            </div>\n\n            <div class=\\\"security-info\\\">\n                <strong>⚠️ Informations de sécurité :</strong><br>\n                • Ce lien expirera dans 1 heure<br>\n                • Si vous n\\\'avez pas demandé cette réinitialisation, ignorez cet email<br>\n                • Ne partagez jamais ce lien avec d\\\'autres personnes<br>\n                • Le lien ne peut être utilisé qu\\\'une seule fois\n            </div>\n\n            <p>Si le bouton ci-dessus ne fonctionne pas, vous pouvez copier et coller ce lien dans votre navigateur :</p>\n            <p style=\\\"word-break: break-all; background-color: #f8f9fa; padding: 10px; border-radius: 5px; font-size: 12px;\\\">\n                http://127.0.0.1:8000/reset-password/26b484298e574a480c398d65e00f1b2db49bf231f1b6ecbfee314056d765547a\n            </p>\n        </div>\n\n        <div class=\\\"footer\\\">\n            <p><strong>BioSync</strong> - Votre plateforme de santé et bien-être</p>\n            <p>Cet email a été envoyé automatiquement. Merci de ne pas répondre à cet email.</p>\n            <p>© 2026 BioSync - Tous droits réservés</p>\n        </div>\n    </div>\n</body>\n</html>\n\\\";i:3;s:5:\\\"utf-8\\\";i:4;a:0:{}i:5;a:2:{i:0;O:37:\\\"Symfony\\\\Component\\\\Mime\\\\Header\\\\Headers\\\":2:{s:46:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\Headers\\0headers\\\";a:3:{s:4:\\\"from\\\";a:1:{i:0;O:47:\\\"Symfony\\\\Component\\\\Mime\\\\Header\\\\MailboxListHeader\\\":5:{s:50:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0name\\\";s:4:\\\"From\\\";s:56:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0lineLength\\\";i:76;s:50:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0lang\\\";N;s:53:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0charset\\\";s:5:\\\"utf-8\\\";s:58:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\MailboxListHeader\\0addresses\\\";a:1:{i:0;O:30:\\\"Symfony\\\\Component\\\\Mime\\\\Address\\\":2:{s:39:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Address\\0address\\\";s:19:\\\"noreply@biosync.com\\\";s:36:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Address\\0name\\\";s:0:\\\"\\\";}}}}s:2:\\\"to\\\";a:1:{i:0;O:47:\\\"Symfony\\\\Component\\\\Mime\\\\Header\\\\MailboxListHeader\\\":5:{s:50:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0name\\\";s:2:\\\"To\\\";s:56:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0lineLength\\\";i:76;s:50:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0lang\\\";N;s:53:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0charset\\\";s:5:\\\"utf-8\\\";s:58:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\MailboxListHeader\\0addresses\\\";a:1:{i:0;O:30:\\\"Symfony\\\\Component\\\\Mime\\\\Address\\\":2:{s:39:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Address\\0address\\\";s:25:\\\"hajjounimehdi00@gmail.com\\\";s:36:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Address\\0name\\\";s:0:\\\"\\\";}}}}s:7:\\\"subject\\\";a:1:{i:0;O:48:\\\"Symfony\\\\Component\\\\Mime\\\\Header\\\\UnstructuredHeader\\\":5:{s:50:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0name\\\";s:7:\\\"Subject\\\";s:56:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0lineLength\\\";i:76;s:50:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0lang\\\";N;s:53:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0charset\\\";s:5:\\\"utf-8\\\";s:55:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\UnstructuredHeader\\0value\\\";s:49:\\\"Réinitialisation de votre mot de passe - BioSync\\\";}}}s:49:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\Headers\\0lineLength\\\";i:76;}i:1;N;}}s:61:\\\"\\0Symfony\\\\Component\\\\Mailer\\\\Messenger\\\\SendEmailMessage\\0envelope\\\";N;}}', '[]', 'default', '2026-02-14 18:16:11', '2026-02-14 18:16:11', NULL),
+(4, 'O:36:\\\"Symfony\\\\Component\\\\Messenger\\\\Envelope\\\":2:{s:44:\\\"\\0Symfony\\\\Component\\\\Messenger\\\\Envelope\\0stamps\\\";a:1:{s:46:\\\"Symfony\\\\Component\\\\Messenger\\\\Stamp\\\\BusNameStamp\\\";a:1:{i:0;O:46:\\\"Symfony\\\\Component\\\\Messenger\\\\Stamp\\\\BusNameStamp\\\":1:{s:55:\\\"\\0Symfony\\\\Component\\\\Messenger\\\\Stamp\\\\BusNameStamp\\0busName\\\";s:21:\\\"messenger.bus.default\\\";}}}s:45:\\\"\\0Symfony\\\\Component\\\\Messenger\\\\Envelope\\0message\\\";O:51:\\\"Symfony\\\\Component\\\\Mailer\\\\Messenger\\\\SendEmailMessage\\\":2:{s:60:\\\"\\0Symfony\\\\Component\\\\Mailer\\\\Messenger\\\\SendEmailMessage\\0message\\\";O:28:\\\"Symfony\\\\Component\\\\Mime\\\\Email\\\":6:{i:0;N;i:1;N;i:2;s:4297:\\\"<!DOCTYPE html>\n<html>\n<head>\n    <meta charset=\\\"utf-8\\\">\n    <title>Réinitialisation de votre mot de passe - BioSync</title>\n    <style>\n        body {\n            font-family: Arial, sans-serif;\n            line-height: 1.6;\n            color: #333;\n            max-width: 600px;\n            margin: 0 auto;\n            padding: 20px;\n            background-color: #f4f4f4;\n        }\n        .container {\n            background-color: white;\n            padding: 30px;\n            border-radius: 10px;\n            box-shadow: 0 2px 10px rgba(0,0,0,0.1);\n        }\n        .header {\n            text-align: center;\n            margin-bottom: 30px;\n            border-bottom: 2px solid #667eea;\n            padding-bottom: 20px;\n        }\n        .logo {\n            font-size: 28px;\n            font-weight: bold;\n            color: #667eea;\n            margin-bottom: 10px;\n        }\n        .title {\n            font-size: 20px;\n            color: #333;\n            margin: 0;\n        }\n        .content {\n            margin-bottom: 30px;\n        }\n        .button {\n            display: inline-block;\n            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n            color: white;\n            padding: 15px 30px;\n            text-decoration: none;\n            border-radius: 25px;\n            font-weight: bold;\n            text-align: center;\n            margin: 20px 0;\n        }\n        .button:hover {\n            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);\n        }\n        .footer {\n            text-align: center;\n            font-size: 12px;\n            color: #666;\n            border-top: 1px solid #eee;\n            padding-top: 20px;\n        }\n        .security-info {\n            background-color: #f8f9fa;\n            border-left: 4px solid #667eea;\n            padding: 15px;\n            margin: 20px 0;\n            font-size: 14px;\n        }\n        .user-info {\n            background-color: #e8f4fd;\n            padding: 15px;\n            border-radius: 8px;\n            margin: 20px 0;\n        }\n        .user-info strong {\n            color: #2c5aa0;\n        }\n    </style>\n</head>\n<body>\n    <div class=\\\"container\\\">\n        <div class=\\\"header\\\">\n            <div class=\\\"logo\\\">🏥 BioSync</div>\n            <h1 class=\\\"title\\\">Réinitialisation de votre mot de passe</h1>\n        </div>\n\n        <div class=\\\"content\\\">\n            <p>Bonjour hajouni mehdi,</p>\n            \n            <p>Vous avez demandé la réinitialisation de votre mot de passe pour votre compte BioSync.</p>\n            \n            <div class=\\\"user-info\\\">\n                <strong>Informations du compte :</strong><br>\n                Email : hajjounimehdi00@gmail.com<br>\n                Nom : hajouni mehdi\n            </div>\n\n            <p>Pour réinitialiser votre mot de passe, veuillez cliquer sur le bouton ci-dessous :</p>\n\n            <div style=\\\"text-align: center;\\\">\n                <a href=\\\"http://127.0.0.1:8000/reset-password/105852ef79376149e7c43d4001a626e1ea273065f86fc0c3c505e344c13206c7\\\" class=\\\"button\\\">\n                    Réinitialiser mon mot de passe\n                </a>\n            </div>\n\n            <div class=\\\"security-info\\\">\n                <strong>⚠️ Informations de sécurité :</strong><br>\n                • Ce lien expirera dans 1 heure<br>\n                • Si vous n\\\'avez pas demandé cette réinitialisation, ignorez cet email<br>\n                • Ne partagez jamais ce lien avec d\\\'autres personnes<br>\n                • Le lien ne peut être utilisé qu\\\'une seule fois\n            </div>\n\n            <p>Si le bouton ci-dessus ne fonctionne pas, vous pouvez copier et coller ce lien dans votre navigateur :</p>\n            <p style=\\\"word-break: break-all; background-color: #f8f9fa; padding: 10px; border-radius: 5px; font-size: 12px;\\\">\n                http://127.0.0.1:8000/reset-password/105852ef79376149e7c43d4001a626e1ea273065f86fc0c3c505e344c13206c7\n            </p>\n        </div>\n\n        <div class=\\\"footer\\\">\n            <p><strong>BioSync</strong> - Votre plateforme de santé et bien-être</p>\n            <p>Cet email a été envoyé automatiquement. Merci de ne pas répondre à cet email.</p>\n            <p>© 2026 BioSync - Tous droits réservés</p>\n        </div>\n    </div>\n</body>\n</html>\n\\\";i:3;s:5:\\\"utf-8\\\";i:4;a:0:{}i:5;a:2:{i:0;O:37:\\\"Symfony\\\\Component\\\\Mime\\\\Header\\\\Headers\\\":2:{s:46:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\Headers\\0headers\\\";a:3:{s:4:\\\"from\\\";a:1:{i:0;O:47:\\\"Symfony\\\\Component\\\\Mime\\\\Header\\\\MailboxListHeader\\\":5:{s:50:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0name\\\";s:4:\\\"From\\\";s:56:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0lineLength\\\";i:76;s:50:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0lang\\\";N;s:53:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0charset\\\";s:5:\\\"utf-8\\\";s:58:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\MailboxListHeader\\0addresses\\\";a:1:{i:0;O:30:\\\"Symfony\\\\Component\\\\Mime\\\\Address\\\":2:{s:39:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Address\\0address\\\";s:19:\\\"noreply@biosync.com\\\";s:36:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Address\\0name\\\";s:0:\\\"\\\";}}}}s:2:\\\"to\\\";a:1:{i:0;O:47:\\\"Symfony\\\\Component\\\\Mime\\\\Header\\\\MailboxListHeader\\\":5:{s:50:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0name\\\";s:2:\\\"To\\\";s:56:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0lineLength\\\";i:76;s:50:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0lang\\\";N;s:53:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0charset\\\";s:5:\\\"utf-8\\\";s:58:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\MailboxListHeader\\0addresses\\\";a:1:{i:0;O:30:\\\"Symfony\\\\Component\\\\Mime\\\\Address\\\":2:{s:39:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Address\\0address\\\";s:25:\\\"hajjounimehdi00@gmail.com\\\";s:36:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Address\\0name\\\";s:0:\\\"\\\";}}}}s:7:\\\"subject\\\";a:1:{i:0;O:48:\\\"Symfony\\\\Component\\\\Mime\\\\Header\\\\UnstructuredHeader\\\":5:{s:50:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0name\\\";s:7:\\\"Subject\\\";s:56:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0lineLength\\\";i:76;s:50:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0lang\\\";N;s:53:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0charset\\\";s:5:\\\"utf-8\\\";s:55:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\UnstructuredHeader\\0value\\\";s:49:\\\"Réinitialisation de votre mot de passe - BioSync\\\";}}}s:49:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\Headers\\0lineLength\\\";i:76;}i:1;N;}}s:61:\\\"\\0Symfony\\\\Component\\\\Mailer\\\\Messenger\\\\SendEmailMessage\\0envelope\\\";N;}}', '[]', 'default', '2026-02-14 18:26:41', '2026-02-14 18:26:41', NULL),
+(5, 'O:36:\\\"Symfony\\\\Component\\\\Messenger\\\\Envelope\\\":2:{s:44:\\\"\\0Symfony\\\\Component\\\\Messenger\\\\Envelope\\0stamps\\\";a:1:{s:46:\\\"Symfony\\\\Component\\\\Messenger\\\\Stamp\\\\BusNameStamp\\\";a:1:{i:0;O:46:\\\"Symfony\\\\Component\\\\Messenger\\\\Stamp\\\\BusNameStamp\\\":1:{s:55:\\\"\\0Symfony\\\\Component\\\\Messenger\\\\Stamp\\\\BusNameStamp\\0busName\\\";s:21:\\\"messenger.bus.default\\\";}}}s:45:\\\"\\0Symfony\\\\Component\\\\Messenger\\\\Envelope\\0message\\\";O:51:\\\"Symfony\\\\Component\\\\Mailer\\\\Messenger\\\\SendEmailMessage\\\":2:{s:60:\\\"\\0Symfony\\\\Component\\\\Mailer\\\\Messenger\\\\SendEmailMessage\\0message\\\";O:28:\\\"Symfony\\\\Component\\\\Mime\\\\Email\\\":6:{i:0;N;i:1;N;i:2;s:4297:\\\"<!DOCTYPE html>\n<html>\n<head>\n    <meta charset=\\\"utf-8\\\">\n    <title>Réinitialisation de votre mot de passe - BioSync</title>\n    <style>\n        body {\n            font-family: Arial, sans-serif;\n            line-height: 1.6;\n            color: #333;\n            max-width: 600px;\n            margin: 0 auto;\n            padding: 20px;\n            background-color: #f4f4f4;\n        }\n        .container {\n            background-color: white;\n            padding: 30px;\n            border-radius: 10px;\n            box-shadow: 0 2px 10px rgba(0,0,0,0.1);\n        }\n        .header {\n            text-align: center;\n            margin-bottom: 30px;\n            border-bottom: 2px solid #667eea;\n            padding-bottom: 20px;\n        }\n        .logo {\n            font-size: 28px;\n            font-weight: bold;\n            color: #667eea;\n            margin-bottom: 10px;\n        }\n        .title {\n            font-size: 20px;\n            color: #333;\n            margin: 0;\n        }\n        .content {\n            margin-bottom: 30px;\n        }\n        .button {\n            display: inline-block;\n            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n            color: white;\n            padding: 15px 30px;\n            text-decoration: none;\n            border-radius: 25px;\n            font-weight: bold;\n            text-align: center;\n            margin: 20px 0;\n        }\n        .button:hover {\n            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);\n        }\n        .footer {\n            text-align: center;\n            font-size: 12px;\n            color: #666;\n            border-top: 1px solid #eee;\n            padding-top: 20px;\n        }\n        .security-info {\n            background-color: #f8f9fa;\n            border-left: 4px solid #667eea;\n            padding: 15px;\n            margin: 20px 0;\n            font-size: 14px;\n        }\n        .user-info {\n            background-color: #e8f4fd;\n            padding: 15px;\n            border-radius: 8px;\n            margin: 20px 0;\n        }\n        .user-info strong {\n            color: #2c5aa0;\n        }\n    </style>\n</head>\n<body>\n    <div class=\\\"container\\\">\n        <div class=\\\"header\\\">\n            <div class=\\\"logo\\\">🏥 BioSync</div>\n            <h1 class=\\\"title\\\">Réinitialisation de votre mot de passe</h1>\n        </div>\n\n        <div class=\\\"content\\\">\n            <p>Bonjour hajouni mehdi,</p>\n            \n            <p>Vous avez demandé la réinitialisation de votre mot de passe pour votre compte BioSync.</p>\n            \n            <div class=\\\"user-info\\\">\n                <strong>Informations du compte :</strong><br>\n                Email : hajjounimehdi00@gmail.com<br>\n                Nom : hajouni mehdi\n            </div>\n\n            <p>Pour réinitialiser votre mot de passe, veuillez cliquer sur le bouton ci-dessous :</p>\n\n            <div style=\\\"text-align: center;\\\">\n                <a href=\\\"http://127.0.0.1:8000/reset-password/5251ee32b4afb954f21163142e03704511a70679878c9eb618e6f98a12fe56cb\\\" class=\\\"button\\\">\n                    Réinitialiser mon mot de passe\n                </a>\n            </div>\n\n            <div class=\\\"security-info\\\">\n                <strong>⚠️ Informations de sécurité :</strong><br>\n                • Ce lien expirera dans 1 heure<br>\n                • Si vous n\\\'avez pas demandé cette réinitialisation, ignorez cet email<br>\n                • Ne partagez jamais ce lien avec d\\\'autres personnes<br>\n                • Le lien ne peut être utilisé qu\\\'une seule fois\n            </div>\n\n            <p>Si le bouton ci-dessus ne fonctionne pas, vous pouvez copier et coller ce lien dans votre navigateur :</p>\n            <p style=\\\"word-break: break-all; background-color: #f8f9fa; padding: 10px; border-radius: 5px; font-size: 12px;\\\">\n                http://127.0.0.1:8000/reset-password/5251ee32b4afb954f21163142e03704511a70679878c9eb618e6f98a12fe56cb\n            </p>\n        </div>\n\n        <div class=\\\"footer\\\">\n            <p><strong>BioSync</strong> - Votre plateforme de santé et bien-être</p>\n            <p>Cet email a été envoyé automatiquement. Merci de ne pas répondre à cet email.</p>\n            <p>© 2026 BioSync - Tous droits réservés</p>\n        </div>\n    </div>\n</body>\n</html>\n\\\";i:3;s:5:\\\"utf-8\\\";i:4;a:0:{}i:5;a:2:{i:0;O:37:\\\"Symfony\\\\Component\\\\Mime\\\\Header\\\\Headers\\\":2:{s:46:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\Headers\\0headers\\\";a:3:{s:4:\\\"from\\\";a:1:{i:0;O:47:\\\"Symfony\\\\Component\\\\Mime\\\\Header\\\\MailboxListHeader\\\":5:{s:50:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0name\\\";s:4:\\\"From\\\";s:56:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0lineLength\\\";i:76;s:50:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0lang\\\";N;s:53:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0charset\\\";s:5:\\\"utf-8\\\";s:58:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\MailboxListHeader\\0addresses\\\";a:1:{i:0;O:30:\\\"Symfony\\\\Component\\\\Mime\\\\Address\\\":2:{s:39:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Address\\0address\\\";s:19:\\\"noreply@biosync.com\\\";s:36:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Address\\0name\\\";s:0:\\\"\\\";}}}}s:2:\\\"to\\\";a:1:{i:0;O:47:\\\"Symfony\\\\Component\\\\Mime\\\\Header\\\\MailboxListHeader\\\":5:{s:50:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0name\\\";s:2:\\\"To\\\";s:56:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0lineLength\\\";i:76;s:50:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0lang\\\";N;s:53:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0charset\\\";s:5:\\\"utf-8\\\";s:58:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\MailboxListHeader\\0addresses\\\";a:1:{i:0;O:30:\\\"Symfony\\\\Component\\\\Mime\\\\Address\\\":2:{s:39:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Address\\0address\\\";s:25:\\\"hajjounimehdi00@gmail.com\\\";s:36:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Address\\0name\\\";s:0:\\\"\\\";}}}}s:7:\\\"subject\\\";a:1:{i:0;O:48:\\\"Symfony\\\\Component\\\\Mime\\\\Header\\\\UnstructuredHeader\\\":5:{s:50:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0name\\\";s:7:\\\"Subject\\\";s:56:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0lineLength\\\";i:76;s:50:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0lang\\\";N;s:53:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\AbstractHeader\\0charset\\\";s:5:\\\"utf-8\\\";s:55:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\UnstructuredHeader\\0value\\\";s:49:\\\"Réinitialisation de votre mot de passe - BioSync\\\";}}}s:49:\\\"\\0Symfony\\\\Component\\\\Mime\\\\Header\\\\Headers\\0lineLength\\\";i:76;}i:1;N;}}s:61:\\\"\\0Symfony\\\\Component\\\\Mailer\\\\Messenger\\\\SendEmailMessage\\0envelope\\\";N;}}', '[]', 'default', '2026-02-14 18:28:03', '2026-02-14 18:28:03', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `prescription`
+--
+
+CREATE TABLE `prescription` (
+  `id` int(11) NOT NULL,
+  `nom_medicament` varchar(100) NOT NULL,
+  `dose` varchar(255) NOT NULL,
+  `frequence` varchar(100) NOT NULL,
+  `duree` int(11) NOT NULL,
+  `instructions` longtext DEFAULT NULL,
+  `consultation_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Déchargement des données de la table `prescription`
+--
+
+INSERT INTO `prescription` (`id`, `nom_medicament`, `dose`, `frequence`, `duree`, `instructions`, `consultation_id`) VALUES
+(1, 'azde', 'azde', 'dez', 1, 'dez', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `profil_sante`
+--
+
+CREATE TABLE `profil_sante` (
+  `id` int(11) NOT NULL,
+  `age` int(11) NOT NULL,
+  `poids` double NOT NULL,
+  `heure_reveil` time NOT NULL,
+  `utilisateur_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Déchargement des données de la table `profil_sante`
+--
+
+INSERT INTO `profil_sante` (`id`, `age`, `poids`, `heure_reveil`, `utilisateur_id`) VALUES
+(1, 20, 80, '07:00:00', 1),
+(5, 20, 88, '20:25:00', 15);
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `question`
+--
+
+CREATE TABLE `question` (
+  `id` int(11) NOT NULL,
+  `enonce` longtext NOT NULL,
+  `reponse_correcte` varchar(255) NOT NULL,
+  `options_fausses` longtext NOT NULL,
+  `points_valeur` int(11) NOT NULL,
+  `quiz_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Déchargement des données de la table `question`
+--
+
+INSERT INTO `question` (`id`, `enonce`, `reponse_correcte`, `options_fausses`, `points_valeur`, `quiz_id`) VALUES
+(1, 'Quel est un symptôme courant de l’anxiété ?', 'Des inquiétudes excessives et persistantes', 'Une forte fièvre|Une perte de vision|Une fracture osseuse', 90, 1),
+(2, 'Quelle activité peut aider à réduire le stress ?', 'La respiration profonde', 'Dormir très peu|Consommer beaucoup de café|Éviter toute activité physique', 50, 1),
+(3, 'Qu’est-ce que la dépression ?', 'Un trouble mental caractérisé par une tristesse persistante et une perte d’intérêt', 'Une simple baisse de motivation passagère|Une maladie infectieuse|Un trouble de la mémoire uniquement', 70, 1),
+(4, 'Qu’est-ce que le stress ?', 'Une réaction naturelle du corps face à une situation perçue comme difficile', 'Une maladie contagieuse|Un trouble alimentaire|Un type de dépression', 100, 1),
+(6, 'hoguiqvqvgvhjfv', 'vzgzgzrg', 'sggsg|gsgs|svbbvs', 50, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `quiz_mental`
+--
+
+CREATE TABLE `quiz_mental` (
+  `id` int(11) NOT NULL,
+  `titre` varchar(100) NOT NULL,
+  `niveau_stress_cible` int(11) NOT NULL,
+  `score_resultat` int(11) NOT NULL,
+  `medaille_quiz` varchar(50) DEFAULT NULL,
+  `date_quiz` datetime NOT NULL,
+  `utilisateur_id` int(11) NOT NULL,
+  `statut` varchar(20) NOT NULL DEFAULT 'disponible'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Déchargement des données de la table `quiz_mental`
+--
+
+INSERT INTO `quiz_mental` (`id`, `titre`, `niveau_stress_cible`, `score_resultat`, `medaille_quiz`, `date_quiz`, `utilisateur_id`, `statut`) VALUES
+(1, 'Question Bank', 5, 0, NULL, '2026-02-09 09:17:53', 1, 'disponible'),
+(2, 'jiuuu', 5, 220, 'Connaisseur', '2026-02-09 15:02:23', 15, 'complete'),
+(3, 'mental helath', 5, 0, NULL, '2026-02-09 14:15:23', 15, 'complete'),
+(4, 'grhhqr', 0, 42, NULL, '2026-02-09 14:57:00', 13, 'disponible');
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `rendez_vous`
+--
+
+CREATE TABLE `rendez_vous` (
+  `id` int(11) NOT NULL,
+  `date_heure` datetime NOT NULL,
+  `motif` varchar(255) NOT NULL,
+  `specialiste_id` int(11) NOT NULL,
+  `patient_id` int(11) NOT NULL,
+  `statut` varchar(50) NOT NULL,
+  `mode` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Déchargement des données de la table `rendez_vous`
+--
+
+INSERT INTO `rendez_vous` (`id`, `date_heure`, `motif`, `specialiste_id`, `patient_id`, `statut`, `mode`) VALUES
+(1, '2026-02-22 13:01:00', 'adzefz', 13, 15, 'REALISE', 'TELECONSULTATION'),
+(3, '2026-02-09 15:30:00', 'douleur aigues', 13, 15, 'REALISE', 'PRESENTIEL');
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `repas`
+--
+
+CREATE TABLE `repas` (
+  `id` int(11) NOT NULL,
+  `titre_repas` varchar(50) NOT NULL,
+  `type_moment` varchar(255) NOT NULL,
+  `date_consommation` datetime NOT NULL,
+  `points_gagnes` int(11) NOT NULL,
+  `utilisateur_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Déchargement des données de la table `repas`
+--
+
+INSERT INTO `repas` (`id`, `titre_repas`, `type_moment`, `date_consommation`, `points_gagnes`, `utilisateur_id`) VALUES
+(2, 'fitouuur noss nihaaaar', 'midi', '2021-02-08 13:23:00', 0, 15),
+(3, 'saladee', 'midi', '2026-02-08 14:15:00', 0, 15),
+(4, 'soupe', 'soir', '2026-02-08 15:10:00', 0, 15);
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `seance_sport`
+--
+
+CREATE TABLE `seance_sport` (
+  `id` int(11) NOT NULL,
+  `nom_seance` varchar(100) NOT NULL,
+  `heure_debut` time NOT NULL,
+  `duree_minutes` int(11) NOT NULL,
+  `medaille_obtenue` varchar(50) DEFAULT NULL,
+  `date_seance` date NOT NULL,
+  `utilisateur_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `specialiste`
+--
+
+CREATE TABLE `specialiste` (
+  `id` int(11) NOT NULL,
+  `nom_docteur` varchar(100) NOT NULL,
+  `specialite` varchar(100) NOT NULL,
+  `telephone` varchar(20) NOT NULL,
+  `disponibilite` varchar(255) NOT NULL,
+  `utilisateur_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `utilisateur`
+--
+
+CREATE TABLE `utilisateur` (
+  `id` int(11) NOT NULL,
+  `nom_complet` varchar(100) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `mot_de_passe` varchar(255) NOT NULL,
+  `score_global` int(11) NOT NULL,
+  `date_inscription` date NOT NULL,
+  `roles` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`roles`)),
+  `reset_token` varchar(255) DEFAULT NULL,
+  `reset_token_expires_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Déchargement des données de la table `utilisateur`
+--
+
+INSERT INTO `utilisateur` (`id`, `nom_complet`, `email`, `mot_de_passe`, `score_global`, `date_inscription`, `roles`, `reset_token`, `reset_token_expires_at`) VALUES
+(1, 'lmehdi', 'MohamedMehdi.Hajouni@esprit.tn', '$2y$13$jYEi663lqrs4OM/WqUZhreR27EwabVKMKSLZdgGMnRQUM1pSJcA9e', 50, '2026-02-05', '[\"ROLE_ADMIN\"]', NULL, NULL),
+(13, 'chamem', 'chammem@gmail.com', '$2y$13$3aICeK/3SfQM2eUe1qExJ.wpvTnvpiNIKbnwgoLwO/IE7j4eIiN7i', 0, '2026-02-07', '[\"ROLE_SPECIALISTE\"]', NULL, NULL),
+(15, 'monji', 'monji@gmail.com', '$2y$13$OdVnRMHg8psZcOhA16VXEOeLG0LBILJ7ETcjgfE6w0d4RUa.20VGm', 150, '2026-02-07', '[\"ROLE_USER\"]', NULL, NULL),
+(21, 'dhia', 'dhia@gmail.com', '$2y$13$eiSleno6BhGOWydZqGJqgObzcgrGRj3F0NfCyZRDv0Klq0ro/56gm', 0, '2026-02-16', '[\"ROLE_USER\"]', NULL, NULL);
+
+--
+-- Index pour les tables déchargées
+--
+
+--
+-- Index pour la table `aliment`
+--
+ALTER TABLE `aliment`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `IDX_70FF972B1D236AAA` (`repas_id`);
+
+--
+-- Index pour la table `certification`
+--
+ALTER TABLE `certification`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `UNIQ_6C3C6D75FB88E14F` (`utilisateur_id`);
+
+--
+-- Index pour la table `consultation`
+--
+ALTER TABLE `consultation`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `UNIQ_964685A691EF7EAA` (`rendez_vous_id`);
+
+--
+-- Index pour la table `doctrine_migration_versions`
+--
+ALTER TABLE `doctrine_migration_versions`
+  ADD PRIMARY KEY (`version`);
+
+--
+-- Index pour la table `evenement_sante`
+--
+ALTER TABLE `evenement_sante`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `IDX_5CA29E937A45358C` (`groupe_id`);
+
+--
+-- Index pour la table `exercice`
+--
+ALTER TABLE `exercice`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `IDX_E418C74DE3797A94` (`seance_id`);
+
+--
+-- Index pour la table `groupe_soutien`
+--
+ALTER TABLE `groupe_soutien`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Index pour la table `membre_groupe`
+--
+ALTER TABLE `membre_groupe`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `IDX_9EB01998FB88E14F` (`utilisateur_id`),
+  ADD KEY `IDX_9EB019987A45358C` (`groupe_id`);
+
+--
+-- Index pour la table `messenger_messages`
+--
+ALTER TABLE `messenger_messages`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `IDX_75EA56E0FB7336F0E3BD61CE16BA31DBBF396750` (`queue_name`,`available_at`,`delivered_at`,`id`);
+
+--
+-- Index pour la table `prescription`
+--
+ALTER TABLE `prescription`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `IDX_1FBFB8D962FF6CDF` (`consultation_id`);
+
+--
+-- Index pour la table `profil_sante`
+--
+ALTER TABLE `profil_sante`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `UNIQ_8104E92FFB88E14F` (`utilisateur_id`);
+
+--
+-- Index pour la table `question`
+--
+ALTER TABLE `question`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `IDX_B6F7494E853CD175` (`quiz_id`);
+
+--
+-- Index pour la table `quiz_mental`
+--
+ALTER TABLE `quiz_mental`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `IDX_9DD826AFB88E14F` (`utilisateur_id`);
+
+--
+-- Index pour la table `rendez_vous`
+--
+ALTER TABLE `rendez_vous`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `IDX_65E8AA0A6F1A5C10` (`specialiste_id`),
+  ADD KEY `IDX_65E8AA0A6B899279` (`patient_id`);
+
+--
+-- Index pour la table `repas`
+--
+ALTER TABLE `repas`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `IDX_A8D351B3FB88E14F` (`utilisateur_id`);
+
+--
+-- Index pour la table `seance_sport`
+--
+ALTER TABLE `seance_sport`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `IDX_593FC9EFB88E14F` (`utilisateur_id`);
+
+--
+-- Index pour la table `specialiste`
+--
+ALTER TABLE `specialiste`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `UNIQ_55C86B15FB88E14F` (`utilisateur_id`);
+
+--
+-- Index pour la table `utilisateur`
+--
+ALTER TABLE `utilisateur`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `UNIQ_1D1C63B3E7927C74` (`email`);
+
+--
+-- AUTO_INCREMENT pour les tables déchargées
+--
+
+--
+-- AUTO_INCREMENT pour la table `aliment`
+--
+ALTER TABLE `aliment`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- AUTO_INCREMENT pour la table `certification`
+--
+ALTER TABLE `certification`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
+-- AUTO_INCREMENT pour la table `consultation`
+--
+ALTER TABLE `consultation`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT pour la table `evenement_sante`
+--
+ALTER TABLE `evenement_sante`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT pour la table `exercice`
+--
+ALTER TABLE `exercice`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT pour la table `groupe_soutien`
+--
+ALTER TABLE `groupe_soutien`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT pour la table `membre_groupe`
+--
+ALTER TABLE `membre_groupe`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- AUTO_INCREMENT pour la table `messenger_messages`
+--
+ALTER TABLE `messenger_messages`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT pour la table `prescription`
+--
+ALTER TABLE `prescription`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT pour la table `profil_sante`
+--
+ALTER TABLE `profil_sante`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT pour la table `question`
+--
+ALTER TABLE `question`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT pour la table `quiz_mental`
+--
+ALTER TABLE `quiz_mental`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT pour la table `rendez_vous`
+--
+ALTER TABLE `rendez_vous`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT pour la table `repas`
+--
+ALTER TABLE `repas`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT pour la table `seance_sport`
+--
+ALTER TABLE `seance_sport`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT pour la table `specialiste`
+--
+ALTER TABLE `specialiste`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT pour la table `utilisateur`
+--
+ALTER TABLE `utilisateur`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+
+--
+-- Contraintes pour les tables déchargées
+--
+
+--
+-- Contraintes pour la table `aliment`
+--
+ALTER TABLE `aliment`
+  ADD CONSTRAINT `FK_70FF972B1D236AAA` FOREIGN KEY (`repas_id`) REFERENCES `repas` (`id`);
+
+--
+-- Contraintes pour la table `certification`
+--
+ALTER TABLE `certification`
+  ADD CONSTRAINT `FK_6C3C6D75FB88E14F` FOREIGN KEY (`utilisateur_id`) REFERENCES `utilisateur` (`id`) ON DELETE CASCADE;
+
+--
+-- Contraintes pour la table `consultation`
+--
+ALTER TABLE `consultation`
+  ADD CONSTRAINT `FK_964685A691EF7EAA` FOREIGN KEY (`rendez_vous_id`) REFERENCES `rendez_vous` (`id`);
+
+--
+-- Contraintes pour la table `evenement_sante`
+--
+ALTER TABLE `evenement_sante`
+  ADD CONSTRAINT `FK_5CA29E937A45358C` FOREIGN KEY (`groupe_id`) REFERENCES `groupe_soutien` (`id`);
+
+--
+-- Contraintes pour la table `exercice`
+--
+ALTER TABLE `exercice`
+  ADD CONSTRAINT `FK_E418C74DE3797A94` FOREIGN KEY (`seance_id`) REFERENCES `seance_sport` (`id`);
+
+--
+-- Contraintes pour la table `membre_groupe`
+--
+ALTER TABLE `membre_groupe`
+  ADD CONSTRAINT `FK_9EB019987A45358C` FOREIGN KEY (`groupe_id`) REFERENCES `groupe_soutien` (`id`),
+  ADD CONSTRAINT `FK_9EB01998FB88E14F` FOREIGN KEY (`utilisateur_id`) REFERENCES `utilisateur` (`id`);
+
+--
+-- Contraintes pour la table `prescription`
+--
+ALTER TABLE `prescription`
+  ADD CONSTRAINT `FK_1FBFB8D962FF6CDF` FOREIGN KEY (`consultation_id`) REFERENCES `consultation` (`id`);
+
+--
+-- Contraintes pour la table `profil_sante`
+--
+ALTER TABLE `profil_sante`
+  ADD CONSTRAINT `FK_8104E92FFB88E14F` FOREIGN KEY (`utilisateur_id`) REFERENCES `utilisateur` (`id`) ON DELETE CASCADE;
+
+--
+-- Contraintes pour la table `question`
+--
+ALTER TABLE `question`
+  ADD CONSTRAINT `FK_B6F7494E853CD175` FOREIGN KEY (`quiz_id`) REFERENCES `quiz_mental` (`id`);
+
+--
+-- Contraintes pour la table `quiz_mental`
+--
+ALTER TABLE `quiz_mental`
+  ADD CONSTRAINT `FK_9DD826AFB88E14F` FOREIGN KEY (`utilisateur_id`) REFERENCES `utilisateur` (`id`);
+
+--
+-- Contraintes pour la table `rendez_vous`
+--
+ALTER TABLE `rendez_vous`
+  ADD CONSTRAINT `FK_65E8AA0A6B899279` FOREIGN KEY (`patient_id`) REFERENCES `utilisateur` (`id`),
+  ADD CONSTRAINT `FK_65E8AA0A6F1A5C10` FOREIGN KEY (`specialiste_id`) REFERENCES `utilisateur` (`id`);
+
+--
+-- Contraintes pour la table `repas`
+--
+ALTER TABLE `repas`
+  ADD CONSTRAINT `FK_A8D351B3FB88E14F` FOREIGN KEY (`utilisateur_id`) REFERENCES `utilisateur` (`id`);
+
+--
+-- Contraintes pour la table `seance_sport`
+--
+ALTER TABLE `seance_sport`
+  ADD CONSTRAINT `FK_593FC9EFB88E14F` FOREIGN KEY (`utilisateur_id`) REFERENCES `utilisateur` (`id`);
+
+--
+-- Contraintes pour la table `specialiste`
+--
+ALTER TABLE `specialiste`
+  ADD CONSTRAINT `FK_55C86B15FB88E14F` FOREIGN KEY (`utilisateur_id`) REFERENCES `utilisateur` (`id`);
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

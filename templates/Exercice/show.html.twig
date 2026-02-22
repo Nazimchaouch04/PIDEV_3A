@@ -1,0 +1,63 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Admin - Détail Exercice{% endblock %}
+
+{% block body %}
+<div class="page-header flex-between">
+    <div>
+        <h1 class="page-title">{{ exercice.nomExercice }}</h1>
+        <p class="page-subtitle">Détails de l'exercice.</p>
+    </div>
+    <div style="display:flex; gap:10px;">
+        <a href="{{ path('app_exercice_edit', {id: exercice.id}) }}" class="btn btn-secondary">✏️ Modifier</a>
+        <a href="{{ path('app_exercice_index') }}" class="btn">← Retour</a>
+    </div>
+</div>
+
+<div class="grid grid-cols-3 gap-4 mb-6">
+    <div class="stat-card">
+        <div class="stat-card-label">Nom</div>
+        <div class="stat-card-value">{{ exercice.nomExercice }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card-label">Intensité</div>
+        <div class="stat-card-value">
+            {% if exercice.intensite.value == 'eleve' %}
+                <span style="color:#dc2626;">🔴 Élevé</span>
+            {% elseif exercice.intensite.value == 'modere' %}
+                <span style="color:#d97706;">🟡 Modéré</span>
+            {% else %}
+                <span style="color:#065f46;">🟢 Faible</span>
+            {% endif %}
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card-label">Calories/min</div>
+        <div class="stat-card-value">{{ exercice.caloriesParMinute }} kcal</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card-label">Séance associée</div>
+        <div class="stat-card-value">{{ exercice.seance.nomSeance }}</div>
+    </div>
+</div>
+
+<div class="card" style="border:1px solid #ffcccc;">
+    <div class="card-header" style="background:#fff3f3;">
+        <h4 class="card-title" style="color:#dc3545;">Zone de danger</h4>
+    </div>
+    <div style="padding:20px;">
+        <form method="post" action="{{ path('app_exercice_delete', {id: exercice.id}) }}" id="delete-form-{{ exercice.id }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ exercice.id) }}">
+            <button type="button" class="btn" style="background:#dc3545; color:white;" onclick="confirmDelete('delete-form-{{ exercice.id }}')">
+                🗑 Supprimer l'exercice
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+function confirmDelete(formId) {
+    if (confirm('Supprimer cet exercice définitivement ?')) document.getElementById(formId).submit();
+}
+</script>
+{% endblock %}

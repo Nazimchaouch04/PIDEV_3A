@@ -1,0 +1,43 @@
+parameters:
+    app.quiz_api_url: '%env(QUIZ_API_URL)%'
+    app.api_key: '%env(QUIZ_API_KEY)%'
+    google_recaptcha_site_key: '%env(GOOGLE_RECAPTCHA_SITE_KEY)%'
+    app.recaptcha_site_key: '%env(RECAPTCHA_SITE_KEY)%'
+    app.recaptcha_secret_key: '%env(RECAPTCHA_SECRET_KEY)%'
+    app.calorie_ninjas_key: '%env(CALORIE_NINJAS_API_KEY)%'
+    app.groq_api_key: '%env(GROQ_API_KEY)%'
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
+            - '../src/Service/QuizService.php'
+            - '../src/Service/RecaptchaService.php'
+            - '../src/Service/CalorieNinjasService.php'
+
+    App\Service\QuizService:
+        arguments:
+            $quizApiUrl: '%app.quiz_api_url%'
+            $apiKey: '%app.api_key%'
+
+    App\Service\RecaptchaService:
+        arguments:
+            $recaptchaSecretKey: '%app.recaptcha_secret_key%'
+
+    App\Service\CalorieNinjasService:
+        arguments:
+            $client: '@http_client'
+            $apiKey: '%app.calorie_ninjas_key%'
+
+    App\Service\ProgrammeIAService:
+        public: true
+        arguments:
+            $client: '@http_client'
+            $groqApiKey: '%app.groq_api_key%'

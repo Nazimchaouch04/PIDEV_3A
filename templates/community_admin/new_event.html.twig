@@ -1,0 +1,47 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block body %}
+    <div class="page-header">
+        <h1 class="page-title">{{ title }}</h1>
+        <p class="page-subtitle">Schedule a new physical activity for your community</p>
+    </div>
+
+    <div class="card" style="max-width: 600px;">
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            
+            <div class="form-group">
+                <label class="form-label">Associated Community</label>
+                {{ form_widget(form.groupe, {'attr': {'class': 'form-control'}}) }}
+                <div style="color: #EF4444; font-size: 12px; margin-top: 4px;">{{ form_errors(form.groupe) }}</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Event Title</label>
+                {{ form_widget(form.titreEvent, {'attr': {'class': 'form-control', 'placeholder': 'e.g. Morning Yoga in the Park'}}) }}
+                <div style="color: #EF4444; font-size: 12px; margin-top: 4px;">{{ form_errors(form.titreEvent) }}</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Date & Time</label>
+                {{ form_widget(form.dateEvent, {'attr': {'class': 'form-control'}}) }}
+                <div style="color: #EF4444; font-size: 12px; margin-top: 4px;">{{ form_errors(form.dateEvent) }}</div>
+            </div>
+
+            {# Meeting Link removed from here as requested #}
+
+            <div class="form-group">
+                <label class="form-label">Participation Points (Bonus for users)</label>
+                {{ form_widget(form.pointsParticipation, {'attr': {'class': 'form-control'}}) }}
+                <div style="color: #EF4444; font-size: 12px; margin-top: 4px;">{{ form_errors(form.pointsParticipation) }}</div>
+            </div>
+
+            <div style="margin-top: 32px; display: flex; gap: 12px;">
+                <button type="submit" class="btn btn-success btn-lg">Schedule Event</button>
+                <a href="{{ path('app_admin_community_index') }}" class="btn btn-outline btn-lg">Cancel</a>
+            </div>
+
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

@@ -1,0 +1,237 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Admin - Gestion Exercices{% endblock %}
+
+{% block body %}
+<div class="page-header flex-between">
+    <div>
+        <h1 class="page-title">Gestion des Exercices</h1>
+        <p class="page-subtitle">Administration de tous les exercices.</p>
+    </div>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        {# ── Bouton Défis & Médailles ── #}
+        <a href="{{ path('app_exercice_defis') }}" style="
+            display: inline-flex; align-items: center; gap: 6px;
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            color: white; padding: 0.5rem 1.2rem;
+            border-radius: 8px; text-decoration: none;
+            font-size: 0.9rem; font-weight: 600;
+            box-shadow: 0 2px 8px rgba(245,158,11,0.35);
+            transition: opacity 0.2s;">
+            🏅 Défis & Médailles
+        </a>
+        {# ── Bouton Statistiques ── #}
+        <a href="{{ path('app_exercice_stats') }}" style="
+            display: inline-flex; align-items: center; gap: 6px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white; padding: 0.5rem 1.2rem;
+            border-radius: 8px; text-decoration: none;
+            font-size: 0.9rem; font-weight: 600;
+            box-shadow: 0 2px 8px rgba(99,102,241,0.35);
+            transition: opacity 0.2s;">
+            📊 Mes Statistiques
+        </a>
+        <a href="{{ path('app_exercice_recommandations') }}" class="btn btn-secondary">
+            🏋️ Recommandations
+        </a>
+        <a href="{{ path('app_exercice_new') }}" class="btn btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Nouvel exercice
+        </a>
+    </div>
+</div>
+
+{# ── KPI rapides ── #}
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+    <div style="background:#fff; border-radius:12px; padding:1rem 1.25rem; box-shadow:0 1px 4px rgba(0,0,0,0.08); border-left:4px solid #6366f1;">
+        <div style="font-size:1.6rem; font-weight:700; color:#1e293b;">{{ exercices|length }}</div>
+        <div style="font-size:0.75rem; color:#94a3b8; text-transform:uppercase; letter-spacing:.04em;">Total exercices</div>
+    </div>
+    <div style="background:#fff; border-radius:12px; padding:1rem 1.25rem; box-shadow:0 1px 4px rgba(0,0,0,0.08); border-left:4px solid #10b981;">
+        <div style="font-size:1.6rem; font-weight:700; color:#1e293b;">
+            {{ exercices|filter(e => e.intensite.value == 'faible')|length }}
+        </div>
+        <div style="font-size:0.75rem; color:#94a3b8; text-transform:uppercase; letter-spacing:.04em;">🟢 Faible</div>
+    </div>
+    <div style="background:#fff; border-radius:12px; padding:1rem 1.25rem; box-shadow:0 1px 4px rgba(0,0,0,0.08); border-left:4px solid #f59e0b;">
+        <div style="font-size:1.6rem; font-weight:700; color:#1e293b;">
+            {{ exercices|filter(e => e.intensite.value == 'modere')|length }}
+        </div>
+        <div style="font-size:0.75rem; color:#94a3b8; text-transform:uppercase; letter-spacing:.04em;">🟡 Modéré</div>
+    </div>
+    <div style="background:#fff; border-radius:12px; padding:1rem 1.25rem; box-shadow:0 1px 4px rgba(0,0,0,0.08); border-left:4px solid #ef4444;">
+        <div style="font-size:1.6rem; font-weight:700; color:#1e293b;">
+            {{ exercices|filter(e => e.intensite.value == 'eleve')|length }}
+        </div>
+        <div style="font-size:0.75rem; color:#94a3b8; text-transform:uppercase; letter-spacing:.04em;">🔴 Élevé</div>
+    </div>
+</div>
+
+{# Filtres #}
+<div class="card mb-4">
+    <div class="card-header"><h4 class="card-title">🔍 Recherche & Filtres</h4></div>
+    <div style="padding:15px; display:flex; gap:10px; flex-wrap:wrap;">
+        <input type="text" id="searchInput" placeholder="Rechercher par nom..." onkeyup="filterTable()" class="form-control" style="flex:1; min-width:200px;"/>
+        <select id="filterIntensite" onchange="filterTable()" class="form-control" style="min-width:180px;">
+            <option value="">Toutes les intensités</option>
+            <option value="faible">🟢 Faible</option>
+            <option value="modere">🟡 Modéré</option>
+            <option value="eleve">🔴 Élevé</option>
+        </select>
+        <select id="filterSeance" onchange="filterTable()" class="form-control" style="min-width:180px;">
+            <option value="">Toutes les séances</option>
+            {% for seance in seances %}
+                <option value="{{ seance.nomSeance }}">{{ seance.nomSeance }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+
+{# ── Widget Calories ── #}
+<div style="background: linear-gradient(135deg, #fff7ed, #fff); border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); margin: 20px 0; border-left: 4px solid #f97316;">
+    <h3 style="margin:0 0 12px; color:#1e293b;">🔥 Calculateur de Calories Brûlées</h3>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items:center;">
+        <select id="cal-activite" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; background:#fff;">
+            <option value="running">🏃 Course à pied</option>
+            <option value="cycling">🚴 Vélo</option>
+            <option value="swimming">🏊 Natation</option>
+            <option value="weightlifting">🏋️ Musculation</option>
+            <option value="yoga">🧘 Yoga</option>
+            <option value="walking">🚶 Marche</option>
+            <option value="jumping rope">🪢 Corde à sauter</option>
+        </select>
+        <input type="number" id="cal-duree" value="30" min="1" max="300"
+               placeholder="Durée (min)"
+               style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; width: 130px; background:#fff;"/>
+        <button onclick="calculerCalories()"
+                style="background: linear-gradient(135deg,#f97316,#ef4444); color: white; border: none; padding: 8px 20px; border-radius: 8px; cursor: pointer; font-weight:600;">
+            Calculer 🔥
+        </button>
+    </div>
+    <div id="cal-resultat" style="margin-top: 15px; font-size: 15px; color: #1e293b;"></div>
+</div>
+
+<div class="card">
+    <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+        <h4 class="card-title">Liste des exercices ({{ exercices|length }})</h4>
+        <div style="display:flex; gap:.75rem; align-items:center;">
+            <a href="{{ path('app_exercice_defis') }}" style="font-size:0.82rem; color:#f59e0b; text-decoration:none; font-weight:600;">🏅 Mes défis →</a>
+            <a href="{{ path('app_exercice_stats') }}" style="font-size:0.82rem; color:#6366f1; text-decoration:none; font-weight:600;">📊 Mes stats →</a>
+        </div>
+    </div>
+    {% if exercices|length > 0 %}
+    <div class="table-container">
+        <table class="table" id="exercicesTable">
+            <thead>
+                <tr>
+                    <th onclick="sortByColumn(0)" style="cursor:pointer;">Nom ▲▼</th>
+                    <th onclick="sortByColumn(1)" style="cursor:pointer;">Intensité ▲▼</th>
+                    <th onclick="sortByColumn(2)" style="cursor:pointer;">Calories/min ▲▼</th>
+                    <th onclick="sortByColumn(3)" style="cursor:pointer;">Séance ▲▼</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                {% for exercice in exercices %}
+                <tr>
+                    <td><strong>{{ exercice.nomExercice }}</strong></td>
+                    <td>
+                        {% if exercice.intensite.value == 'eleve' %}
+                            <span class="badge" style="background:#fee2e2; color:#dc2626; padding:4px 10px; border-radius:20px; font-size:.8rem;">🔴 Élevé</span>
+                        {% elseif exercice.intensite.value == 'modere' %}
+                            <span class="badge" style="background:#fef3c7; color:#d97706; padding:4px 10px; border-radius:20px; font-size:.8rem;">🟡 Modéré</span>
+                        {% else %}
+                            <span class="badge" style="background:#d1fae5; color:#065f46; padding:4px 10px; border-radius:20px; font-size:.8rem;">🟢 Faible</span>
+                        {% endif %}
+                    </td>
+                    <td><strong style="color:#f97316;">{{ exercice.caloriesParMinute }}</strong> kcal/min</td>
+                    <td>
+                        <span style="background:#ede9fe; color:#6d28d9; padding:3px 8px; border-radius:6px; font-size:.82rem;">
+                            {{ exercice.seance.nomSeance }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="table-actions">
+                            <a href="{{ path('app_exercice_show', {id: exercice.id}) }}" class="icon-btn" title="Voir">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </a>
+                            <a href="{{ path('app_exercice_edit', {id: exercice.id}) }}" class="icon-btn" title="Modifier">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                </svg>
+                            </a>
+                            <form action="{{ path('app_exercice_delete', {id: exercice.id}) }}" method="post" style="display:inline;" id="delete-form-{{ exercice.id }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ exercice.id) }}">
+                                <button type="button" class="icon-btn danger" title="Supprimer" onclick="confirmDelete('delete-form-{{ exercice.id }}')">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="3 6 5 6 21 6"/>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                    </svg>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <h4 class="empty-state-title">Aucun exercice trouvé</h4>
+        <p class="text-gray">Commencez par ajouter un exercice.</p>
+        <a href="{{ path('app_exercice_new') }}" class="btn btn-secondary mt-4">Ajouter un exercice</a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function filterTable() {
+    const search   = document.getElementById('searchInput').value.toLowerCase();
+    const intensite = document.getElementById('filterIntensite').value.toLowerCase();
+    const seance   = document.getElementById('filterSeance').value.toLowerCase();
+    document.querySelectorAll('#tableBody tr').forEach(row => {
+        const text = row.innerText.toLowerCase();
+        row.style.display = (
+            text.includes(search) &&
+            (intensite === '' || text.includes(intensite)) &&
+            (seance === '' || text.includes(seance))
+        ) ? '' : 'none';
+    });
+}
+function sortByColumn(col) {
+    const tbody = document.querySelector('#tableBody');
+    const rows  = Array.from(tbody.querySelectorAll('tr'));
+    rows.sort((a, b) => (a.cells[col]?.innerText || '').localeCompare(b.cells[col]?.innerText || ''));
+    rows.forEach(r => tbody.appendChild(r));
+}
+function confirmDelete(formId) {
+    if (confirm('Supprimer cet exercice ?')) document.getElementById(formId).submit();
+}
+async function calculerCalories() {
+    const activite = document.getElementById('cal-activite').value;
+    const duree    = document.getElementById('cal-duree').value;
+    const resultat = document.getElementById('cal-resultat');
+    resultat.innerHTML = '⏳ Calcul en cours...';
+    const res  = await fetch(`/exercice/calories?activite=${activite}&duree=${duree}`);
+    const data = await res.json();
+    if (data.total_calories) {
+        resultat.innerHTML = `
+            <div style="background:#fff7ed; border-radius:8px; padding:10px 14px; border-left:3px solid #f97316; display:inline-block;">
+                <strong>🔥 Calories brûlées :</strong>
+                <span style="color:#f97316; font-size:1.1rem;">${Math.round(data.total_calories)} kcal</span>
+                <br><small style="color:#94a3b8;">Activité : ${data.name} | Durée : ${data.duration_minutes} min</small>
+            </div>`;
+    } else {
+        resultat.innerHTML = '<span style="color:#ef4444;">❌ Activité non trouvée.</span>';
+    }
+}
+</script>
+{% endblock %}

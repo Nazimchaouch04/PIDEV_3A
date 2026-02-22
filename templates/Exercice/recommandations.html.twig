@@ -1,0 +1,73 @@
+{% extends 'base_back.html.twig' %}
+{% block title %}Recommandations d'exercices{% endblock %}
+{% block body %}
+
+<div class="page-header flex-between">
+    <div>
+        <h1 class="page-title">🏋️ Recommandations d'exercices</h1>
+        <p class="page-subtitle">Trouvez les meilleurs exercices par groupe musculaire</p>
+    </div>
+    <a href="{{ path('app_exercice_index') }}" class="btn btn-secondary">
+        ← Retour aux exercices
+    </a>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header"><h4 class="card-title">💪 Choisir un muscle</h4></div>
+    <div style="padding: 20px;">
+        <form method="GET" style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <select name="muscle" class="form-control" style="min-width: 200px;">
+                <option value="biceps" {{ muscleChoisi == 'biceps' ? 'selected' : '' }}>Biceps</option>
+                <option value="triceps" {{ muscleChoisi == 'triceps' ? 'selected' : '' }}>Triceps</option>
+                <option value="chest" {{ muscleChoisi == 'chest' ? 'selected' : '' }}>Pectoraux</option>
+                <option value="abdominals" {{ muscleChoisi == 'abdominals' ? 'selected' : '' }}>Abdominaux</option>
+                <option value="quadriceps" {{ muscleChoisi == 'quadriceps' ? 'selected' : '' }}>Quadriceps</option>
+                <option value="hamstrings" {{ muscleChoisi == 'hamstrings' ? 'selected' : '' }}>Ischio-jambiers</option>
+                <option value="glutes" {{ muscleChoisi == 'glutes' ? 'selected' : '' }}>Fessiers</option>
+                <option value="lats" {{ muscleChoisi == 'lats' ? 'selected' : '' }}>Dorsaux</option>
+            </select>
+            <button type="submit" class="btn btn-secondary">🔍 Rechercher</button>
+            {# ✅ BOUTON PROGRAMME IA AJOUTÉ #}
+            <a href="{{ path('app_exercice_programme') }}" class="btn btn-secondary" style="background: #4f46e5; color: white;">
+                🤖 Générer un programme IA
+            </a>
+        </form>
+    </div>
+</div>
+
+{% if exercices %}
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title">📋 Exercices trouvés ({{ exercices|length }})</h4>
+    </div>
+    <div style="padding: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px;">
+        {% for ex in exercices %}
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 15px;">
+            <h4 style="color: #1e293b; margin-bottom: 8px;">🏋️ {{ ex.name ?? '' }}</h4>
+            <p>
+                <span style="background: #dbeafe; color: #1d4ed8; padding: 2px 8px; border-radius: 20px; font-size: 12px;">
+                    {{ ex.muscle ?? '' }}
+                </span>
+                <span style="background: #fef3c7; color: #d97706; padding: 2px 8px; border-radius: 20px; font-size: 12px; margin-left: 5px;">
+                    {{ ex.difficulty ?? '' }}
+                </span>
+            </p>
+            <p style="color: #64748b; font-size: 13px; margin-top: 8px;">
+                {{ ex.instructions is defined and ex.instructions ? ex.instructions|slice(0, 120) ~ '...' : 'Aucune instruction disponible.' }}
+            </p>
+            <p style="font-size: 12px; color: #94a3b8; margin-top: 5px;">
+                🔧 Équipement : {{ ex.equipments is defined and ex.equipments is iterable ? ex.equipments|join(', ') : (ex.equipments ?? 'Non spécifié') }}
+            </p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% else %}
+<div class="card">
+    <div style="padding: 40px; text-align: center; color: #94a3b8;">
+        <p>Aucun exercice trouvé. Essayez un autre muscle.</p>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

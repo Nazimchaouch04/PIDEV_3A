@@ -1,0 +1,52 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Admin - Nouvel Exercice{% endblock %}
+
+{% block body %}
+<div class="page-header flex-between">
+    <div>
+        <h1 class="page-title">Nouvel Exercice</h1>
+        <p class="page-subtitle">Ajouter un nouvel exercice.</p>
+    </div>
+    <a href="{{ path('app_exercice_index') }}" class="btn btn-secondary">← Retour</a>
+</div>
+
+<div class="card" style="max-width:600px;">
+    <div class="card-header"><h4 class="card-title">Informations de l'exercice</h4></div>
+    <div style="padding:20px;">
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+        <div class="form-group">
+            {{ form_label(form.nomExercice) }}
+            {{ form_widget(form.nomExercice, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.nomExercice) }}
+            <small class="text-gray">pompes, squats, abdos, burpees, fentes, tractions, course, vélo, natation, musculation, yoga, danse</small>
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.intensite) }}
+            {{ form_widget(form.intensite, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.intensite) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.caloriesParMinute) }}
+            {{ form_widget(form.caloriesParMinute, {'attr': {'class': 'form-control', 'placeholder': 'Ex: 5.5', 'min': '0', 'max': '10000'}}) }}
+            {{ form_errors(form.caloriesParMinute) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.seance) }}
+            {{ form_widget(form.seance, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.seance) }}
+        </div>
+
+        <div class="modal-footer" style="margin-top:2rem; padding-top:1rem; border-top:1px solid var(--gray-200);">
+            <a href="{{ path('app_exercice_index') }}" class="btn btn-ghost">Annuler</a>
+            <button type="submit" class="btn btn-secondary">Enregistrer</button>
+        </div>
+
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}
