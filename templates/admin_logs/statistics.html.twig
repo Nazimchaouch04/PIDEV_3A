@@ -1,0 +1,375 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Statistiques des Logs - BioSync{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    .stat-card {
+        background: white;
+        padding: 25px;
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        text-align: center;
+        transition: transform 0.2s;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    .stat-icon {
+        font-size: 40px;
+        margin-bottom: 10px;
+    }
+    .stat-number {
+        font-size: 32px;
+        font-weight: 700;
+        color: #6C5CE7;
+        margin-bottom: 5px;
+    }
+    .stat-label {
+        color: #718096;
+        font-size: 14px;
+        font-weight: 500;
+    }
+    .chart-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 25px;
+        margin-bottom: 25px;
+    }
+    .chart-card {
+        background: white;
+        padding: 25px;
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+    .chart-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #2D3748;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .chart-container {
+        position: relative;
+        height: 300px;
+    }
+    .full-width {
+        grid-column: 1 / -1;
+    }
+    .top-users-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .top-users-list li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #E2E8F0;
+    }
+    .top-users-list li:last-child {
+        border-bottom: none;
+    }
+    .user-rank {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: #6C5CE7;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 14px;
+    }
+    .user-info {
+        flex: 1;
+        margin-left: 15px;
+    }
+    .user-name {
+        font-weight: 600;
+        color: #2D3748;
+    }
+    .user-count {
+        background: #C6F6D5;
+        color: #22543D;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+    .stats-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+    .back-link {
+        color: #6C5CE7;
+        text-decoration: none;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .back-link:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="bo-mental-dashboard">
+    <div class="stats-header">
+        <div>
+            <h1 class="page-title">📊 Statistiques des Logs</h1>
+            <p class="page-subtitle">Analyse complète de l'activité sur BioSync</p>
+        </div>
+        <a href="{{ path('app_admin_logs_index') }}" class="back-link">
+            ← Retour aux logs
+        </a>
+    </div>
+
+    {# Cartes de statistiques #}
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">📁</div>
+            <div class="stat-number">{{ totalLogs }}</div>
+            <div class="stat-label">Total des logs</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📅</div>
+            <div class="stat-number">{{ logsToday }}</div>
+            <div class="stat-label">Logs aujourd'hui</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📆</div>
+            <div class="stat-number">{{ logsThisWeek }}</div>
+            <div class="stat-label">Cette semaine</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📈</div>
+            <div class="stat-number">{{ logsThisMonth }}</div>
+            <div class="stat-label">Ce mois</div>
+        </div>
+    </div>
+
+    {# Grille de graphiques #}
+    <div class="chart-grid">
+        {# Courbe d'activité par jour #}
+        <div class="chart-card">
+            <div class="chart-title">
+                📈 Activité par jour (30 derniers jours)
+            </div>
+            <div class="chart-container">
+                <canvas id="activityChart"></canvas>
+            </div>
+        </div>
+
+        {# Pie chart par rôle #}
+        <div class="chart-card">
+            <div class="chart-title">
+                🥧 Répartition par rôle
+            </div>
+            <div class="chart-container">
+                <canvas id="roleChart"></canvas>
+            </div>
+        </div>
+
+        {# Top utilisateurs actifs #}
+        <div class="chart-card">
+            <div class="chart-title">
+                🏆 Top 5 utilisateurs les plus actifs
+            </div>
+            <ul class="top-users-list">
+                {% set rank = 1 %}
+                {% for name, count in topUsers %}
+                <li>
+                    <div style="display: flex; align-items: center;">
+                        <div class="user-rank">{{ rank }}</div>
+                        <div class="user-info">
+                            <div class="user-name">{{ name }}</div>
+                        </div>
+                    </div>
+                    <span class="user-count">{{ count }} actions</span>
+                </li>
+                {% set rank = rank + 1 %}
+                {% endfor %}
+            </ul>
+        </div>
+
+        {# Distribution horaire #}
+        <div class="chart-card">
+            <div class="chart-title">
+                ⏰ Distribution horaire
+            </div>
+            <div class="chart-container">
+                <canvas id="hourlyChart"></canvas>
+            </div>
+        </div>
+
+        {# Top actions #}
+        <div class="chart-card full-width">
+            <div class="chart-title">
+                🎯 Top 5 des actions les plus fréquentes
+            </div>
+            <div class="chart-container">
+                <canvas id="actionChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Courbe d'activité par jour
+    const activityCtx = document.getElementById('activityChart').getContext('2d');
+    new Chart(activityCtx, {
+        type: 'line',
+        data: {
+            labels: {{ activityByDay.labels|json_encode|raw }},
+            datasets: [{
+                label: 'Nombre de logs',
+                data: {{ activityByDay.data|json_encode|raw }},
+                borderColor: '#6C5CE7',
+                backgroundColor: 'rgba(108, 92, 231, 0.1)',
+                borderWidth: 3,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#6C5CE7',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(0,0,0,0.05)' }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+
+    // Pie chart par rôle
+    const roleCtx = document.getElementById('roleChart').getContext('2d');
+    new Chart(roleCtx, {
+        type: 'doughnut',
+        data: {
+            labels: {{ activityByRole.labels|json_encode|raw }},
+            datasets: [{
+                data: {{ activityByRole.data|json_encode|raw }},
+                backgroundColor: {{ activityByRole.colors|json_encode|raw }},
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 15,
+                        usePointStyle: true
+                    }
+                }
+            }
+        }
+    });
+
+    // Distribution horaire
+    const hourlyCtx = document.getElementById('hourlyChart').getContext('2d');
+    new Chart(hourlyCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ hourlyDistribution.labels|json_encode|raw }},
+            datasets: [{
+                label: 'Activité',
+                data: {{ hourlyDistribution.data|json_encode|raw }},
+                backgroundColor: '#4299E1',
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(0,0,0,0.05)' }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: {
+                        maxTicksLimit: 12
+                    }
+                }
+            }
+        }
+    });
+
+    // Top actions
+    const actionCtx = document.getElementById('actionChart').getContext('2d');
+    new Chart(actionCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ activityByAction.labels|json_encode|raw }},
+            datasets: [{
+                label: 'Fréquence',
+                data: {{ activityByAction.data|json_encode|raw }},
+                backgroundColor: [
+                    '#48BB78',
+                    '#4299E1',
+                    '#ED8936',
+                    '#9F7AEA',
+                    '#F56565'
+                ],
+                borderRadius: 8,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(0,0,0,0.05)' }
+                },
+                y: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

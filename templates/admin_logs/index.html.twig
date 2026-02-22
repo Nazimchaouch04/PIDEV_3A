@@ -2,6 +2,170 @@
 
 {% block title %}Historique des Activités{% endblock %}
 
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .filters-container {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        margin-bottom: 25px;
+    }
+    .filters-form {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        align-items: end;
+    }
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+    }
+    .filter-group label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #4A5568;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .filter-group select,
+    .filter-group input {
+        padding: 10px 14px;
+        border: 2px solid #E2E8F0;
+        border-radius: 8px;
+        font-size: 14px;
+        background: white;
+        transition: all 0.2s;
+    }
+    .filter-group select:focus,
+    .filter-group input:focus {
+        outline: none;
+        border-color: #6C5CE7;
+    }
+    .filter-buttons {
+        display: flex;
+        gap: 10px;
+    }
+    .btn-filter {
+        padding: 10px 20px;
+        background: #6C5CE7;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .btn-filter:hover {
+        background: #5A4FCF;
+    }
+    .btn-reset {
+        padding: 10px 20px;
+        background: #EDF2F7;
+        color: #4A5568;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    .btn-reset:hover {
+        background: #E2E8F0;
+    }
+    /* Badges colorés cohérents */
+    .badge-login {
+        background: #C6F6D5 !important;
+        color: #22543D !important;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .badge-logout {
+        background: #BEE3F8 !important;
+        color: #2A4365 !important;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .badge-failed {
+        background: #FED7D7 !important;
+        color: #742A2A !important;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .badge-suspicious {
+        background: #FEEBC8 !important;
+        color: #7C2D12 !important;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .badge-password {
+        background: #E9D8FD !important;
+        color: #44337A !important;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .badge-default {
+        background: #E2E8F0 !important;
+        color: #2D3748 !important;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .badge-role {
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: 600;
+    }
+    .badge-role-admin {
+        background: #FED7D7;
+        color: #742A2A;
+    }
+    .badge-role-user {
+        background: #C6F6D5;
+        color: #22543D;
+    }
+    .badge-role-coach {
+        background: #FEEBC8;
+        color: #7C2D12;
+    }
+    .badge-role-specialist {
+        background: #E9D8FD;
+        color: #44337A;
+    }
+</style>
+{% endblock %}
+
 {% block body %}
 <div class="bo-mental-dashboard">
     <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
@@ -9,12 +173,69 @@
             <h1 class="page-title">Historique des Logs</h1>
             <p class="page-subtitle">Suivi complet de l'activité sur l'application BioSync</p>
         </div>
-        <div>
-            <a href="{{ path('app_admin_logs_pdf') }}" class="btn btn-primary" style="background-color: #6C5CE7; border-color: #6C5CE7; display: flex; align-items: center; gap: 8px;">
+        <div style="display: flex; gap: 10px;">
+            <form method="POST" action="{{ path('app_admin_logs_clear') }}" style="display: inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir effacer tous les logs ? Cette action est irréversible.');">
+                <button type="submit" class="btn btn-danger" style="background-color: #E53E3E; border-color: #E53E3E; display: flex; align-items: center; gap: 8px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    Effacer l'historique
+                </button>
+            </form>
+            <a href="{{ path('app_admin_logs_statistics') }}" class="btn btn-success" style="background-color: #48BB78; border-color: #48BB78; display: flex; align-items: center; gap: 8px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                Statistiques
+            </a>
+            <a href="{{ path('app_admin_logs_pdf', {role: filters.role, action_type: filters.action_type, date_from: filters.date_from, date_to: filters.date_to}) }}" class="btn btn-primary" style="background-color: #6C5CE7; border-color: #6C5CE7; display: flex; align-items: center; gap: 8px;">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                 Exporter en PDF
             </a>
         </div>
+    </div>
+
+    {# Filtres Avancés #}
+    <div class="filters-container">
+        <form method="GET" action="{{ path('app_admin_logs_index') }}" class="filters-form">
+            <div class="filter-group">
+                <label for="role">🔽 Rôle</label>
+                <select name="role" id="role">
+                    <option value="">Tous les rôles</option>
+                    <option value="ROLE_ADMIN" {{ filters.role == 'ROLE_ADMIN' ? 'selected' : '' }}>Admin</option>
+                    <option value="ROLE_COACH" {{ filters.role == 'ROLE_COACH' ? 'selected' : '' }}>Coach</option>
+                    <option value="ROLE_SPECIALISTE" {{ filters.role == 'ROLE_SPECIALISTE' ? 'selected' : '' }}>Spécialiste</option>
+                    <option value="ROLE_USER" {{ filters.role == 'ROLE_USER' ? 'selected' : '' }}>Utilisateur</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="action_type">🔽 Type d'action</label>
+                <select name="action_type" id="action_type">
+                    <option value="">Toutes les actions</option>
+                    <option value="login" {{ filters.action_type == 'login' ? 'selected' : '' }}>🟢 Connexion réussie</option>
+                    <option value="logout" {{ filters.action_type == 'logout' ? 'selected' : '' }}>🔵 Déconnexion</option>
+                    <option value="failed" {{ filters.action_type == 'failed' ? 'selected' : '' }}>🔴 Connexion échouée</option>
+                    <option value="password" {{ filters.action_type == 'password' ? 'selected' : '' }}>🟣 Changement de mot de passe</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="date_from">📅 Date de début</label>
+                <input type="date" name="date_from" id="date_from" value="{{ filters.date_from }}" max="{{ "now"|date('Y-m-d') }}">
+            </div>
+
+            <div class="filter-group">
+                <label for="date_to">📅 Date de fin</label>
+                <input type="date" name="date_to" id="date_to" value="{{ filters.date_to }}" max="{{ "now"|date('Y-m-d') }}">
+            </div>
+
+            <div class="filter-buttons">
+                <button type="submit" class="btn-filter">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 5px;">
+                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                    </svg>
+                    Filtrer
+                </button>
+                <a href="{{ path('app_admin_logs_index') }}" class="btn-reset">Réinitialiser</a>
+            </div>
+        </form>
     </div>
 
     {# Recherche Dynamique #}
@@ -48,22 +269,32 @@
                         </td>
                         <td class="log-role">
                             {% if log.utilisateur and log.utilisateur.roles|length > 0 %}
-                                <span class="badge" style="background: #EBF4FF; color: #4299E1;">{{ log.utilisateur.roles|first }}</span>
+                                {% set role = log.utilisateur.roles|first %}
+                                {% if 'ROLE_ADMIN' in role %}
+                                    <span class="badge-role badge-role-admin">{{ role }}</span>
+                                {% elseif 'ROLE_COACH' in role %}
+                                    <span class="badge-role badge-role-coach">{{ role }}</span>
+                                {% elseif 'ROLE_SPECIALISTE' in role %}
+                                    <span class="badge-role badge-role-specialist">{{ role }}</span>
+                                {% else %}
+                                    <span class="badge-role badge-role-user">{{ role }}</span>
+                                {% endif %}
                             {% else %}
                                 -
                             {% endif %}
                         </td>
-                        <td class="log-action" style="font-weight: 500; color: #2D3748;">
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                {% if 'Connexion' in log.action %}
-                                    <span style="color: #48BB78;">🟢</span>
-                                {% elseif 'Suppression' in log.action or 'Refusé' in log.action %}
-                                    <span style="color: #F56565;">🔴</span>
-                                {% else %}
-                                    <span style="color: #4299E1;">🔵</span>
-                                {% endif %}
-                                {{ log.action }}
-                            </div>
+                        <td class="log-action">
+                            {% if 'Connexion réussie' in log.action %}
+                                <span class="badge-login">🟢 {{ log.action }}</span>
+                            {% elseif 'Déconnexion' in log.action %}
+                                <span class="badge-logout">🔵 {{ log.action }}</span>
+                            {% elseif 'échouée' in log.action or 'failed' in log.action|lower %}
+                                <span class="badge-failed">🔴 {{ log.action }}</span>
+                            {% elseif 'mot de passe' in log.action|lower or 'password' in log.action|lower %}
+                                <span class="badge-password">🟣 {{ log.action }}</span>
+                            {% else %}
+                                <span class="badge-default">⚪ {{ log.action }}</span>
+                            {% endif %}
                         </td>
                     </tr>
                     {% else %}
@@ -100,7 +331,6 @@
         var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
         table = document.getElementById("logsTable");
         switching = true;
-        // Direction du tri (croissant par défaut)
         dir = "asc"; 
         
         while (switching) {
@@ -112,7 +342,6 @@
                 x = rows[i].getElementsByTagName("TD")[columnIndex];
                 y = rows[i + 1].getElementsByTagName("TD")[columnIndex];
                 
-                // Extraire le texte pour la comparaison
                 let valX = x.textContent.trim().toLowerCase();
                 let valY = y.textContent.trim().toLowerCase();
 

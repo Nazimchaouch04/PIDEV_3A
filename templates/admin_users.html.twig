@@ -1,79 +1,306 @@
 {% extends 'base_back.html.twig' %}
 
+{% block title %}Utilisateurs - BioSync{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .filters-container {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        margin-bottom: 25px;
+    }
+    .filters-form {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        align-items: end;
+    }
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+    }
+    .filter-group label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #4A5568;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .filter-group input {
+        padding: 10px 14px;
+        border: 2px solid #E2E8F0;
+        border-radius: 8px;
+        font-size: 14px;
+        background: white;
+        transition: all 0.2s;
+    }
+    .filter-group input:focus {
+        outline: none;
+        border-color: #6C5CE7;
+    }
+    .filter-buttons {
+        display: flex;
+        gap: 10px;
+    }
+    .btn-filter {
+        padding: 10px 20px;
+        background: #6C5CE7;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .btn-filter:hover {
+        background: #5A4FCF;
+    }
+    
+    /* Table styling */
+    .table-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .data-table th {
+        background: #F7FAFC;
+        padding: 14px 18px;
+        text-align: left;
+        font-size: 12px;
+        font-weight: 700;
+        color: #4A5568;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #E2E8F0;
+    }
+    .data-table td {
+        padding: 16px 18px;
+        border-bottom: 1px solid #EDF2F7;
+        font-size: 14px;
+        color: #2D3748;
+    }
+    .data-table tr:hover {
+        background: #F7FAFC;
+    }
+    .data-table tr:last-child td {
+        border-bottom: none;
+    }
+    
+    /* User info */
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #6C5CE7, #A29BFE);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 14px;
+    }
+    .user-details {
+        display: flex;
+        flex-direction: column;
+    }
+    .user-name {
+        font-weight: 600;
+        color: #2D3748;
+    }
+    .user-email {
+        font-size: 13px;
+        color: #718096;
+    }
+    
+    /* Role badges */
+    .role-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    .role-badge.admin {
+        background: #FED7D7;
+        color: #9B2C2C;
+    }
+    .role-badge.coach {
+        background: #C6F6D5;
+        color: #22543D;
+    }
+    .role-badge.specialist {
+        background: #FEEBC8;
+        color: #744210;
+    }
+    .role-badge.user {
+        background: #E2E8F0;
+        color: #4A5568;
+    }
+    
+    /* Score badge */
+    .score-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        background: #E6FFFA;
+        color: #234E52;
+    }
+    
+    /* Action buttons */
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+    .action-btn.view {
+        background: rgba(59, 130, 246, 0.1);
+        color: #3B82F6;
+    }
+    .action-btn.view:hover {
+        background: #3B82F6;
+        color: white;
+    }
+    .action-btn.edit {
+        background: rgba(245, 158, 11, 0.1);
+        color: #F59E0B;
+    }
+    .action-btn.edit:hover {
+        background: #F59E0B;
+        color: white;
+    }
+    .action-btn.delete {
+        background: rgba(239, 68, 68, 0.1);
+        color: #EF4444;
+    }
+    .action-btn.delete:hover {
+        background: #EF4444;
+        color: white;
+    }
+    
+    /* Sort buttons */
+    .sort-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 14px;
+        background: white;
+        border: 2px solid #E2E8F0;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #4A5568;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .sort-btn:hover {
+        border-color: #6C5CE7;
+        color: #6C5CE7;
+    }
+    .sort-btn.active {
+        background: #6C5CE7;
+        border-color: #6C5CE7;
+        color: white;
+    }
+</style>
+{% endblock %}
+
 {% block body %}
-<div class="page-header flex-between">
-    <div>
-        <h1 class="page-title">Utilisateurs BioSync</h1>
-        <p class="page-subtitle">Gérez les membres de la plateforme</p>
+<div class="bo-mental-dashboard">
+    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+        <div>
+            <h1 class="page-title">Utilisateurs BioSync</h1>
+            <p class="page-subtitle">Gérez les membres de la plateforme</p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <a href="{{ path('app_admin_user_new') }}" class="btn btn-primary" style="background-color: #3B82F6; border-color: #3B82F6; display: flex; align-items: center; gap: 8px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Nouvel utilisateur
+            </a>
+            <a href="{{ path('app_admin_users_pdf') }}" class="btn btn-success" style="background-color: #6C5CE7; border-color: #6C5CE7; display: flex; align-items: center; gap: 8px;" target="_blank">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Exporter PDF
+            </a>
+            <a href="{{ path('app_admin_dashboard') }}" class="btn btn-secondary" style="background-color: #EDF2F7; border-color: #EDF2F7; color: #4A5568; display: flex; align-items: center; gap: 8px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                Retour
+            </a>
+        </div>
     </div>
-    <div style="display: flex; gap: 1rem;">
-        <a href="{{ path('app_admin_user_new') }}" class="btn btn-primary">+ Nouvel utilisateur</a>
-        <a href="{{ path('app_admin_users_pdf') }}" class="btn btn-success" target="_blank">📄 Exporter PDF</a>
-        <a href="{{ path('app_admin_dashboard') }}" class="btn btn-secondary">Retour au Dashboard</a>
+
+    {# Search and Sort #}
+    <div class="filters-container">
+        <div class="filters-form">
+            <div class="filter-group" style="grid-column: span 2;">
+                <label>🔍 Rechercher</label>
+                <input type="text" name="q" id="user-search" value="{{ current_q }}" placeholder="Rechercher un nom ou email...">
+            </div>
+            <div class="filter-group">
+                <label>📊 Trier par</label>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" onclick="sortUsers('nomComplet')" class="sort-btn {{ current_sort == 'nomComplet' ? 'active' : '' }}">
+                        Nom
+                        {% if current_sort == 'nomComplet' %}
+                            {{ current_direction == 'ASC' ? '↑' : '↓' }}
+                        {% endif %}
+                    </button>
+                    <button type="button" onclick="sortUsers('dateInscription')" class="sort-btn {{ current_sort == 'dateInscription' ? 'active' : '' }}">
+                        Date
+                        {% if current_sort == 'dateInscription' %}
+                            {{ current_direction == 'ASC' ? '↑' : '↓' }}
+                        {% endif %}
+                    </button>
+                    <button type="button" onclick="sortUsers('scoreGlobal')" class="sort-btn {{ current_sort == 'scoreGlobal' ? 'active' : '' }}">
+                        Score
+                        {% if current_sort == 'scoreGlobal' %}
+                            {{ current_direction == 'ASC' ? '↑' : '↓' }}
+                        {% endif %}
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
 
-{# Barre de Recherche et Tri #}
-<div class="card mb-4">
-    <div class="flex gap-4">
-        <input type="text" name="q" id="user-search" value="{{ current_q }}" placeholder="Rechercher un nom ou email..." class="form-control" style="flex: 2;">
-        
-        <button type="button" onclick="sortUsers('nomComplet')" class="btn btn-outline">
-            Nom 
-            {% if current_sort == 'nomComplet' %}
-                {% if current_direction == 'ASC' %}
-                    ↑
-                {% else %}
-                    ↓
-                {% endif %}
-            {% else %}
-                ↕
-            {% endif %}
-        </button>
-
-        <button type="button" onclick="sortUsers('dateInscription')" class="btn btn-outline">
-            Date 
-            {% if current_sort == 'dateInscription' %}
-                {% if current_direction == 'ASC' %}
-                    ↑
-                {% else %}
-                    ↓
-                {% endif %}
-            {% else %}
-                ↕
-            {% endif %}
-        </button>
-
-        <button type="button" onclick="sortUsers('scoreGlobal')" class="btn btn-outline">
-            Score 
-            {% if current_sort == 'scoreGlobal' %}
-                {% if current_direction == 'ASC' %}
-                    ↑
-                {% else %}
-                    ↓
-                {% endif %}
-            {% else %}
-                ↕
-            {% endif %}
-        </button>
+    {# Users Table #}
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Utilisateur</th>
+                    <th>Rôle</th>
+                    <th>Date d'inscription</th>
+                    <th>Score Global</th>
+                    <th style="text-align: center;">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="users-table-body">
+                {% include 'admin/_user_list.html.twig' %}
+            </tbody>
+        </table>
     </div>
-</div>
-
-<div class="card">
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Nom</th>
-                <th>Email</th>
-                <th>Date d'inscription</th>
-                <th>Score</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody id="users-table-body">
-            {% include 'admin/_user_list.html.twig' %}
-        </tbody>
-    </table>
 </div>
 
 <script>

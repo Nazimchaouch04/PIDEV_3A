@@ -111,7 +111,7 @@
                                 {% if 'Connexion' in log.action %}
                                     <span class="login">🟢 {{ log.action }}</span>
                                 {% elseif 'Déconnexion' in log.action %}
-                                    <span class="logout">🔴 {{ log.action }}</span>
+                                    <span class="logout">� {{ log.action }}</span>
                                 {% else %}
                                     {{ log.action }}
                                 {% endif %}
@@ -120,7 +120,7 @@
                                 {% if 'Connexion' in log.action %}
                                     <span style="color: #48BB78;">En ligne</span>
                                 {% else %}
-                                    <span style="color: #F56565;">Hors ligne</span>
+                                    <span style="color: #4299E1;">Hors ligne</span>
                                 {% endif %}
                             </td>
                         </tr>
