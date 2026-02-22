@@ -1,0 +1,57 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Aliment - BioSync{% endblock %}
+
+{% block body %}
+<div class="app-layout">
+    {% include 'partials/_sidebar.html.twig' with {'active': 'nutrition'} %}
+
+    <main class="main-content">
+        <div class="page-header flex-between">
+            <div>
+                <h1 class="page-title">{{ aliment.nomAliment }}</h1>
+                <p class="page-subtitle">Nutritional information</p>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <a class="btn btn-outline" href="{{ path('app_aliment_index') }}">Back</a>
+                <a class="btn btn-primary" href="{{ path('app_aliment_edit', {'id': aliment.id}) }}">Edit</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-content" style="padding: 20px;">
+                <div class="grid-2">
+                    <div>
+                        <div class="form-label">Calories</div>
+                        <div class="stat-value" style="font-size: 24px;">{{ aliment.calories }}</div>
+                    </div>
+                    <div>
+                        <div class="form-label">Glycemic Index</div>
+                        <div class="stat-value" style="font-size: 24px;">{{ aliment.indexGlycemique }}</div>
+                    </div>
+                    <div>
+                        <div class="form-label">Proteins (g)</div>
+                        <div class="stat-value" style="font-size: 24px;">{{ aliment.proteines ?? 0 }}</div>
+                    </div>
+                    <div>
+                        <div class="form-label">Carbs (g)</div>
+                        <div class="stat-value" style="font-size: 24px;">{{ aliment.glucides ?? 0 }}</div>
+                    </div>
+                    <div>
+                        <div class="form-label">Fats (g)</div>
+                        <div class="stat-value" style="font-size: 24px;">{{ aliment.lipides ?? 0 }}</div>
+                    </div>
+                    <div>
+                        <div class="form-label">Excitant</div>
+                        <div class="stat-value" style="font-size: 24px;">{{ aliment.estExcitant ? 'Yes' : 'No' }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 16px;">
+            {{ include('aliment/_delete_form.html.twig') }}
+        </div>
+    </main>
+</div>
+{% endblock %}

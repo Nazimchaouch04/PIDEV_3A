@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouveau Quiz - BioSync{% endblock %}
+
+{% block body %}
+<div class="app-layout">
+    {% include 'partials/_sidebar.html.twig' with {'active': 'mental'} %}
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Nouveau Quiz Mental</h1>
+            <p class="page-subtitle">Creez un quiz pour evaluer votre niveau de stress.</p>
+        </div>
+
+        <div class="card" style="max-width: 600px;">
+            {{ form_start(form) }}
+                <div class="form-group">
+                    {{ form_label(form.titre) }}
+                    {{ form_widget(form.titre) }}
+                    {{ form_errors(form.titre) }}
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.niveauStressCible) }}
+                    {{ form_widget(form.niveauStressCible) }}
+                    {{ form_errors(form.niveauStressCible) }}
+                    <small class="text-gray">1 = Tres peu stresse, 10 = Tres stresse</small>
+                </div>
+
+                <div class="modal-footer" style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--gray-200);">
+                    <a href="{{ path('app_mental') }}" class="btn btn-ghost">Annuler</a>
+                    <button type="submit" class="btn btn-primary">Creer le quiz</button>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </main>
+</div>
+{% endblock %}

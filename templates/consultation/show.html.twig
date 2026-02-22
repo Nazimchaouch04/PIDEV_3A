@@ -1,0 +1,79 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Consultation{% endblock %}
+{% block stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('app') }}
+{% endblock %}
+
+{% block body %}
+
+<h2>Détails de la consultation</h2>
+
+<div class="card p-4 mb-4 shadow-sm">
+
+    <p><strong>Date :</strong>
+        {{ consultation.dateConsultation ? consultation.dateConsultation|date('d/m/Y H:i') : '' }}
+    </p>
+
+    <p><strong>Symptômes :</strong><br>
+        {{ consultation.symptomes }}
+    </p>
+
+    <p><strong>Diagnostic :</strong><br>
+        {{ consultation.diagnostic }}
+    </p>
+
+    <p><strong>Recommandations :</strong><br>
+        {{ consultation.recommandations }}
+    </p>
+
+</div>
+
+
+<h3>Prescriptions</h3>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Médicament</th>
+            <th>Dose</th>
+            <th>Fréquence</th>
+            <th>Durée</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for p in consultation.prescriptions %}
+            <tr>
+                <td>{{ p.nomMedicament }}</td>
+                <td>{{ p.dose }}</td>
+                <td>{{ p.frequence }}</td>
+                <td>{{ p.duree }} jours</td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="4">Aucune prescription</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+<a class="btn btn-success"
+   href="{{ path('app_prescription_new', {'id': consultation.id}) }}">
+   Ajouter prescription
+</a>
+
+<br><br>
+
+<a class="btn btn-secondary"
+   href="{{ path('app_specialiste') }}">
+   Retour dashboard médecin
+</a>
+
+<a class="btn btn-primary"
+   href="{{ path('app_consultation_edit', {'id': consultation.id}) }}">
+   Modifier consultation
+</a>
+
+{% endblock %} 

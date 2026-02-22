@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BioSync{% endblock %}</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2245%22 fill=%22%236EC5A6%22/><text x=%2250%22 y=%2265%22 font-size=%2240%22 text-anchor=%22middle%22 fill=%22white%22>B</text></svg>">
+
+    {# Google Fonts #}
+    <link rel="stylesheet" href="{{ asset('css/fonts.css') }}">
+
+    {# Main CSS #}
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+
+    {% block stylesheets %}{% endblock %}
+</head>
+<body>
+    {# Conteneur des messages Flash pour les notifications utilisateur #}
+    <div class="flash-messages-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 400px;">
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label == 'error' ? 'danger' : label }}" 
+                     style="padding: 15px; margin-bottom: 10px; border-radius: 8px; border-left: 5px solid; 
+                            background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                            {% if label == 'success' %} border-color: #28a745; color: #155724; {% elseif label == 'danger' or label == 'error' %} border-color: #dc3545; color: #721c24; {% else %} border-color: #17a2b8; color: #0c5460; {% endif %}">
+                    {{ message }}
+                    <button type="button" onclick="this.parentElement.style.display='none'" style="float: right; border: none; background: transparent; cursor: pointer; font-weight: bold;">&times;</button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+
+    {% block body %}{% endblock %}
+
+    {# Main JS #}
+    <script src="{{ asset('js/app.js') }}"></script>
+
+    {# Script pour masquer automatiquement les flashs après 5 secondes #}
+    <script>
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.transition = "opacity 0.5s ease";
+                alert.style.opacity = "0";
+                setTimeout(() => alert.remove(), 500);
+            });
+        }, 5000);
+    </script>
+
+    {% block javascripts %}{% endblock %}
+</body>
+</html>

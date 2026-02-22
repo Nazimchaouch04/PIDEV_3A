@@ -1,0 +1,1116 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Add Aliment - BioSync{% endblock %}
+
+{% block body %}
+<div class="app-layout">
+    {% include 'partials/_sidebar.html.twig' with {'active': 'nutrition'} %}
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Add Food</h1>
+            <p class="page-subtitle">Add nutritional details</p>
+        </div>
+
+        <div style="display: flex; gap: 20px;">
+            {# Formulaire principal #}
+            <div style="flex: 1; max-width: 800px;">
+                {# Affichage des points du repas #}
+                {% if aliment.repas %}
+                {% set calories = aliment.repas.getTotalCalories() %}
+                {% set proteines = aliment.repas.getTotalProteines() %}
+                {% set glucides = aliment.repas.getTotalGlucides() %}
+                {% set lipides = aliment.repas.getTotalLipides() %}
+                
+                {# Calcul du score par défaut pour éviter l'erreur #}
+                {% set scoreFinal = 0 %}
+                {% if calories > 0 or proteines > 0 or glucides > 0 or lipides > 0 %}
+                    {# Utiliser le service RepasService pour calculer le score #}
+                    {% set scoreFinal = repasService.calculerScoreIntelligent(aliment.repas) %}
+                {% endif %}
+                
+                <div class="card" style="margin-bottom: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    <div class="card-content" style="padding: 16px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h4 style="margin: 0; font-size: 1.1rem;">{{ aliment.repas.titreRepas }}</h4>
+                                <p style="margin: 4px 0 0 0; opacity: 0.9; font-size: 0.9rem;">
+                                    {{ aliment.repas.typeMoment.label }} - {{ aliment.repas.dateConsommation|date('H:i') }}
+                                </p>
+                                
+                                {# Message d'état du repas #}
+                                {% if calories == 0 and proteines == 0 and glucides == 0 and lipides == 0 %}
+                                    <div style="margin-top: 8px; padding: 8px; background: rgba(255,255,255,0.2); border-radius: 8px; font-size: 0.8rem;">
+                                        <div style="color: #ffd700;">📝 EN ATTENTE D'ALIMENTS</div>
+                                        <div style="font-size: 0.75rem; margin-top: 4px; opacity: 0.9;">
+                                            Ajoutez des aliments pour voir le calcul du score intelligent
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                
+                                {# Toujours afficher le détail du calcul s'il y a des aliments #}
+                                {% if calories > 0 or proteines > 0 or glucides > 0 or lipides > 0 %}
+                                    <div style="margin-top: 12px; padding: 12px; background: rgba(255,255,255,0.1); border-radius: 8px; font-size: 0.8rem;">
+                                        <div style="font-weight: bold; margin-bottom: 8px;">🧮 DÉTAIL DU CALCUL :</div>
+                                        
+                                        {# Calcul Timing #}
+                                        <div style="margin-bottom: 8px;">
+                                            <div style="color: #ffd700;">🕒 TIMING ({{ aliment.repas.dateConsommation|date('H') }}h)</div>
+                                            {% set heure = aliment.repas.dateConsommation|date('H') %}
+                                            {% if aliment.repas.typeMoment.value == 'midi' %}
+                                                {% if heure >= 11 and heure <= 14 %}
+                                                    <div style="color: #90EE90;">✅ Bon horaire (11h-14h) : +4 points</div>
+                                                {% else %}
+                                                    <div style="color: #ff6b6b;">❌ Horaire incorrect ({{ heure }}h au lieu de 11h-14h) : -2 points</div>
+                                                {% endif %}
+                                            {% endif %}
+                                        </div>
+                                        
+                                        {# Calcul de cohérence #}
+                                        {% set caloriesTheoriques = (proteines * 4) + (glucides * 4) + (lipides * 9) %}
+                                        {% set ecart = calories > 0 ? ((calories - caloriesTheoriques) / calories) * 100 : 0 %}
+                                        
+                                        {# Répartition calorique CORRECTE : utiliser les calories théoriques pour que le total = 100% #}
+                                        {% set caloriesTheoriques = (proteines * 4) + (glucides * 4) + (lipides * 9) %}
+                                        {% set caloriesGlucides = glucides * 4 %}
+                                        {% set caloriesProteines = proteines * 4 %}
+                                        {% set caloriesLipides = lipides * 9 %}
+                                        
+                                        {% if caloriesTheoriques > 0 %}
+                                            {% set pourcentageGlucides = (caloriesGlucides / caloriesTheoriques) * 100 %}
+                                            {% set pourcentageProteines = (caloriesProteines / caloriesTheoriques) * 100 %}
+                                            {% set pourcentageLipides = (caloriesLipides / caloriesTheoriques) * 100 %}
+                                        {% else %}
+                                            {% set pourcentageGlucides = 0 %}
+                                            {% set pourcentageProteines = 0 %}
+                                            {% set pourcentageLipides = 0 %}
+                                        {% endif %}
+                                        
+                                        {# Vérification répartition idéale scientifique #}
+                                        {% set repartsitionIdeale = false %}
+                                        {% if (pourcentageGlucides >= 45 and pourcentageGlucides <= 55) and (pourcentageProteines >= 15 and pourcentageProteines <= 25) and (pourcentageLipides >= 25 and pourcentageLipides <= 35) %}
+                                            {% set repartsitionIdeale = true %}
+                                        {% endif %}
+                                        
+                                        {# Analyse nutritionnelle DÉTAILLÉE #}
+                                        {% set nutritionScore = 0 %}
+                                        
+                                        {# Calories #}
+                                        {% if calories > 2000 %}
+                                            <div style="color: #ff6b6b;">🚨 Excès calories très massif (>2000) : -4 points</div>
+                                            {% set nutritionScore = nutritionScore - 4 %}
+                                        {% elseif calories > 1500 %}
+                                            <div style="color: #ff6b6b;">⚠️ Excès calories massif (>1500) : -2 points</div>
+                                            {% set nutritionScore = nutritionScore - 2 %}
+                                        {% elseif calories > 1200 %}
+                                            <div style="color: #ff6b6b;">⚠️ Excès calories important (>1200) : -1 point</div>
+                                            {% set nutritionScore = nutritionScore - 1 %}
+                                        {% elseif calories < 300 %}
+                                            <div style="color: #ff6b6b;">⚠️ Trop peu de calories (<300) : -1 point</div>
+                                            {% set nutritionScore = nutritionScore - 1 %}
+                                        {% else %}
+                                            <div style="color: #90EE90;">✅ Calories appropriées (300-1200) : +1 point</div>
+                                            {% set nutritionScore = nutritionScore + 1 %}
+                                        {% endif %}
+                                        
+                                        {# Cohérence #}
+                                        {% if ecart > 100 %}
+                                            <div style="color: #ff6b6b;">🚨 Incohérence très grave (écart {{ ecart|round }}%) : -5 points</div>
+                                            {% set nutritionScore = nutritionScore - 5 %}
+                                        {% elseif ecart > 70 %}
+                                            <div style="color: #ff6b6b;">⚠️ Incohérence grave (écart {{ ecart|round }}%) : -4 points</div>
+                                            {% set nutritionScore = nutritionScore - 4 %}
+                                        {% elseif ecart > 50 %}
+                                            <div style="color: #ff6b6b;">⚠️ Incohérence modérée (écart {{ ecart|round }}%) : -3 points</div>
+                                            {% set nutritionScore = nutritionScore - 3 %}
+                                        {% elseif ecart > 30 %}
+                                            <div style="color: #ffa500;">⚠️ Légère incohérence (écart {{ ecart|round }}%) : -1 point</div>
+                                            {% set nutritionScore = nutritionScore - 1 %}
+                                        {% else %}
+                                        {% endif %}
+                                        
+                                        {# Protéines #}
+                                        {% if proteines >= 30 %}
+                                            <div style="color: #90EE90;">🏆 Protéines excellentes (≥30g) : +3 points</div>
+                                            {% set nutritionScore = nutritionScore + 3 %}
+                                        {% elseif proteines >= 15 %}
+                                            <div style="color: #90EE90;">✅ Protéines très élevées (≥15g) : +2 points</div>
+                                            {% set nutritionScore = nutritionScore + 2 %}
+                                        {% elseif proteines >= 8 %}
+                                            <div style="color: #90EE90;">✅ Protéines suffisantes (≥8g) : +1 point</div>
+                                            {% set nutritionScore = nutritionScore + 1 %}
+                                        {% else %}
+                                            <div style="color: #ff6b6b;">⚠️ Manque protéines (<8g) : -1 point</div>
+                                            {% set nutritionScore = nutritionScore - 1 %}
+                                        {% endif %}
+                                        
+                                        {# Glucides #}
+                                        {% if glucides >= 40 and glucides <= 70 %}
+                                            <div style="color: #90EE90;">✅ Glucides équilibrés (40-70g) : +1 point</div>
+                                            {% set nutritionScore = nutritionScore + 1 %}
+                                        {% elseif glucides > 100 %}
+                                            <div style="color: #ff6b6b;">⚠️ Trop glucides (>100g) : -2 points</div>
+                                            {% set nutritionScore = nutritionScore - 2 %}
+                                        {% endif %}
+                                        
+                                        {# Lipides #}
+                                        {% if lipides >= 10 and lipides <= 25 %}
+                                            <div style="color: #90EE90;">✅ Lipides équilibrés (10-25g) : +1 point</div>
+                                            {% set nutritionScore = nutritionScore + 1 %}
+                                        {% elseif lipides > 40 %}
+                                            <div style="color: #ff6b6b;">⚠️ Trop lipides (>40g) : -2 points</div>
+                                            {% set nutritionScore = nutritionScore - 2 %}
+                                        {% endif %}
+                                        
+                                        {# Répartition idéale #}
+                                        {% if repartsitionIdeale %}
+                                            <div style="color: #90EE90;">🎯 Répartition idéale (50% glucides, 20% protéines, 30% lipides) : +1 point</div>
+                                            {% set nutritionScore = nutritionScore + 1 %}
+                                        {% endif %}
+                                        
+                                        {# Calcul du score final #}
+                                        {% set timingScore = 0 %}
+                                        {% set heure = aliment.repas.dateConsommation|date('H') %}
+                                        {% if aliment.repas.typeMoment.value == 'midi' %}
+                                            {% if heure >= 11 and heure <= 14 %}
+                                                {% set timingScore = 4 %}
+                                            {% else %}
+                                                {% set timingScore = -2 %}
+                                            {% endif %}
+                                        {% endif %}
+                                        
+                                        {% set scoreFinal = timingScore + nutritionScore %}
+                                        {% if timingScore > 0 %}
+                                            {% set scoreFinal = max(scoreFinal, 4) %}
+                                        {% endif %}
+                                        
+                                        <div style="margin-top: 8px; padding: 8px; background: rgba(255,255,255,0.15); border-radius: 6px; font-size: 0.75rem;">
+                                            <div style="color: #ffd700; font-weight: bold;">🧮 CALCUL COMPLET :</div>
+                                            <div>🕒 Timing : {{ timingScore }} points</div>
+                                            <div>🥗 Nutrition : {{ nutritionScore }} points</div>
+                                            <div style="border-top: 1px solid rgba(255,255,255,0.3); margin-top: 4px; padding-top: 4px;">
+                                                <div style="color: #ffd700; font-weight: bold;">🏆 SCORE FINAL : {{ scoreFinal }} points</div>
+                                            </div>
+                                        </div>
+                                        
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 2rem; font-weight: bold;">{{ scoreFinal }}</div>
+                                <div style="font-size: 0.8rem; opacity: 0.9;">points score</div>
+                                <div style="font-size: 0.7rem; opacity: 0.8; margin-top: 4px;">Timing + Nutrition</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="card">
+                    <div class="card-header" style="padding-bottom: 16px; border-bottom: 1px solid var(--border-color);">
+                        <h3 class="card-title" style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin: 0;">Food Information</h3>
+                    </div>
+                    <div class="card-content" style="padding-top: 16px;">
+                        {% include 'aliment/_form_simple.html.twig' with {'button_label': 'Add'} %}
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 12px; margin-top: 16px;">
+                    <a href="{{ path('app_repas_show', {'id': repasId}) }}" class="btn btn-outline">Back to Meal</a>
+                </div>
+            </div>
+
+            {# Chatbot Gemini sur le côté #}
+            <div style="width: 350px; flex-shrink: 0;">
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 16px; padding: 20px; height: 500px; display: flex; flex-direction: column; color: white;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.3);">
+                        <div style="width: 32px; height: 32px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <span style="color: white; font-size: 16px;">🤖</span>
+                        </div>
+                        <div>
+                            <h4 style="margin: 0; font-size: 1rem; color: white;">Assistant Nutrition IA</h4>
+                            <p style="margin: 0; font-size: 0.8rem; color: rgba(255,255,255,0.8);">Propulsé par Gemini AI</p>
+                        </div>
+                    </div>
+                    
+                    <div id="chatbot-messages" style="flex: 1; overflow-y: auto; padding: 10px 0; display: flex; flex-direction: column; gap: 10px; min-height: 200px; max-height: 350px; background: rgba(255,255,255,0.1); border-radius: 12px; padding: 15px;">
+                        <div class="message bot-message" style="display: flex; gap: 8px; align-items: flex-start;">
+                            <div style="width: 24px; height: 24px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <span style="color: white; font-size: 12px;">🤖</span>
+                            </div>
+                            <div style="background: rgba(255,255,255,0.2); padding: 12px; border-radius: 12px; max-width: 80%; font-size: 0.9rem; color: white;">
+                                Bonjour ! Je suis votre assistant nutritionnel IA. Je peux vous aider avec les informations nutritionnelles. Essayez de demander :<br><br>
+                                🍎 "Combien de calories dans une pomme ?"<br>
+                                🥩 "Valeurs nutritionnelles du poulet"<br>
+                                🥑 "Protéines dans les œufs"<br><br>
+                                Je vais utiliser l'IA Gemini pour vous donner des informations précises !
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center; padding-top: 10px;">
+                        <input 
+                            type="text" 
+                            id="chatbot-input" 
+                            placeholder="Demandez-moi n'importe quel aliment..."
+                            style="flex: 1; padding: 12px 16px; border: 1px solid rgba(255,255,255,0.3); border-radius: 25px; font-size: 0.9rem; outline: none; background: rgba(255,255,255,0.1); color: #333;"
+                        >
+                        <button 
+                            type="button" 
+                            id="chatbot-submit"
+                            style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border: none; border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;"
+                        >
+                            →
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<style>
+    /* Styles pour le chatbot Gemini */
+    #chatbot-input::placeholder {
+        color: #666;
+    }
+
+    #chatbot-input:focus {
+        border-color: rgba(255,255,255,0.5);
+        background: rgba(255,255,255,0.15);
+    }
+
+    #chatbot-submit:hover {
+        background: rgba(255,255,255,0.3);
+        transform: scale(1.1);
+    }
+
+    .message {
+        max-width: 80%;
+        word-wrap: break-word;
+    }
+
+    .user-message {
+        align-self: flex-end;
+    }
+
+    .user-message > div:first-child {
+        background: rgba(255,255,255,0.3);
+        color: #333;
+    }
+
+    .bot-message > div:first-child {
+        background: rgba(255,255,255,0.2);
+        color: white;
+    }
+
+    .typing-indicator {
+        display: flex;
+        gap: 4px;
+        padding: 12px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 12px;
+        max-width: 80%;
+    }
+
+    .typing-indicator span {
+        width: 6px;
+        height: 6px;
+        background: rgba(255,255,255,0.6);
+        border-radius: 50%;
+        animation: typing 1.4s infinite;
+    }
+
+    .typing-indicator span:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .typing-indicator span:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+
+    @keyframes typing {
+        0%, 60%, 100% {
+            transform: translateY(0);
+        }
+        30% {
+            transform: translateY(-10px);
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const chatbotInput = document.getElementById('chatbot-input');
+        const chatbotSubmit = document.getElementById('chatbot-submit');
+        const chatbotMessages = document.getElementById('chatbot-messages');
+
+        // Récupérer les champs du formulaire avec plusieurs sélecteurs possibles
+        const nomAlimentField = document.querySelector('[name="aliment[nomAliment]"]') || 
+                               document.querySelector('[id*="nomAliment"]') || 
+                               document.querySelector('[id*="nom_aliment"]') || 
+                               document.querySelector('input[name*="nom"]') ||
+                               document.querySelector('input[name*="aliment"]');
+        const caloriesField = document.querySelector('[name="aliment[calories]"]') || 
+                             document.querySelector('[id*="calories"]') || 
+                             document.querySelector('input[name*="calories"]');
+        const proteinesField = document.querySelector('[name="aliment[proteines]"]') || 
+                              document.querySelector('[id*="proteines"]') || 
+                              document.querySelector('input[name*="proteines"]');
+        // Sélecteur universel pour le champ glucides
+        const findAllInputs = () => document.querySelectorAll('input[type="number"], input[type="text"]');
+        const findFieldByLabel = (labelText) => {
+            const labels = document.querySelectorAll('label');
+            for (let label of labels) {
+                if (label.textContent.toLowerCase().includes(labelText.toLowerCase())) {
+                    const input = label.querySelector('input') || document.getElementById(label.getAttribute('for'));
+                    if (input) return input;
+                }
+            }
+            return null;
+        };
+        
+        const glucidesField = document.querySelector('[name="aliment[glucides]"]') || 
+                             document.querySelector('[name="aliment[glucides]"]') || // avec accent
+                             document.querySelector('[id*="glucides"]') || 
+                             document.querySelector('[id*="glucides"]') || // avec accent
+                             document.querySelector('input[name*="glucides"]') ||
+                             document.querySelector('input[name*="glucides"]') || // avec accent
+                             document.querySelector('input[placeholder*="Glucides"]') ||
+                             document.querySelector('input[placeholder*="glucides"]') ||
+                             document.querySelector('input[id*="glucide"]') ||
+                             findFieldByLabel('glucides') ||
+                             findFieldByLabel('glucides') ||
+                             Array.from(findAllInputs()).find(input => 
+                                 input.id && input.id.toLowerCase().includes('glucide') ||
+                                 input.name && input.name.toLowerCase().includes('glucide')
+                             );
+        const lipidesField = document.querySelector('[name="aliment[lipides]"]') || 
+                            document.querySelector('[id*="lipides"]') || 
+                            document.querySelector('input[name*="lipides"]');
+        
+        // Debug: vérifier si les champs sont trouvés
+        console.log('Champs trouvés:', {
+            nomAliment: nomAlimentField,
+            calories: caloriesField,
+            proteines: proteinesField,
+            glucides: glucidesField,
+            lipides: lipidesField
+        });
+
+        function addMessage(text, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            messageDiv.style.cssText = `
+                display: flex;
+                gap: 8px;
+                align-items: flex-start;
+                ${isUser ? 'align-self: flex-end;' : ''}
+            `;
+            
+            const avatarDiv = document.createElement('div');
+            avatarDiv.style.cssText = `
+                width: 24px;
+                height: 24px;
+                background: ${isUser ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.2)'};
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+            `;
+            avatarDiv.innerHTML = `<span style="color: white; font-size: 12px;">${isUser ? '👤' : '🤖'}</span>`;
+            
+            const textDiv = document.createElement('div');
+            textDiv.style.cssText = `
+                background: ${isUser ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.2)'};
+                color: ${isUser ? '#333' : 'white'};
+                padding: 12px;
+                border-radius: 12px;
+                max-width: 80%;
+                font-size: 0.9rem;
+            `;
+            textDiv.innerHTML = text;
+            
+            messageDiv.appendChild(avatarDiv);
+            messageDiv.appendChild(textDiv);
+            
+            chatbotMessages.appendChild(messageDiv);
+            chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot-message';
+            typingDiv.style.cssText = `
+                display: flex;
+                gap: 8px;
+                align-items: flex-start;
+            `;
+            
+            const avatarDiv = document.createElement('div');
+            avatarDiv.style.cssText = `
+                width: 24px;
+                height: 24px;
+                background: rgba(255,255,255,0.2);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+            `;
+            avatarDiv.innerHTML = '<span style="color: white; font-size: 12px;">🤖</span>';
+            
+            const typingTextDiv = document.createElement('div');
+            typingTextDiv.className = 'typing-indicator';
+            typingTextDiv.innerHTML = `
+                <span></span>
+                <span></span>
+                <span></span>
+            `;
+            
+            typingDiv.appendChild(avatarDiv);
+            typingDiv.appendChild(typingTextDiv);
+            
+            chatbotMessages.appendChild(typingDiv);
+            chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+            
+            return typingDiv;
+        }
+
+        function fillFormFields(data) {
+            // Remplir le nom de l'aliment si disponible
+            if (nomAlimentField && data.nomAliment) {
+                nomAlimentField.value = data.nomAliment;
+                nomAlimentField.dispatchEvent(new Event('input', { bubbles: true }));
+                nomAlimentField.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            
+            if (caloriesField && data.calories) {
+                caloriesField.value = data.calories;
+                caloriesField.dispatchEvent(new Event('input', { bubbles: true }));
+                caloriesField.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            if (proteinesField && data.proteines) {
+                proteinesField.value = data.proteines;
+                proteinesField.dispatchEvent(new Event('input', { bubbles: true }));
+                proteinesField.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            if (glucidesField && data.glucides) {
+                glucidesField.value = data.glucides;
+                glucidesField.dispatchEvent(new Event('input', { bubbles: true }));
+                glucidesField.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            if (lipidesField && data.lipides) {
+                lipidesField.value = data.lipides;
+                lipidesField.dispatchEvent(new Event('input', { bubbles: true }));
+                lipidesField.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            
+            // Ajouter un effet visuel pour montrer que les champs ont été remplis
+            [nomAlimentField, caloriesField, proteinesField, glucidesField, lipidesField].forEach(field => {
+                if (field && field.value) {
+                    field.style.backgroundColor = '#e8f5e8';
+                    field.style.border = '2px solid #4caf50';
+                    setTimeout(() => {
+                        field.style.backgroundColor = '';
+                        field.style.border = '';
+                    }, 2000);
+                }
+            });
+        }
+
+        async function sendQuery() {
+            const query = chatbotInput.value.trim();
+            
+            if (!query) return;
+
+            addMessage(query, true);
+            chatbotInput.value = '';
+
+            const typingIndicator = showTypingIndicator();
+            chatbotSubmit.disabled = true;
+
+            try {
+                const formData = new FormData();
+                formData.append('query', query);
+
+                const response = await fetch('{{ path('app_aliment_chatbot') }}', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    addMessage(`❌ Erreur: ${data.error}`, false);
+                } else {
+                    addMessage(`✅ **Informations nutritionnelles trouvées par Gemini AI :**<br>
+                        🍽 **Calories:** ${data.calories || 'N/A'} kcal<br>
+                        🥩 **Protéines:** ${data.proteines || 'N/A'} g<br>
+                        🍞 **Glucides:** ${data.glucides || 'N/A'} g<br>
+                        🥑 **Lipides:** ${data.lipides || 'N/A'} g<br><br>
+                        ✨ **Les champs du formulaire ont été automatiquement remplis !**<br>
+                        <small style="opacity: 0.8;">Vous pouvez ajuster les valeurs si nécessaire avant de sauvegarder.</small>`, false);
+                    
+                    // Remplir automatiquement les champs du formulaire
+                    fillFormFields(data);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage("❌ Erreur de connexion avec Gemini AI. Veuillez réessayer.", false);
+            } finally {
+                typingIndicator.remove();
+                chatbotSubmit.disabled = false;
+                chatbotInput.focus();
+            }
+        }
+
+        chatbotSubmit.addEventListener('click', sendQuery);
+        chatbotInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendQuery();
+            }
+        });
+
+        chatbotInput.focus();
+    });
+</script>
+
+<style>
+    /* Styles pour le chatbot Gemini */
+    #chatbot-input::placeholder {
+        color: #666;
+    }
+
+    #chatbot-input:focus {
+        border-color: rgba(255,255,255,0.5);
+        background: rgba(255,255,255,0.15);
+    }
+
+    #chatbot-submit:hover {
+        background: rgba(255,255,255,0.3);
+        transform: scale(1.1);
+    }
+
+    /* Style pour le bouton microphone */
+    #voice-button:hover {
+        background: rgba(255,255,255,0.3);
+        transform: scale(1.1);
+    }
+
+    #voice-button.recording {
+        background: #ff4444;
+        animation: mic-pulse 1s infinite;
+    }
+
+    .message {
+        max-width: 80%;
+        word-wrap: break-word;
+    }
+
+    .user-message {
+        align-self: flex-end;
+    }
+
+    .user-message > div:first-child {
+        background: rgba(255,255,255,0.3);
+        color: #333;
+    }
+
+    .bot-message > div:first-child {
+        background: rgba(255,255,255,0.2);
+        color: white;
+    }
+
+    .typing-indicator {
+        display: flex;
+        gap: 4px;
+        padding: 12px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 12px;
+        max-width: 80%;
+    }
+
+    .typing-indicator span {
+        width: 6px;
+        height: 6px;
+        background: rgba(255,255,255,0.6);
+        border-radius: 50%;
+        animation: typing 1.4s infinite;
+    }
+
+    .typing-indicator span:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .typing-indicator span:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+
+    @keyframes typing {
+        0%, 60%, 100% {
+            transform: translateY(0);
+        }
+        30% {
+            transform: translateY(-10px);
+        }
+    }
+
+    @keyframes pulse {
+        0% {
+            opacity: 1;
+            transform: scale(1);
+        }
+        50% {
+            opacity: 0.5;
+            transform: scale(1.2);
+        }
+        100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @keyframes mic-pulse {
+        0% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.7);
+        }
+        50% {
+            transform: scale(1.1);
+            box-shadow: 0 0 0 10px rgba(255, 68, 68, 0);
+        }
+        100% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(255, 68, 68, 0);
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const chatbotInput = document.getElementById('chatbot-input');
+        const chatbotSubmit = document.getElementById('chatbot-submit');
+        const voiceButton = document.getElementById('voice-button');
+        const recordingStatus = document.getElementById('recording-status');
+        const chatbotMessages = document.getElementById('chatbot-messages');
+
+        // Récupérer les champs du formulaire avec plusieurs sélecteurs possibles
+        const nomAlimentField = document.querySelector('[name="aliment[nomAliment]"]') || 
+                               document.querySelector('[id*="nomAliment"]') || 
+                               document.querySelector('[id*="nom_aliment"]') || 
+                               document.querySelector('input[name*="nom"]') ||
+                               document.querySelector('input[name*="aliment"]');
+        const caloriesField = document.querySelector('[name="aliment[calories]"]') || 
+                             document.querySelector('[id*="calories"]') || 
+                             document.querySelector('input[name*="calories"]');
+        const proteinesField = document.querySelector('[name="aliment[proteines]"]') || 
+                              document.querySelector('[id*="proteines"]') || 
+                              document.querySelector('input[name*="proteines"]');
+        
+        // Sélecteur universel pour le champ glucides
+        const findAllInputs = () => document.querySelectorAll('input[type="number"], input[type="text"]');
+        const findFieldByLabel = (labelText) => {
+            const labels = document.querySelectorAll('label');
+            for (let label of labels) {
+                if (label.textContent.toLowerCase().includes(labelText.toLowerCase())) {
+                    const input = label.querySelector('input') || document.getElementById(label.getAttribute('for'));
+                    if (input) return input;
+                }
+            }
+            return null;
+        };
+        
+        const glucidesField = document.querySelector('[name="aliment[glucides]"]') || 
+                             document.querySelector('[name="aliment[glucides]"]') || // avec accent
+                             document.querySelector('[id*="glucides"]') || 
+                             document.querySelector('[id*="glucides"]') || // avec accent
+                             document.querySelector('input[name*="glucides"]') ||
+                             document.querySelector('input[name*="glucides"]') || // avec accent
+                             document.querySelector('input[placeholder*="Glucides"]') ||
+                             document.querySelector('input[placeholder*="glucides"]') ||
+                             document.querySelector('input[id*="glucide"]') ||
+                             findFieldByLabel('glucides') ||
+                             findFieldByLabel('glucides') ||
+                             Array.from(findAllInputs()).find(input => 
+                                 input.id && input.id.toLowerCase().includes('glucide') ||
+                                 input.name && input.name.toLowerCase().includes('glucide')
+                             );
+        const lipidesField = document.querySelector('[name="aliment[lipides]"]') || 
+                            document.querySelector('[id*="lipides"]') || 
+                            document.querySelector('input[name*="lipides"]');
+        
+        // Debug: vérifier si les champs sont trouvés
+        console.log('Champs trouvés:', {
+            nomAliment: nomAlimentField,
+            calories: caloriesField,
+            proteines: proteinesField,
+            glucides: glucidesField,
+            lipides: lipidesField
+        });
+        
+        // ============================================
+        // RECONNAISSANCE VOCALE
+        // ============================================
+        class VoiceRecognition {
+            constructor() {
+                this.mediaRecorder = null;
+                this.audioChunks = [];
+                this.isRecording = false;
+                
+                this.voiceButton = voiceButton;
+                this.recordingStatus = recordingStatus;
+                this.chatbotInput = chatbotInput;
+                
+                if (this.voiceButton) {
+                    this.voiceButton.addEventListener('click', () => this.toggleRecording());
+                }
+            }
+            
+            async toggleRecording() {
+                if (!this.isRecording) {
+                    await this.startRecording();
+                } else {
+                    this.stopRecording();
+                }
+            }
+            
+            async startRecording() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    this.mediaRecorder = new MediaRecorder(stream);
+                    this.audioChunks = [];
+                    
+                    this.mediaRecorder.ondataavailable = event => {
+                        this.audioChunks.push(event.data);
+                    };
+                    
+                    this.mediaRecorder.onstop = async () => {
+                        const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+                        await this.sendAudioToAPI(audioBlob);
+                        
+                        // Arrêter toutes les pistes audio
+                        this.mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                    };
+                    
+                    this.mediaRecorder.start();
+                    this.isRecording = true;
+                    this.voiceButton.classList.add('recording');
+                    this.recordingStatus.style.display = 'block';
+                    
+                    // Auto-stop après 7 secondes maximum
+                    setTimeout(() => {
+                        if (this.isRecording) {
+                            this.stopRecording();
+                        }
+                    }, 7000);
+                    
+                } catch (err) {
+                    alert('Erreur microphone: ' + err.message);
+                    this.voiceButton.classList.remove('recording');
+                    this.recordingStatus.style.display = 'none';
+                }
+            }
+            
+            stopRecording() {
+                if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+                    this.mediaRecorder.stop();
+                    this.isRecording = false;
+                    this.voiceButton.classList.remove('recording');
+                    this.recordingStatus.style.display = 'none';
+                }
+            }
+            
+            async sendAudioToAPI(audioBlob) {
+                // Ajouter un message utilisateur
+                this.addMessage('🎤 [Message vocal...]', true);
+                
+                // Créer un FormData et ajouter le fichier audio
+                const formData = new FormData();
+                formData.append('audio', audioBlob, 'recording.webm');
+                
+                // Afficher l'indicateur de frappe
+                const typingIndicator = this.showTypingIndicator();
+                
+                try {
+                    const response = await fetch('/api/speech/transcribe', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        // Afficher la transcription
+                        this.addMessage(`🗣️ "${result.transcription}"`, true);
+                        
+                        if (result.nutrition && result.nutrition.success) {
+                            // Afficher les infos nutritionnelles
+                            this.addMessage(`✅ **Informations nutritionnelles trouvées :**<br>
+                                🍽 **Aliment:** ${result.nutrition.food}<br>
+                                ⚖️ **Quantité:** ${result.nutrition.quantity}g<br>
+                                🔥 **Calories:** ${result.nutrition.calories} kcal<br>
+                                🥩 **Protéines:** ${result.nutrition.proteines}g<br>
+                                🍞 **Glucides:** ${result.nutrition.glucides}g<br>
+                                🥑 **Lipides:** ${result.nutrition.lipides}g<br><br>
+                                ✨ **Les champs du formulaire ont été automatiquement remplis !**`, false);
+                            
+                            // Remplir le formulaire
+                            if (nomAlimentField) {
+                                nomAlimentField.value = result.nutrition.food;
+                                nomAlimentField.dispatchEvent(new Event('input', { bubbles: true }));
+                            }
+                            if (caloriesField && result.nutrition.calories) {
+                                caloriesField.value = result.nutrition.calories;
+                                caloriesField.dispatchEvent(new Event('input', { bubbles: true }));
+                            }
+                            if (proteinesField && result.nutrition.proteines) {
+                                proteinesField.value = result.nutrition.proteines;
+                                proteinesField.dispatchEvent(new Event('input', { bubbles: true }));
+                            }
+                            if (glucidesField && result.nutrition.glucides) {
+                                glucidesField.value = result.nutrition.glucides;
+                                glucidesField.dispatchEvent(new Event('input', { bubbles: true }));
+                            }
+                            if (lipidesField && result.nutrition.lipides) {
+                                lipidesField.value = result.nutrition.lipides;
+                                lipidesField.dispatchEvent(new Event('input', { bubbles: true }));
+                            }
+                            
+                            // Mettre en surbrillance les champs remplis
+                            [nomAlimentField, caloriesField, proteinesField, glucidesField, lipidesField].forEach(field => {
+                                if (field && field.value) {
+                                    field.style.backgroundColor = '#e8f5e8';
+                                    field.style.border = '2px solid #4caf50';
+                                    setTimeout(() => {
+                                        field.style.backgroundColor = '';
+                                        field.style.border = '';
+                                    }, 2000);
+                                }
+                            });
+                            
+                        } else {
+                            // Message d'erreur
+                            this.addMessage(`❌ ${result.nutrition?.message || 'Aliment non reconnu'}`, false);
+                        }
+                    } else {
+                        this.addMessage('❌ Erreur de transcription. Veuillez réessayer.', false);
+                    }
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    this.addMessage('❌ Erreur de connexion avec le serveur vocal.', false);
+                } finally {
+                    if (typingIndicator && typingIndicator.parentNode) {
+                        typingIndicator.remove();
+                    }
+                }
+            }
+            
+            addMessage(text, isUser = false) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+                messageDiv.style.cssText = `
+                    display: flex;
+                    gap: 8px;
+                    align-items: flex-start;
+                    ${isUser ? 'align-self: flex-end;' : ''}
+                `;
+                
+                const avatarDiv = document.createElement('div');
+                avatarDiv.style.cssText = `
+                    width: 24px;
+                    height: 24px;
+                    background: ${isUser ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.2)'};
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    flex-shrink: 0;
+                `;
+                avatarDiv.innerHTML = `<span style="color: white; font-size: 12px;">${isUser ? '👤' : '🤖'}</span>`;
+                
+                const textDiv = document.createElement('div');
+                textDiv.style.cssText = `
+                    background: ${isUser ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.2)'};
+                    color: ${isUser ? '#333' : 'white'};
+                    padding: 12px;
+                    border-radius: 12px;
+                    max-width: 80%;
+                    font-size: 0.9rem;
+                `;
+                textDiv.innerHTML = text;
+                
+                messageDiv.appendChild(avatarDiv);
+                messageDiv.appendChild(textDiv);
+                
+                chatbotMessages.appendChild(messageDiv);
+                chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+            }
+            
+            showTypingIndicator() {
+                const typingDiv = document.createElement('div');
+                typingDiv.className = 'message bot-message';
+                typingDiv.style.cssText = `
+                    display: flex;
+                    gap: 8px;
+                    align-items: flex-start;
+                `;
+                
+                const avatarDiv = document.createElement('div');
+                avatarDiv.style.cssText = `
+                    width: 24px;
+                    height: 24px;
+                    background: rgba(255,255,255,0.2);
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    flex-shrink: 0;
+                `;
+                avatarDiv.innerHTML = '<span style="color: white; font-size: 12px;">🤖</span>';
+                
+                const typingTextDiv = document.createElement('div');
+                typingTextDiv.className = 'typing-indicator';
+                typingTextDiv.innerHTML = `
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                `;
+                
+                typingDiv.appendChild(avatarDiv);
+                typingDiv.appendChild(typingTextDiv);
+                
+                chatbotMessages.appendChild(typingDiv);
+                chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+                
+                return typingDiv;
+            }
+        }
+
+        // Initialiser la reconnaissance vocale
+        const voiceRecognition = new VoiceRecognition();
+
+        // Fonctions existantes du chatbot texte
+        function addMessage(text, isUser = false) {
+            // Utilise la même méthode que dans VoiceRecognition pour rester cohérent
+            voiceRecognition.addMessage(text, isUser);
+        }
+
+        function showTypingIndicator() {
+            return voiceRecognition.showTypingIndicator();
+        }
+
+        function fillFormFields(data) {
+            // Remplir le nom de l'aliment si disponible
+            if (nomAlimentField && data.nomAliment) {
+                nomAlimentField.value = data.nomAliment;
+                nomAlimentField.dispatchEvent(new Event('input', { bubbles: true }));
+                nomAlimentField.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            
+            if (caloriesField && data.calories) {
+                caloriesField.value = data.calories;
+                caloriesField.dispatchEvent(new Event('input', { bubbles: true }));
+                caloriesField.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            if (proteinesField && data.proteines) {
+                proteinesField.value = data.proteines;
+                proteinesField.dispatchEvent(new Event('input', { bubbles: true }));
+                proteinesField.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            if (glucidesField && data.glucides) {
+                glucidesField.value = data.glucides;
+                glucidesField.dispatchEvent(new Event('input', { bubbles: true }));
+                glucidesField.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            if (lipidesField && data.lipides) {
+                lipidesField.value = data.lipides;
+                lipidesField.dispatchEvent(new Event('input', { bubbles: true }));
+                lipidesField.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            
+            // Ajouter un effet visuel pour montrer que les champs ont été remplis
+            [nomAlimentField, caloriesField, proteinesField, glucidesField, lipidesField].forEach(field => {
+                if (field && field.value) {
+                    field.style.backgroundColor = '#e8f5e8';
+                    field.style.border = '2px solid #4caf50';
+                    setTimeout(() => {
+                        field.style.backgroundColor = '';
+                        field.style.border = '';
+                    }, 2000);
+                }
+            });
+        }
+
+        async function sendQuery() {
+            const query = chatbotInput.value.trim();
+            
+            if (!query) return;
+
+            addMessage(query, true);
+            chatbotInput.value = '';
+
+            const typingIndicator = showTypingIndicator();
+            chatbotSubmit.disabled = true;
+
+            try {
+                const formData = new FormData();
+                formData.append('query', query);
+
+                const response = await fetch('{{ path('app_aliment_chatbot') }}', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    addMessage(`❌ Erreur: ${data.error}`, false);
+                } else {
+                    addMessage(`✅ **Informations nutritionnelles trouvées par Gemini AI :**<br>
+                        🍽 **Calories:** ${data.calories || 'N/A'} kcal<br>
+                        🥩 **Protéines:** ${data.proteines || 'N/A'} g<br>
+                        🍞 **Glucides:** ${data.glucides || 'N/A'} g<br>
+                        🥑 **Lipides:** ${data.lipides || 'N/A'} g<br><br>
+                        ✨ **Les champs du formulaire ont été automatiquement remplis !**<br>
+                        <small style="opacity: 0.8;">Vous pouvez ajuster les valeurs si nécessaire avant de sauvegarder.</small>`, false);
+                    
+                    // Remplir automatiquement les champs du formulaire
+                    fillFormFields(data);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage("❌ Erreur de connexion avec Gemini AI. Veuillez réessayer.", false);
+            } finally {
+                typingIndicator.remove();
+                chatbotSubmit.disabled = false;
+                chatbotInput.focus();
+            }
+        }
+
+        chatbotSubmit.addEventListener('click', sendQuery);
+        chatbotInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendQuery();
+            }
+        });
+
+        chatbotInput.focus();
+    });
+</script>
+{% endblock %}
