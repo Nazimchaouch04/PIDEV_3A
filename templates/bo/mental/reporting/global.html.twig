@@ -1,0 +1,129 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Reporting Management Mental - BioSync{% endblock %}
+
+{% block body %}
+<div class="reporting-page p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">📊 Reporting Management Mental</h1>
+            <p class="text-muted">Analyse de la santé mentale corrélée aux activités physiques et à la nutrition.</p>
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-outline-primary" onclick="window.print()">
+                <i class="fas fa-print mr-2"></i>Imprimer la vue
+            </button>
+        </div>
+    </div>
+
+    {# Global Metrics #}
+    <div class="row mb-5">
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Indice de Résilience Moyen</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ globalStats.avg_resilience }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-shield-alt fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Engagement Hebdomadaire</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ globalStats.avg_engagement }}%</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-user-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Population Analysée</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ globalStats.count }} Utilisateurs</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Users Correlation Table #}
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Détails des Performances par Utilisateur</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Utilisateur</th>
+                            <th>Email</th>
+                            <th>Résilience (Sport/Mental)</th>
+                            <th>Engagement</th>
+                            <th>Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for data in usersData %}
+                        <tr>
+                            <td>{{ data.user.nomComplet }}</td>
+                            <td>{{ data.user.email }}</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <span class="mr-2">{{ data.resilience }}</span>
+                                    <div class="progress progress-sm w-100">
+                                        <div class="progress-bar bg-primary" role="progressbar" style="width: {{ data.resilience }}%" aria-valuenow="{{ data.resilience }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge badge-pill badge-{{ data.engagement > 50 ? 'success' : 'warning' }}">
+                                    {{ data.engagement }}%
+                                </span>
+                            </td>
+                            <td>
+                                {% if data.resilience > 70 %}
+                                    <span class="text-success"><i class="fas fa-check-circle mr-1"></i>Optimale</span>
+                                {% elseif data.resilience > 40 %}
+                                    <span class="text-info"><i class="fas fa-info-circle mr-1"></i>Stable</span>
+                                {% else %}
+                                    <span class="text-danger"><i class="fas fa-exclamation-triangle mr-1"></i>À surveiller</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .reporting-page .border-left-primary { border-left: 0.25rem solid #4e73df !important; }
+    .reporting-page .border-left-success { border-left: 0.25rem solid #1cc88a !important; }
+    .reporting-page .border-left-info { border-left: 0.25rem solid #36b9cc !important; }
+    .reporting-page .progress { height: 0.5rem; }
+</style>
+{% endblock %}

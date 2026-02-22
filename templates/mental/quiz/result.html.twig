@@ -59,6 +59,14 @@
                 <div class="quiz-stat-value">{{ totalScore }}</div>
                 <div class="quiz-stat-label">Points totaux</div>
             </div>
+            <div class="quiz-stat-item">
+                <div class="quiz-stat-value">{{ quiz.tempsMoyenReponse|number_format(1) }}s</div>
+                <div class="quiz-stat-label">Temps moyen</div>
+            </div>
+            <div class="quiz-stat-item">
+                <div class="quiz-stat-value text-info" style="font-size: 0.9rem;">{{ quiz.agiliteCognitive }}</div>
+                <div class="quiz-stat-label">Agilité</div>
+            </div>
         </div>
 
         {# Médaille #}

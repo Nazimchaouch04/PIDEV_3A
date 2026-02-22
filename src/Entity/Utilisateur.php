@@ -120,8 +120,11 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
      * Collection des groupes de soutien auxquels l'utilisateur est inscrit
      * Relation OneToMany : un utilisateur peut rejoindre plusieurs groupes
      */
-    #[ORM\OneToMany(targetEntity: MembreGroupe::class, mappedBy: 'utilisateur', orphanRemoval: true)]
-    private Collection $membresGroupes;
+    /**
+     * @var Collection<int, CognitiveInsight>
+     */
+    #[ORM\OneToMany(targetEntity: CognitiveInsight::class, mappedBy: 'utilisateur', orphanRemoval: true)]
+    private Collection $cognitiveInsights;
 
     /**
      * Constructeur de l'entité Utilisateur
@@ -137,6 +140,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         $this->rendezVousPatient = new ArrayCollection();     // Initialisation collection rendez-vous patient
         $this->rendezVousSpecialiste = new ArrayCollection();  // Initialisation collection rendez-vous spécialiste
         $this->membresGroupes = new ArrayCollection();  // Initialisation collection groupes
+        $this->cognitiveInsights = new ArrayCollection();
     }
 
     // =========================================================================
@@ -364,6 +368,14 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function getMembresGroupes(): Collection
     {
         return $this->membresGroupes;
+    }
+
+    /**
+     * @return Collection<int, CognitiveInsight>
+     */
+    public function getCognitiveInsights(): Collection
+    {
+        return $this->cognitiveInsights;
     }
 
     public function getResetToken(): ?string

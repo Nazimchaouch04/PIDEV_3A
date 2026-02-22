@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Rapport Mental BioSync</title>
+    <style>
+        body { font-family: Helvetica, sans-serif; color: #333; }
+        .header { text-align: center; border-bottom: 2px solid #4e73df; padding-bottom: 20px; margin-bottom: 30px; }
+        .title { color: #4e73df; font-size: 24px; }
+        .section { margin-bottom: 25px; }
+        .section-title { font-size: 18px; color: #1cc88a; border-left: 5px solid #1cc88a; padding-left: 10px; margin-bottom: 10px; }
+        .metric-box { background: #f8f9fc; border: 1px solid #e3e6f0; padding: 15px; border-radius: 5px; }
+        .score { font-size: 32px; font-weight: bold; color: #4e73df; }
+        .footer { position: fixed; bottom: 0; width: 100%; text-align: center; font-size: 10px; color: #888; border-top: 1px solid #eee; padding-top: 10px; }
+        .info-table { width: 100%; border-collapse: collapse; }
+        .info-table td { padding: 10px; border-bottom: 1px solid #eee; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 class="title">Rapport de Santé Mentale BioSync</h1>
+        <p>Généré le {{ date|date('d/m/Y à H:i') }}</p>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Informations Utilisateur</div>
+        <table class="info-table">
+            <tr>
+                <td><strong>Nom :</strong> {{ user.nomComplet }}</td>
+                <td><strong>Email :</strong> {{ user.email }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Indicateurs Clés de Performance (KPIs)</div>
+        <div style="display: flex; justify-content: space-between;">
+            <div class="metric-box" style="width: 45%;">
+                <strong>Indice de Résilience</strong><br>
+                <span class="score">{{ resilience }}</span>
+                <p style="font-size: 12px;">Corrélation activité physique / équilibre mental.</p>
+            </div>
+            <div class="metric-box" style="width: 45%;">
+                <strong>Niveau d'Engagement</strong><br>
+                <span class="score">{{ engagement }}%</span>
+                <p style="font-size: 12px;">Participation aux activités de bien-être (7j).</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Analyse & Recommandations</div>
+        <p>Basé sur vos données récentes :</p>
+        <ul>
+            {% if resilience > 70 %}
+                <li>Votre niveau de résilience est <strong>excellent</strong>. Votre routine sportive semble avoir un impact direct et positif sur votre clarté mentale.</li>
+            {% elseif resilience > 40 %}
+                <li>Votre résilience est <strong>stable</strong>. Pensez à augmenter l'intensité de vos sessions sportives pour booster encore plus votre moral.</li>
+            {% else %}
+                <li>Votre score de résilience est <strong>bas</strong>. Nous vous recommandons de prioriser au moins 3 sessions de sport par semaine et de consulter un coach.</li>
+            {% endif %}
+
+            {% if engagement < 50 %}
+                <li>Attention, votre engagement est en baisse. Essayez de réaliser au moins un quiz mental tous les deux jours.</li>
+            {% endif %}
+        </ul>
+    </div>
+
+    <div class="footer">
+        BioSync - Votre allié santé & performance. Document confidentiel généré automatiquement.
+    </div>
+</body>
+</html>

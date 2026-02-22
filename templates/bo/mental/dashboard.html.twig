@@ -10,10 +10,16 @@
             <h1 class="page-title">Backoffice Mental Wellness</h1>
             <p class="page-subtitle">Gérer les quiz, questions et assessments</p>
         </div>
+        <div class="header-actions">
+            <a href="{{ path('app_mental_admin_reporting') }}" class="btn btn-primary d-flex align-items-center">
+                <i class="fas fa-chart-line mr-2"></i>📊 Global Reporting
+            </a>
+        </div>
     </div>
 
     {# Stats Cards #}
     <div class="stats-grid">
+        {# Existing stats... #}
         <div class="stat-card">
             <div class="stat-icon blue">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -65,6 +71,36 @@
                 <div class="stat-label">Médailles attribuées</div>
             </div>
         </div>
+    </div>
+
+    {# Cognitive Agility Stats #}
+    <div class="stats-grid mt-4">
+        <div class="stat-card">
+            <div class="stat-icon red">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                </svg>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value">{{ avgResponseTime }}s</div>
+                <div class="stat-label">Réponse moyenne</div>
+            </div>
+        </div>
+
+        {% for agility in agilityDistribution %}
+            <div class="stat-card">
+                <div class="stat-icon teal">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                    </svg>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ agility.count }}</div>
+                    <div class="stat-label">{{ agility.agiliteCognitive }}</div>
+                </div>
+            </div>
+        {% endfor %}
     </div>
 
     {# Actions Rapides #}

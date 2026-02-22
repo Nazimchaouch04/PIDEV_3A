@@ -29,9 +29,9 @@ class QuizService
      * Récupère des questions de quiz selon les critères
      */
     public function getQuestions(
-        string $category = null,
+        ?string $category = null,
         int $limit = 10,
-        string $difficulty = null
+        ?string $difficulty = null
     ): array {
         try {
             $queryParams = [
