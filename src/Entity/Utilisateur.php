@@ -118,14 +118,16 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
      * Collection des rendez-vous médicaux de l'utilisateur (comme spécialiste)
      * Relation OneToMany : un spécialiste peut avoir plusieurs rendez-vous
      */
-    #[ORM\OneToMany(targetEntity: RendezVous::class, mappedBy: 'specialiste', orphanRemoval: true)]
-    private Collection $rendezVousSpecialiste;
+    #[ORM\OneToMany(targetEntity: MembreGroupe::class, mappedBy: 'utilisateur', orphanRemoval: true)]
+    private Collection $membresGroupes;
 
     /**
-     * @var Collection<int, MembreGroupe>
-     * Collection des groupes de soutien auxquels l'utilisateur est inscrit
-     * Relation OneToMany : un utilisateur peut rejoindre plusieurs groupes
+     * @var Specialiste|null
+     * Relation OneToOne avec l'entité Specialiste (si l'utilisateur est un spécialiste)
      */
+    #[ORM\OneToOne(targetEntity: Specialiste::class, mappedBy: 'utilisateur')]
+    private ?Specialiste $specialiste = null;
+
     /**
      * @var Collection<int, CognitiveInsight>
      */
@@ -145,7 +147,6 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         $this->quizMentaux = new ArrayCollection();   // Initialisation collection quiz mentaux
         $this->mentalCheckIns = new ArrayCollection(); // Initialisation collection mental check-ins
         $this->rendezVousPatient = new ArrayCollection();     // Initialisation collection rendez-vous patient
-        $this->rendezVousSpecialiste = new ArrayCollection();  // Initialisation collection rendez-vous spécialiste
         $this->membresGroupes = new ArrayCollection();  // Initialisation collection groupes
         $this->cognitiveInsights = new ArrayCollection();
     }
@@ -348,30 +349,6 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getRendezVousSpecialiste(): Collection
-    {
-        return $this->rendezVousSpecialiste;
-    }
-    
-    public function addRendezVousSpecialiste(RendezVous $rendezVous): static
-    {
-        if (!$this->rendezVousSpecialiste->contains($rendezVous)) {
-            $this->rendezVousSpecialiste->add($rendezVous);
-            $rendezVous->setSpecialiste($this);
-        }
-        return $this;
-    }
-    
-    public function removeRendezVousSpecialiste(RendezVous $rendezVous): static
-    {
-        if ($this->rendezVousSpecialiste->removeElement($rendezVous)) {
-            if ($rendezVous->getSpecialiste() === $this) {
-                $rendezVous->setSpecialiste(null);
-            }
-        }
-        return $this;
-    }
-
     public function getMembresGroupes(): Collection
     {
         return $this->membresGroupes;
@@ -440,6 +417,45 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPhoto(?string $photo): static
     {
         $this->photo = $photo;
+        return $this;
+    }
+
+    public function getMentalCheckIns(): Collection
+    {
+        return $this->mentalCheckIns;
+    }
+
+    public function addMentalCheckIn(MentalCheckIn $mentalCheckIn): static
+    {
+        if (!$this->mentalCheckIns->contains($mentalCheckIn)) {
+            $this->mentalCheckIns->add($mentalCheckIn);
+            $mentalCheckIn->setUtilisateur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMentalCheckIn(MentalCheckIn $mentalCheckIn): static
+    {
+        if ($this->mentalCheckIns->removeElement($mentalCheckIn)) {
+            // set the owning side to null (unless already changed)
+            if ($mentalCheckIn->getUtilisateur() === $this) {
+                $mentalCheckIn->setUtilisateur(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getSpecialiste(): ?Specialiste
+    {
+        return $this->specialiste;
+    }
+
+    public function setSpecialiste(?Specialiste $specialiste): static
+    {
+        $this->specialiste = $specialiste;
+
         return $this;
     }
 }

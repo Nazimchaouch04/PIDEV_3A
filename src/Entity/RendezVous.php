@@ -41,10 +41,10 @@ class RendezVous
     #[ORM\JoinColumn(nullable: false)]
     private ?Utilisateur $patient = null;
 
-    // DOCTOR ACCOUNT (Utilisateur ROLE_MEDECIN)
-    #[ORM\ManyToOne(inversedBy: 'rendezVousSpecialiste')]
+    // DOCTOR ACCOUNT (Specialiste)
+    #[ORM\ManyToOne(inversedBy: 'rendezVous')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Utilisateur $specialiste = null;
+    private ?Specialiste $specialiste = null;
 
     // CONSULTATION
     #[ORM\OneToOne(mappedBy: 'rendezVous', cascade: ['persist', 'remove'])]
@@ -115,12 +115,12 @@ class RendezVous
         return $this;
     }
 
-    public function getSpecialiste(): ?Utilisateur
+    public function getSpecialiste(): ?Specialiste
     {
         return $this->specialiste;
     }
 
-    public function setSpecialiste(?Utilisateur $specialiste): static
+    public function setSpecialiste(?Specialiste $specialiste): static
     {
         $this->specialiste = $specialiste;
         return $this;
