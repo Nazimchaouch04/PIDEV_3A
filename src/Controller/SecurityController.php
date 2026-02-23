@@ -201,9 +201,6 @@ class SecurityController extends AbstractController
             
             $entityManager->flush();
 
-            // Log the password change
-            $this->activityLogger->log('Changement de mot de passe', $user);
-
             $this->addFlash('success', 'Votre mot de passe a été réinitialisé avec succès.');
             return $this->redirectToRoute('app_login');
         }

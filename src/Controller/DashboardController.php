@@ -24,9 +24,20 @@ class DashboardController extends AbstractController
             return $this->redirectToRoute('app_login');
         }
 
+        // ✅ Redirection selon le rôle
+        if ($this->isGranted('ROLE_ADMIN')) {
+            return $this->redirectToRoute('app_sports');
+        }
 
+        if ($this->isGranted('ROLE_COACH')) {
+            return $this->redirectToRoute('app_seance_sport_index');
+        }
 
-        // Chargement des données du dashboard (Code existant)
+        if ($this->isGranted('ROLE_USER')) {
+            return $this->redirectToRoute('app_exercice_index');
+        }
+
+        // Chargement des données du dashboard
         $todayRepas = $repasRepository->findTodayByUtilisateur($user);
         $weekSeances = $seanceSportRepository->findThisWeekByUtilisateur($user);
         $upcomingRdv = $rendezVousRepository->findBy(

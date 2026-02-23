@@ -1,0 +1,497 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+    .motivation-page {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f0f7ff 0%, #dbeafe 30%, #eff6ff 65%, #ffffff 100%);
+        font-family: 'DM Sans', sans-serif;
+        padding: 60px 20px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Orbes décoratifs bleus animés */
+    .motivation-page::before {
+        content: '';
+        position: fixed;
+        top: -150px;
+        left: -150px;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(59,130,246,0.18) 0%, rgba(147,197,253,0.08) 50%, transparent 70%);
+        pointer-events: none;
+        animation: drift 8s ease-in-out infinite alternate;
+    }
+
+    .motivation-page::after {
+        content: '';
+        position: fixed;
+        bottom: -150px;
+        right: -100px;
+        width: 550px;
+        height: 550px;
+        background: radial-gradient(circle, rgba(6,182,212,0.15) 0%, rgba(96,165,250,0.08) 50%, transparent 70%);
+        pointer-events: none;
+        animation: drift 10s ease-in-out infinite alternate-reverse;
+    }
+
+    @keyframes drift {
+        from { transform: translate(0, 0); }
+        to   { transform: translate(40px, 30px); }
+    }
+
+    /* ── Card principale ── */
+    .motivation-card {
+        max-width: 620px;
+        margin: 0 auto;
+        background: rgba(255,255,255,0.88);
+        border: 1px solid rgba(147,197,253,0.45);
+        border-radius: 28px;
+        padding: 50px 48px;
+        backdrop-filter: blur(20px);
+        box-shadow: 0 8px 40px rgba(59,130,246,0.12), 0 2px 12px rgba(0,0,0,0.05);
+        position: relative;
+        z-index: 1;
+        animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(40px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Bouton retour ── */
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #64748b;
+        font-size: 13px;
+        font-weight: 500;
+        text-decoration: none;
+        margin-bottom: 28px;
+        transition: color 0.2s;
+    }
+    .back-btn:hover { color: #3b82f6; }
+
+    .page-header { margin-bottom: 44px; }
+
+    .page-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(59,130,246,0.1);
+        border: 1px solid rgba(59,130,246,0.3);
+        color: #2563eb;
+        padding: 6px 14px;
+        border-radius: 100px;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+    }
+
+    .page-title {
+        font-family: 'Syne', sans-serif;
+        font-size: 36px;
+        font-weight: 800;
+        color: #1e293b;
+        line-height: 1.1;
+        margin: 0 0 10px 0;
+    }
+
+    .page-title span {
+        background: linear-gradient(135deg, #3b82f6, #06b6d4);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .page-subtitle {
+        color: #64748b;
+        font-size: 15px;
+        margin: 0;
+        line-height: 1.6;
+    }
+
+    .form-section { margin-bottom: 32px; }
+
+    .form-label-custom {
+        display: block;
+        color: #374151;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        margin-bottom: 14px;
+    }
+
+    /* ── Humeur Cards ── */
+    .humeur-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+
+    .humeur-option { position: relative; }
+
+    .humeur-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .humeur-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 18px 12px;
+        background: #f8fafc;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 16px;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        text-align: center;
+    }
+
+    .humeur-card:hover {
+        background: #eff6ff;
+        border-color: #93c5fd;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59,130,246,0.12);
+    }
+
+    .humeur-option input:checked + .humeur-card {
+        background: #dbeafe;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59,130,246,0.15), 0 4px 12px rgba(59,130,246,0.18);
+    }
+
+    .humeur-emoji { font-size: 28px; line-height: 1; }
+
+    .humeur-label {
+        color: #64748b;
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    .humeur-option input:checked + .humeur-card .humeur-label {
+        color: #2563eb;
+        font-weight: 600;
+    }
+
+    /* ── Energie Slider ── */
+    .energie-display {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .energie-value {
+        font-family: 'Syne', sans-serif;
+        font-size: 32px;
+        font-weight: 800;
+        color: #3b82f6;
+        line-height: 1;
+    }
+
+    .energie-max {
+        color: #94a3b8;
+        font-size: 16px;
+        font-weight: 400;
+    }
+
+    .energie-dots { display: flex; gap: 6px; }
+
+    .energie-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #e2e8f0;
+        transition: all 0.3s ease;
+    }
+
+    .energie-dot.active {
+        background: #3b82f6;
+        box-shadow: 0 0 8px rgba(59,130,246,0.4);
+    }
+
+    input[type="range"].custom-range {
+        -webkit-appearance: none;
+        width: 100%;
+        height: 5px;
+        background: #e2e8f0;
+        border-radius: 100px;
+        outline: none;
+        margin-top: 8px;
+    }
+
+    input[type="range"].custom-range::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3b82f6, #06b6d4);
+        cursor: pointer;
+        box-shadow: 0 0 10px rgba(59,130,246,0.4);
+        transition: transform 0.2s;
+    }
+
+    input[type="range"].custom-range::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+    /* ── Sommeil Input ── */
+    .custom-number {
+        width: 100%;
+        background: #f8fafc;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 16px 20px;
+        color: #1e293b;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 16px;
+        outline: none;
+        transition: all 0.25s ease;
+    }
+
+    .custom-number::placeholder { color: #94a3b8; }
+
+    .custom-number:focus {
+        border-color: #3b82f6;
+        background: #eff6ff;
+        box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+    }
+
+    /* ── Stress Cards ── */
+    .stress-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+
+    .stress-option { position: relative; }
+
+    .stress-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .stress-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        padding: 16px 8px;
+        background: #f8fafc;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 14px;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        text-align: center;
+    }
+
+    .stress-card:hover {
+        background: #eff6ff;
+        border-color: #93c5fd;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59,130,246,0.12);
+    }
+
+    .stress-option input:checked + .stress-card {
+        background: #dbeafe;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59,130,246,0.15), 0 4px 12px rgba(59,130,246,0.18);
+    }
+
+    .stress-emoji { font-size: 22px; }
+
+    .stress-label {
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .stress-option input:checked + .stress-card .stress-label {
+        color: #2563eb;
+        font-weight: 600;
+    }
+
+    /* ── Submit Button ── */
+    .submit-btn {
+        width: 100%;
+        padding: 18px;
+        background: linear-gradient(135deg, #3b82f6, #06b6d4);
+        border: none;
+        border-radius: 16px;
+        color: #ffffff;
+        font-family: 'Syne', sans-serif;
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        margin-top: 8px;
+    }
+
+    .submit-btn::before {
+        content: '';
+        position: absolute;
+        top: 0; left: -100%;
+        width: 100%; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .submit-btn:hover::before { left: 100%; }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px rgba(59,130,246,0.4);
+    }
+
+    .submit-btn:active { transform: translateY(0); }
+
+    .divider {
+        height: 1px;
+        background: #e2e8f0;
+        margin: 28px 0;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="motivation-page">
+    <div class="motivation-card">
+
+        {# ── Retour à la liste ── #}
+        <a href="{{ path('app_exercice_index') }}" class="back-btn">
+            ← Retour à la liste des exercices
+        </a>
+
+        <div class="page-header">
+            <div class="page-badge">🤖 Coach IA</div>
+            <h1 class="page-title">Comment tu te sens<br><span>aujourd'hui ?</span></h1>
+            <p class="page-subtitle">Notre IA analyse ton état mental et physique pour générer la séance parfaite pour toi.</p>
+        </div>
+
+        <form action="{{ path('app_exercice_motivation_analyser') }}" method="POST">
+
+            {# ── Humeur ── #}
+            <div class="form-section">
+                <label class="form-label-custom">😊 Ton humeur du moment</label>
+                <div class="humeur-grid">
+                    <label class="humeur-option">
+                        <input type="radio" name="humeur" value="Bien" required>
+                        <div class="humeur-card">
+                            <span class="humeur-emoji">😊</span>
+                            <span class="humeur-label">Bien</span>
+                        </div>
+                    </label>
+                    <label class="humeur-option">
+                        <input type="radio" name="humeur" value="Moyen">
+                        <div class="humeur-card">
+                            <span class="humeur-emoji">😐</span>
+                            <span class="humeur-label">Moyen</span>
+                        </div>
+                    </label>
+                    <label class="humeur-option">
+                        <input type="radio" name="humeur" value="Fatigué">
+                        <div class="humeur-card">
+                            <span class="humeur-emoji">😞</span>
+                            <span class="humeur-label">Fatigué</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            {# ── Energie ── #}
+            <div class="form-section">
+                <label class="form-label-custom">⚡ Niveau d'énergie</label>
+                <div class="energie-display">
+                    <div>
+                        <span class="energie-value" id="energieVal">3</span>
+                        <span class="energie-max"> / 5</span>
+                    </div>
+                    <div class="energie-dots" id="energieDots">
+                        <div class="energie-dot active"></div>
+                        <div class="energie-dot active"></div>
+                        <div class="energie-dot active"></div>
+                        <div class="energie-dot"></div>
+                        <div class="energie-dot"></div>
+                    </div>
+                </div>
+                <input type="range" name="energie" min="1" max="5" value="3"
+                       class="custom-range" id="energieSlider"
+                       oninput="updateEnergie(this.value)">
+            </div>
+
+            <div class="divider"></div>
+
+            {# ── Sommeil ── #}
+            <div class="form-section">
+                <label class="form-label-custom">😴 Heures de sommeil cette nuit</label>
+                <input type="number" name="sommeil" min="1" max="12"
+                       class="custom-number" placeholder="ex: 7" required>
+            </div>
+
+            <div class="divider"></div>
+
+            {# ── Stress ── #}
+            <div class="form-section">
+                <label class="form-label-custom">🧠 Niveau de stress</label>
+                <div class="stress-grid">
+                    <label class="stress-option">
+                        <input type="radio" name="stress" value="Faible" required>
+                        <div class="stress-card">
+                            <span class="stress-emoji">😌</span>
+                            <span class="stress-label">Faible</span>
+                        </div>
+                    </label>
+                    <label class="stress-option">
+                        <input type="radio" name="stress" value="Moyen">
+                        <div class="stress-card">
+                            <span class="stress-emoji">😤</span>
+                            <span class="stress-label">Moyen</span>
+                        </div>
+                    </label>
+                    <label class="stress-option">
+                        <input type="radio" name="stress" value="Élevé">
+                        <div class="stress-card">
+                            <span class="stress-emoji">😰</span>
+                            <span class="stress-label">Élevé</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn">
+                🚀 Analyser mon état et générer ma séance
+            </button>
+
+        </form>
+    </div>
+</div>
+
+<script>
+function updateEnergie(val) {
+    document.getElementById('energieVal').textContent = val;
+    var dots = document.querySelectorAll('.energie-dot');
+    for (var i = 0; i < dots.length; i++) {
+        dots[i].classList.toggle('active', i < val);
+    }
+}
+</script>
+{% endblock %}

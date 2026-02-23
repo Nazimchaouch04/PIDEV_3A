@@ -54,31 +54,19 @@
             padding: 6px 12px;
             border-radius: 20px;
             font-size: 0.85em;
-            font-weight: 600;
+            font-weight: 500;
         }
         .action-login {
             background: #C6F6D5;
             color: #22543D;
         }
         .action-logout {
-            background: #BEE3F8;
-            color: #2A4365;
-        }
-        .action-failed {
             background: #FED7D7;
             color: #742A2A;
         }
-        .action-suspicious {
-            background: #FEEBC8;
-            color: #7C2D12;
-        }
-        .action-password {
-            background: #E9D8FD;
-            color: #44337A;
-        }
         .action-default {
-            background: #E2E8F0;
-            color: #2D3748;
+            background: #EBF4FF;
+            color: #2C5282;
         }
         .back-btn {
             display: inline-block;
@@ -154,16 +142,12 @@
                                 {{ log.createdAt|date('d/m/Y H:i:s') }}
                             </td>
                             <td>
-                                {% if 'Connexion réussie' in log.action %}
+                                {% if 'Connexion' in log.action %}
                                     <span class="action-badge action-login">🟢 {{ log.action }}</span>
                                 {% elseif 'Déconnexion' in log.action %}
-                                    <span class="action-badge action-logout">🔵 {{ log.action }}</span>
-                                {% elseif 'échouée' in log.action or 'failed' in log.action|lower %}
-                                    <span class="action-badge action-failed">🔴 {{ log.action }}</span>
-                                {% elseif 'mot de passe' in log.action|lower or 'password' in log.action|lower %}
-                                    <span class="action-badge action-password">🟣 {{ log.action }}</span>
+                                    <span class="action-badge action-logout">🔴 {{ log.action }}</span>
                                 {% else %}
-                                    <span class="action-badge action-default">⚪ {{ log.action }}</span>
+                                    <span class="action-badge action-default">{{ log.action }}</span>
                                 {% endif %}
                             </td>
                             <td>{{ log.utilisateur ? log.utilisateur.nomComplet : 'Système' }}</td>

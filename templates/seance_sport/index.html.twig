@@ -1,0 +1,158 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Admin - Gestion Séances Sport{% endblock %}
+
+{% block body %}
+<div style="padding: 20px;">
+
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <div>
+            <h1 style="margin:0;">Gestion des Séances Sport</h1>
+            <p style="color:#888;">Administration de toutes les séances.</p>
+        </div>
+        <div style="display:flex; gap:10px;">
+            <a href="{{ path('app_seance_sport_defis') }}" style="background:linear-gradient(135deg,#f59e0b,#ef4444); color:white; padding:10px 20px; border-radius:8px; text-decoration:none; font-weight:600; box-shadow:0 4px 12px rgba(245,158,11,0.3);">🏅 Défis & Médailles</a>
+            <a href="{{ path('app_seance_sport_stats') }}" style="background:#6366f1; color:white; padding:10px 20px; border-radius:8px; text-decoration:none; font-weight:600;">📊 Statistiques</a>
+            <a href="{{ path('app_seance_sport_new') }}" style="background:#4f46e5; color:white; padding:10px 20px; border-radius:8px; text-decoration:none;">+ Nouvelle séance</a>
+        </div>
+    </div>
+
+    {% for message in app.flashes('success') %}
+        <div style="background:#d1fae5; color:#065f46; padding:12px; border-radius:8px; margin-bottom:15px;">✅ {{ message }}</div>
+    {% endfor %}
+
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:15px; margin-bottom:20px;">
+        <div style="background:white; padding:15px; border-radius:10px; box-shadow:0 1px 4px rgba(0,0,0,0.1);">
+            <div style="font-size:24px; font-weight:bold; color:#4f46e5;">{{ seance_sports|length }}</div>
+            <div style="color:#888;">Total séances</div>
+        </div>
+        <div style="background:white; padding:15px; border-radius:10px; box-shadow:0 1px 4px rgba(0,0,0,0.1);">
+            <div style="font-size:24px; font-weight:bold; color:#10b981;">
+                {% set total = 0 %}
+                {% for s in seance_sports %}{% set total = total + s.dureeMinutes %}{% endfor %}
+                {{ total }}
+            </div>
+            <div style="color:#888;">Minutes totales</div>
+        </div>
+        <div style="background:white; padding:15px; border-radius:10px; box-shadow:0 1px 4px rgba(0,0,0,0.1);">
+            <div style="font-size:24px; font-weight:bold; color:#f59e0b;">
+                {% set medailles = 0 %}
+                {% for s in seance_sports %}{% if s.medailleObtenue %}{% set medailles = medailles + 1 %}{% endif %}{% endfor %}
+                {{ medailles }}
+            </div>
+            <div style="color:#888;">Médailles attribuées</div>
+        </div>
+    </div>
+
+    <div style="display:flex; gap:10px; margin-bottom:15px;">
+        <input type="text" id="searchInput" placeholder="🔍 Rechercher par nom, utilisateur..." onkeyup="filterTable()" style="padding:10px; border:1px solid #ddd; border-radius:8px; flex:1;"/>
+        <select id="filterMedaille" onchange="filterTable()" style="padding:10px; border:1px solid #ddd; border-radius:8px;">
+            <option value="">🏅 Toutes médailles</option>
+            <option value="or">Or</option>
+            <option value="argent">Argent</option>
+            <option value="bronze">Bronze</option>
+        </select>
+        <select id="filterDuree" onchange="filterTable()" style="padding:10px; border:1px solid #ddd; border-radius:8px;">
+            <option value="">⏱ Toutes durées</option>
+            <option value="court">Court (< 30 min)</option>
+            <option value="moyen">Moyen (30-60 min)</option>
+            <option value="long">Long (> 60 min)</option>
+        </select>
+    </div>
+
+    <div style="background:white; border-radius:10px; box-shadow:0 1px 4px rgba(0,0,0,0.1); overflow:hidden;">
+        <table style="width:100%; border-collapse:collapse;" id="seancesTable">
+            <thead style="background:#f8fafc;">
+                <tr>
+                    <th onclick="sortByColumn(0)" style="padding:12px; text-align:left; cursor:pointer; border-bottom:2px solid #e2e8f0;">ID ▲▼</th>
+                    <th onclick="sortByColumn(1)" style="padding:12px; text-align:left; cursor:pointer; border-bottom:2px solid #e2e8f0;">Nom Séance ▲▼</th>
+                    <th onclick="sortByColumn(2)" style="padding:12px; text-align:left; cursor:pointer; border-bottom:2px solid #e2e8f0;">Utilisateur ▲▼</th>
+                    <th onclick="sortByColumn(3)" style="padding:12px; text-align:left; cursor:pointer; border-bottom:2px solid #e2e8f0;">Date ▲▼</th>
+                    <th onclick="sortByColumn(4)" style="padding:12px; text-align:left; cursor:pointer; border-bottom:2px solid #e2e8f0;">Heure ▲▼</th>
+                    <th onclick="sortByColumn(5)" style="padding:12px; text-align:left; cursor:pointer; border-bottom:2px solid #e2e8f0;">Durée ▲▼</th>
+                    <th style="padding:12px; text-align:left; border-bottom:2px solid #e2e8f0;">Médaille</th>
+                    <th style="padding:12px; text-align:left; border-bottom:2px solid #e2e8f0;">Exercices</th>
+                    <th style="padding:12px; text-align:left; border-bottom:2px solid #e2e8f0;">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                {% for seance in seance_sports %}
+                <tr style="border-bottom:1px solid #f1f5f9;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
+                    <td style="padding:12px;">{{ seance.id }}</td>
+                    <td style="padding:12px; font-weight:500;">{{ seance.nomSeance }}</td>
+                    <td style="padding:12px;">{{ seance.utilisateur ? seance.utilisateur.id : '-' }}</td>
+                    <td style="padding:12px;">{{ seance.dateSeance|date('d/m/Y') }}</td>
+                    <td style="padding:12px;">{{ seance.heureDebut|date('H:i') }}</td>
+                    <td style="padding:12px;">{{ seance.dureeMinutes }} min</td>
+                    <td style="padding:12px;">
+                        {% if seance.medailleObtenue %}
+                            {% if '🥇' in seance.medailleObtenue or 'or' in seance.medailleObtenue|lower %}
+                                <span style="background:#fef3c7; color:#92400e; padding:3px 10px; border-radius:20px; font-size:12px;">🥇 Or</span>
+                            {% elseif '🥈' in seance.medailleObtenue or 'argent' in seance.medailleObtenue|lower %}
+                                <span style="background:#f1f5f9; color:#475569; padding:3px 10px; border-radius:20px; font-size:12px;">🥈 Argent</span>
+                            {% elseif '🥉' in seance.medailleObtenue or 'bronze' in seance.medailleObtenue|lower %}
+                                <span style="background:#fef3c7; color:#78350f; padding:3px 10px; border-radius:20px; font-size:12px;">🥉 Bronze</span>
+                            {% else %}
+                                <span style="background:#f1f5f9; color:#888; padding:3px 10px; border-radius:20px; font-size:12px;">{{ seance.medailleObtenue }}</span>
+                            {% endif %}
+                        {% else %}
+                            <span style="color:#ccc;">—</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding:12px;">
+                        <span style="background:#ede9fe; color:#4f46e5; padding:3px 10px; border-radius:20px; font-size:12px;">{{ seance.exercices|length }} exercice(s)</span>
+                    </td>
+                    <td style="padding:12px;">
+                        <div style="display:flex; gap:5px;">
+                            <a href="{{ path('app_seance_sport_show', {'id': seance.id}) }}" style="background:#e0f2fe; color:#0369a1; padding:5px 10px; border-radius:6px; text-decoration:none; font-size:13px;">👁 Voir</a>
+                            <a href="{{ path('app_seance_sport_edit', {'id': seance.id}) }}" style="background:#fef9c3; color:#854d0e; padding:5px 10px; border-radius:6px; text-decoration:none; font-size:13px;">✏️ Edit</a>
+                            <form method="post" action="{{ path('app_seance_sport_delete', {'id': seance.id}) }}" onsubmit="return confirm('Supprimer cette séance ?')" style="display:inline">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ seance.id) }}">
+                                <button type="submit" style="background:#fee2e2; color:#dc2626; padding:5px 10px; border-radius:6px; border:none; cursor:pointer; font-size:13px;">🗑 Suppr</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9" style="padding:30px; text-align:center; color:#888;">Aucune séance trouvée.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+function filterTable() {
+    const search   = document.getElementById('searchInput').value.toLowerCase();
+    const medaille = document.getElementById('filterMedaille').value.toLowerCase();
+    const duree    = document.getElementById('filterDuree').value;
+    const rows     = document.querySelectorAll('#tableBody tr');
+    rows.forEach(row => {
+        const text      = row.innerText.toLowerCase();
+        const dureeCell = row.cells[5] ? parseInt(row.cells[5].innerText) : 0;
+        const matchSearch   = text.includes(search);
+        const matchMedaille = medaille === '' || text.includes(medaille);
+        let matchDuree = true;
+        if (duree === 'court') matchDuree = dureeCell < 30;
+        else if (duree === 'moyen') matchDuree = dureeCell >= 30 && dureeCell <= 60;
+        else if (duree === 'long') matchDuree = dureeCell > 60;
+        row.style.display = (matchSearch && matchMedaille && matchDuree) ? '' : 'none';
+    });
+}
+let sortDirection = {};
+function sortByColumn(colIndex) {
+    const tbody  = document.querySelector('#tableBody');
+    const rows   = Array.from(tbody.querySelectorAll('tr'));
+    const dir    = sortDirection[colIndex] === 'asc' ? 'desc' : 'asc';
+    sortDirection[colIndex] = dir;
+    const sorted = rows.sort((a, b) => {
+        const aText = a.cells[colIndex]?.innerText.trim() || '';
+        const bText = b.cells[colIndex]?.innerText.trim() || '';
+        return dir === 'asc' ? aText.localeCompare(bText) : bText.localeCompare(aText);
+    });
+    sorted.forEach(row => tbody.appendChild(row));
+}
+</script>
+{% endblock %}

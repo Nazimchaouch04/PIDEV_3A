@@ -1,329 +1,117 @@
 {% extends 'base_back.html.twig' %}
 
-{% block title %}Certifications - BioSync{% endblock %}
-
-{% block stylesheets %}
-{{ parent() }}
-<style>
-    .filters-container {
-        background: white;
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        margin-bottom: 25px;
-    }
-    
-    /* Table styling */
-    .table-container {
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        overflow: hidden;
-    }
-    .data-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-    .data-table th {
-        background: #F7FAFC;
-        padding: 14px 18px;
-        text-align: left;
-        font-size: 12px;
-        font-weight: 700;
-        color: #4A5568;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        border-bottom: 2px solid #E2E8F0;
-    }
-    .data-table td {
-        padding: 16px 18px;
-        border-bottom: 1px solid #EDF2F7;
-        font-size: 14px;
-        color: #2D3748;
-        vertical-align: middle;
-    }
-    .data-table tr:hover {
-        background: #F7FAFC;
-    }
-    .data-table tr:last-child td {
-        border-bottom: none;
-    }
-    
-    /* User info */
-    .user-info {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-    .user-avatar {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #6C5CE7, #A29BFE);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: 600;
-        font-size: 14px;
-    }
-    .user-details {
-        display: flex;
-        flex-direction: column;
-    }
-    .user-name {
-        font-weight: 600;
-        color: #2D3748;
-    }
-    
-    /* Type badges */
-    .type-badge {
-        display: inline-block;
-        padding: 6px 14px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
-        text-transform: uppercase;
-    }
-    .type-badge.coach {
-        background: #C6F6D5;
-        color: #22543D;
-    }
-    .type-badge.specialist {
-        background: #FEEBC8;
-        color: #744210;
-    }
-    
-    /* Motivation tooltip */
-    .motivation-container {
-        position: relative;
-    }
-    .motivation-trigger {
-        padding: 8px 14px;
-        background: rgba(99, 102, 241, 0.1);
-        color: #6366F1;
-        border: none;
-        border-radius: 8px;
-        font-size: 13px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-    .motivation-trigger:hover {
-        background: #6366F1;
-        color: white;
-    }
-    .motivation-popup {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        margin-top: 8px;
-        background: white;
-        border: 1px solid #E2E8F0;
-        border-radius: 12px;
-        padding: 16px;
-        width: 320px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-        z-index: 100;
-        display: none;
-    }
-    .motivation-popup.show {
-        display: block;
-    }
-    .motivation-popup::before {
-        content: '';
-        position: absolute;
-        bottom: 100%;
-        left: 20px;
-        border: 8px solid transparent;
-        border-bottom-color: white;
-    }
-    .motivation-title {
-        font-size: 13px;
-        font-weight: 700;
-        color: #4A5568;
-        margin-bottom: 8px;
-        text-transform: uppercase;
-    }
-    .motivation-text {
-        font-size: 14px;
-        color: #2D3748;
-        line-height: 1.6;
-    }
-    
-    /* Action buttons */
-    .action-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        padding: 8px 16px;
-        border-radius: 8px;
-        font-size: 13px;
-        font-weight: 600;
-        text-decoration: none;
-        transition: all 0.2s;
-        border: none;
-        cursor: pointer;
-    }
-    .action-btn.view {
-        background: rgba(59, 130, 246, 0.1);
-        color: #3B82F6;
-    }
-    .action-btn.view:hover {
-        background: #3B82F6;
-        color: white;
-    }
-    .action-btn.approve {
-        background: #10B981;
-        color: white;
-    }
-    .action-btn.approve:hover {
-        background: #059669;
-    }
-    
-    /* Empty state */
-    .empty-state {
-        text-align: center;
-        padding: 60px 20px;
-    }
-    .empty-state-icon {
-        width: 80px;
-        height: 80px;
-        background: #F7FAFC;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 20px;
-        color: #A0AEC0;
-    }
-    .empty-state-title {
-        font-size: 18px;
-        font-weight: 600;
-        color: #2D3748;
-        margin-bottom: 8px;
-    }
-    .empty-state-text {
-        font-size: 14px;
-        color: #718096;
-    }
-</style>
-{% endblock %}
-
 {% block body %}
-<div class="bo-mental-dashboard">
-    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-        <div>
-            <h1 class="page-title">Certifications en attente</h1>
-            <p class="page-subtitle">Validez les demandes de certification des professionnels</p>
-        </div>
-        <a href="{{ path('app_admin_dashboard') }}" class="btn btn-secondary" style="background-color: #EDF2F7; border-color: #EDF2F7; color: #4A5568; display: flex; align-items: center; gap: 8px;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-            Retour
-        </a>
-    </div>
-
-    {# Certifications Table #}
-    <div class="table-container">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Utilisateur</th>
-                    <th>Type</th>
-                    <th>Spécialité</th>
-                    <th>N° Enregistrement</th>
-                    <th>Motivation</th>
-                    <th>Diplôme</th>
-                    <th style="text-align: center;">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for c in certifications %}
-                <tr>
-                    <td>
-                        <div class="user-info">
-                            <div class="user-avatar">{{ c.utilisateur.nomComplet|slice(0, 2)|upper }}</div>
-                            <div class="user-details">
-                                <div class="user-name">{{ c.utilisateur.nomComplet }}</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td>
-                        <span class="type-badge {{ c.type == 'COACH' ? 'coach' : 'specialist' }}">
-                            {{ c.type == 'COACH' ? 'Coach' : 'Spécialiste' }}
-                        </span>
-                    </td>
-                    <td>{{ c.specialite }}</td>
-                    <td><code style="background: #F7FAFC; padding: 4px 8px; border-radius: 6px; font-size: 13px;">{{ c.numeroEnregistrement }}</code></td>
-                    <td>
-                        <div class="motivation-container">
-                            <button type="button" class="motivation-trigger" onclick="toggleMotivation('{{ c.id }}')">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                                Lire
-                            </button>
-                            <div id="motivation-{{ c.id }}" class="motivation-popup">
-                                <div class="motivation-title">Motivation de la demande</div>
-                                <div class="motivation-text">{{ c.motivation|nl2br }}</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td>
-                        {% if c.diplomeFilename %}
-                            <a href="/uploads/diplomes/{{ c.diplomeFilename }}" target="_blank" class="action-btn view">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                                Voir
-                            </a>
-                        {% else %}
-                            <span style="color: #A0AEC0; font-size: 13px;">Aucun</span>
-                        {% endif %}
-                    </td>
-                    <td style="text-align: center;">
-                        <a href="{{ path('app_admin_cert_approve', {id: c.id}) }}" class="action-btn approve">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                            Approuver
-                        </a>
-                    </td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="7">
-                        <div class="empty-state">
-                            <div class="empty-state-icon">
-                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                            </div>
-                            <div class="empty-state-title">Aucune demande en attente</div>
-                            <div class="empty-state-text">Toutes les certifications ont été traitées</div>
-                        </div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+<div class="page-header flex-between">
+    <h1 class="page-title">Certifications en attente</h1>
+    <a href="{{ path('app_admin_dashboard') }}" class="btn btn-secondary">Retour</a>
 </div>
 
+<div class="card">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Utilisateur</th>
+                <th>Type</th>
+                <th>Spécialité</th>
+                <th>N° Enregistrement</th>
+                <th>Motivation</th>
+                <th>Diplôme</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in certifications %}
+            <tr>
+                <td>{{ c.utilisateur.nomComplet }}</td>
+                <td>
+                    <span class="badge badge-{{ c.type == 'COACH' ? 'primary' : 'success' }}">
+                        {{ c.type == 'COACH' ? 'Coach' : 'Spécialiste' }}
+                    </span>
+                </td>
+                <td>{{ c.specialite }}</td>
+                <td>{{ c.numeroEnregistrement }}</td>
+                <td>
+                    <button type="button" class="btn btn-sm btn-info" onclick="showMotivation('{{ c.id }}')">
+                        Voir
+                    </button>
+                    <div id="motivation-{{ c.id }}" class="motivation-text" style="display: none;">
+                        {{ c.motivation|nl2br }}
+                    </div>
+                </td>
+                <td>
+                    {% if c.diplomeFilename %}
+                        <a href="/uploads/diplomes/{{ c.diplomeFilename }}" target="_blank" class="btn btn-sm btn-secondary">
+                            📄 Voir
+                        </a>
+                    {% else %}
+                        <span class="text-muted">Aucun</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ path('app_admin_cert_approve', {id: c.id}) }}" class="btn btn-sm btn-primary">Approuver</a>
+                </td>
+            </tr>
+            {% else %}
+                <tr><td colspan="7" class="text-center">Aucune demande en attente.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+.badge-primary {
+    background: #007bff;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+.badge-success {
+    background: #28a745;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+.motivation-text {
+    position: absolute;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    padding: 10px;
+    border-radius: 4px;
+    max-width: 300px;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+td {
+    position: relative;
+}
+</style>
+
 <script>
-function toggleMotivation(id) {
-    const popup = document.getElementById('motivation-' + id);
-    const allPopups = document.querySelectorAll('.motivation-popup');
+function showMotivation(id) {
+    const element = document.getElementById('motivation-' + id);
+    const allMotivations = document.querySelectorAll('.motivation-text');
     
-    // Fermer les autres popups
-    allPopups.forEach(el => {
+    // Cacher toutes les autres motivations
+    allMotivations.forEach(el => {
         if (el.id !== 'motivation-' + id) {
-            el.classList.remove('show');
+            el.style.display = 'none';
         }
     });
     
-    // Toggle le popup actuel
-    popup.classList.toggle('show');
+    // Afficher/cacher la motivation actuelle
+    element.style.display = element.style.display === 'none' ? 'block' : 'none';
 }
 
-// Fermer les popups en cliquant ailleurs
+// Cacher les motivations quand on clique ailleurs
 document.addEventListener('click', function(e) {
-    if (!e.target.closest('.motivation-container')) {
-        document.querySelectorAll('.motivation-popup').forEach(el => {
-            el.classList.remove('show');
+    if (!e.target.closest('button') && !e.target.closest('.motivation-text')) {
+        document.querySelectorAll('.motivation-text').forEach(el => {
+            el.style.display = 'none';
         });
     }
 });

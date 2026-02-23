@@ -43,12 +43,6 @@ class QuizMental
     #[ORM\JoinColumn(nullable: false)]
     private ?Utilisateur $utilisateur = null;
 
-    #[ORM\Column(type: Types::FLOAT, nullable: true)]
-    private ?float $tempsMoyenReponse = null;
-
-    #[ORM\Column(length: 50, nullable: true)]
-    private ?string $agiliteCognitive = null;
-
     /**
      * @var Collection<int, Question>
      */
@@ -177,27 +171,5 @@ class QuizMental
             $total += $question->getPointsValeur();
         }
         return $total;
-    }
-
-    public function getTempsMoyenReponse(): ?float
-    {
-        return $this->tempsMoyenReponse;
-    }
-
-    public function setTempsMoyenReponse(?float $tempsMoyenReponse): static
-    {
-        $this->tempsMoyenReponse = $tempsMoyenReponse;
-        return $this;
-    }
-
-    public function getAgiliteCognitive(): ?string
-    {
-        return $this->agiliteCognitive;
-    }
-
-    public function setAgiliteCognitive(?string $agiliteCognitive): static
-    {
-        $this->agiliteCognitive = $agiliteCognitive;
-        return $this;
     }
 }

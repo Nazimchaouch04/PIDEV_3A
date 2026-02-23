@@ -5,38 +5,9 @@
 {% block body %}
 <div class="mental-wellness-page">
     {# Page Header #}
-    <div class="page-header-mental d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="page-title-mental">Mental Wellness</h1>
-            <p class="page-subtitle-mental">Choisissez un quiz thématique pour évaluer votre bien-être mental</p>
-        </div>
-        <div class="header-actions">
-            <a href="{{ path('app_mental_portrait') }}" class="btn btn-outline-primary btn-sm rounded-pill px-4 shadow-sm mr-2">
-                <i class="fas fa-id-badge mr-2"></i>Mon Portrait
-            </a>
-            <a href="{{ path('app_mental_coach') }}" class="btn btn-primary btn-sm rounded-pill px-4 shadow-sm">
-                <i class="fas fa-robot mr-2"></i>Coach IA
-            </a>
-        </div>
-    </div>
-
-    {# Moment Zen #}
-    <div class="zen-moment-card mb-5">
-        <div class="card bg-gradient-light border-0 shadow-sm overflow-hidden">
-            <div class="card-body p-4 p-md-5 position-relative">
-                <div class="zen-badge mb-3">MOMENT ZEN ✨</div>
-                <blockquote class="blockquote mb-0">
-                    <p class="h4 italic mb-2">"{{ quote.text }}"</p>
-                    <footer class="blockquote-footer text-muted">{{ quote.author }}</footer>
-                </blockquote>
-                <div class="mt-4">
-                    <a href="{{ path('app_wellness_zen_zone') }}" class="btn btn-primary-soft">
-                        Explorer la Zone Zen <i class="fas fa-arrow-right ml-2"></i>
-                    </a>
-                </div>
-                <div class="zen-bg-icon">😌</div>
-            </div>
-        </div>
+    <div class="page-header-mental">
+        <h1 class="page-title-mental">Mental Wellness</h1>
+        <p class="page-subtitle-mental">Choisissez un quiz thématique pour évaluer votre bien-être mental</p>
     </div>
 
     {# Quiz Disponibles créés par l'admin #}
@@ -412,42 +383,5 @@ document.addEventListener('DOMContentLoaded', function() {
     border-color: #8B5CF6;
     box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
 }
-</style>
-
-<style>
-    .zen-moment-card .bg-gradient-light { 
-        background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
-        border-radius: 1.5rem;
-    }
-    .zen-badge { 
-        background: rgba(139, 92, 246, 0.1); 
-        color: #8B5CF6; 
-        padding: 0.25rem 0.75rem; 
-        border-radius: 1rem; 
-        font-weight: bold; 
-        font-size: 0.8rem;
-        display: inline-block;
-    }
-    .btn-primary-soft {
-        background: #8B5CF6;
-        color: white;
-        border-radius: 0.75rem;
-        padding: 0.6rem 1.5rem;
-        transition: all 0.3s;
-    }
-    .btn-primary-soft:hover {
-        background: #7c3aed;
-        transform: translateY(-2px);
-        color: white;
-        text-decoration: none;
-    }
-    .zen-bg-icon {
-        position: absolute;
-        bottom: -10px;
-        right: 20px;
-        font-size: 5rem;
-        opacity: 0.1;
-    }
-    .italic { font-style: italic; }
 </style>
 {% endblock %}

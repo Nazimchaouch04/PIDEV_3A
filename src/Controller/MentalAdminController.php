@@ -5,10 +5,8 @@ namespace App\Controller;
 use App\Entity\Question;
 use App\Entity\QuizMental;
 use App\Repository\QuestionRepository;
-use App\Service\MistralService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -38,24 +36,6 @@ class MentalAdminController extends AbstractController
             ->getQuery()
             ->getSingleScalarResult();
 
-        $avgResponseTime = $em->getRepository(QuizMental::class)
-            ->createQueryBuilder('q')
-            ->select('AVG(q.tempsMoyenReponse)')
-            ->where('q.statut = :statut')
-            ->setParameter('statut', 'complete')
-            ->getQuery()
-            ->getSingleScalarResult();
-
-        $agilityDistribution = $em->getRepository(QuizMental::class)
-            ->createQueryBuilder('q')
-            ->select('q.agiliteCognitive, COUNT(q.id) as count')
-            ->where('q.statut = :statut')
-            ->andWhere('q.agiliteCognitive IS NOT NULL')
-            ->setParameter('statut', 'complete')
-            ->groupBy('q.agiliteCognitive')
-            ->getQuery()
-            ->getResult();
-
         $recentQuestions = $questionRepository->findBy([], ['id' => 'DESC'], 5);
 
         return $this->render('bo/mental/dashboard.html.twig', [
@@ -64,8 +44,6 @@ class MentalAdminController extends AbstractController
             'totalUsers' => $totalUsers,
             'totalMedailles' => $totalMedailles,
             'recentQuestions' => $recentQuestions,
-            'avgResponseTime' => round($avgResponseTime ?? 0, 1),
-            'agilityDistribution' => $agilityDistribution,
         ]);
     }
 
@@ -76,47 +54,6 @@ class MentalAdminController extends AbstractController
 
         return $this->render('bo/mental/questions/list.html.twig', [
             'questions' => $questions,
-        ]);
-    }
-
-    #[Route('/questions/ajax', name: 'app_mental_admin_questions_ajax')]
-    public function listQuestionsAjax(Request $request, QuestionRepository $questionRepository): Response
-    {
-        $search = $request->query->get('search', '');
-        $sort = $request->query->get('sort', 'id-desc');
-        
-        // Construire la requête
-        $qb = $questionRepository->createQueryBuilder('q');
-        
-        // Ajouter la recherche si présente
-        if (!empty($search)) {
-            $qb->where('q.enonce LIKE :search')
-               ->orWhere('q.reponseCorrecte LIKE :search')
-               ->setParameter('search', '%' . $search . '%');
-        }
-        
-        // Gérer le tri
-        [$sortField, $sortOrder] = explode('-', $sort);
-        $sortField = match($sortField) {
-            'enonce' => 'q.enonce',
-            'points' => 'q.pointsValeur',
-            'id' => 'q.id',
-            default => 'q.id'
-        };
-        
-        $qb->orderBy($sortField, $sortOrder);
-        
-        $questions = $qb->getQuery()->getResult();
-        
-        // Générer le HTML pour le tableau
-        $html = $this->renderView('bo/mental/questions/_table.html.twig', [
-            'questions' => $questions,
-        ]);
-        
-        return $this->json([
-            'success' => true,
-            'html' => $html,
-            'count' => count($questions)
         ]);
     }
 
@@ -133,51 +70,6 @@ class MentalAdminController extends AbstractController
 
         return $this->render('bo/mental/quiz/list.html.twig', [
             'quizzes' => $quizzes,
-        ]);
-    }
-
-    #[Route('/quiz/ajax', name: 'app_mental_admin_quiz_ajax')]
-    public function listQuizzesAjax(Request $request, EntityManagerInterface $em): Response
-    {
-        $search = $request->query->get('search', '');
-        $sort = $request->query->get('sort', 'id-desc');
-        
-        // Construire la requête
-        $qb = $em->getRepository(QuizMental::class)
-            ->createQueryBuilder('q')
-            ->leftJoin('q.utilisateur', 'u')
-            ->addSelect('u');
-        
-        // Ajouter la recherche si présente
-        if (!empty($search)) {
-            $qb->where('q.titre LIKE :search')
-               ->orWhere('u.nomComplet LIKE :search')
-               ->orWhere('u.email LIKE :search')
-               ->setParameter('search', '%' . $search . '%');
-        }
-        
-        // Gérer le tri
-        [$sortField, $sortOrder] = explode('-', $sort);
-        $sortField = match($sortField) {
-            'id' => 'q.id',
-            'utilisateur' => 'u.nomComplet',
-            'titre' => 'q.titre',
-            default => 'q.id'
-        };
-        
-        $qb->orderBy($sortField, $sortOrder);
-        
-        $quizzes = $qb->getQuery()->getResult();
-        
-        // Générer le HTML pour le tableau
-        $html = $this->renderView('bo/mental/quiz/_table.html.twig', [
-            'quizzes' => $quizzes,
-        ]);
-        
-        return $this->json([
-            'success' => true,
-            'html' => $html,
-            'count' => count($quizzes)
         ]);
     }
 
@@ -262,7 +154,7 @@ class MentalAdminController extends AbstractController
     }
 
     #[Route('/questions/new', name: 'app_mental_admin_question_new')]
-    public function newQuestion(Request $request, EntityManagerInterface $em, MistralService $mistralService): Response
+    public function newQuestion(Request $request, EntityManagerInterface $em): Response
     {
         $question = new Question();
 
@@ -280,31 +172,8 @@ class MentalAdminController extends AbstractController
             
             $question->setPointsValeur((int) $request->request->get('points_valeur'));
 
-            // Validation des champs
-            $errors = [];
-            if (empty($question->getEnonce())) {
-                $errors[] = 'L\'énoncé de la question est obligatoire.';
-            }
-            if (empty($question->getReponseCorrecte())) {
-                $errors[] = 'La réponse correcte est obligatoire.';
-            }
-            if (count($question->getOptionsFaussesArray()) < 2) {
-                $errors[] = 'Au moins 2 options fausses sont requises.';
-            }
-            if ($question->getPointsValeur() <= 0) {
-                $errors[] = 'La valeur en points doit être supérieure à 0.';
-            }
-
-            if (!empty($errors)) {
-                return $this->render('bo/mental/questions/form.html.twig', [
-                    'question' => $question,
-                    'isEdit' => false,
-                    'errors' => $errors,
-                    'mistral_configured' => $mistralService->isConfigured(),
-                ]);
-            }
-
             // Créer un quiz par défaut ou lier à un quiz existant
+            // Pour l'instant, on crée un quiz "Question Bank"
             $quiz = $em->getRepository(QuizMental::class)->findOneBy(['titre' => 'Question Bank']) 
                     ?? (new QuizMental())
                         ->setTitre('Question Bank')
@@ -323,57 +192,11 @@ class MentalAdminController extends AbstractController
         return $this->render('bo/mental/questions/form.html.twig', [
             'question' => $question,
             'isEdit' => false,
-            'mistral_configured' => $mistralService->isConfigured(),
         ]);
     }
 
-        #[Route('/questions/generate-mistral', name: 'app_mental_admin_generate_mistral', methods: ['POST'])]
-    public function generateQuestionWithMistral(MistralService $mistralService): JsonResponse
-    {
-        // Rendre cette route complètement publique pour les tests
-        // $this->denyAccessUnlessGranted('IS_AUTHENTICATED_ANONYMOUSLY');
-        
-        try {
-            // Journalisation pour diagnostiquer
-            error_log('Mistral API - Début de génération');
-            
-            if (!$mistralService->isConfigured()) {
-                error_log('Mistral API - Non configurée');
-                return new JsonResponse([
-                    'success' => false,
-                    'error' => 'L\'API Mistral n\'est pas configurée. Veuillez configurer votre clé API.'
-                ], 400);
-            }
-
-            error_log('Mistral API - Service configuré, tentative de génération');
-            $questionData = $mistralService->generateQuizQuestion();
-
-            if (!$questionData) {
-                error_log('Mistral API - Échec de génération');
-                return new JsonResponse([
-                    'success' => false,
-                    'error' => 'Impossible de générer une question. Veuillez réessayer.'
-                ], 500);
-            }
-
-            error_log('Mistral API - Succès: ' . json_encode($questionData));
-            
-            return new JsonResponse([
-                'success' => true,
-                'data' => $questionData
-            ]);
-
-        } catch (\Exception $e) {
-            error_log('Mistral API - Exception: ' . $e->getMessage());
-            return new JsonResponse([
-                'success' => false,
-                'error' => 'Erreur lors de la génération: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
     #[Route('/questions/{id}/edit', name: 'app_mental_admin_question_edit')]
-    public function editQuestion(Question $question, Request $request, EntityManagerInterface $em, MistralService $mistralService): Response
+    public function editQuestion(Question $question, Request $request, EntityManagerInterface $em): Response
     {
         if ($request->isMethod('POST')) {
             $question->setEnonce($request->request->get('enonce'));
@@ -397,7 +220,6 @@ class MentalAdminController extends AbstractController
         return $this->render('bo/mental/questions/form.html.twig', [
             'question' => $question,
             'isEdit' => true,
-            'mistral_configured' => $mistralService->isConfigured(),
         ]);
     }
 

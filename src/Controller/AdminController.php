@@ -8,7 +8,6 @@ use App\Repository\CertificationRepository;
 use App\Repository\UtilisateurRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -16,7 +15,6 @@ use Symfony\Component\Routing\Annotation\Route;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[IsGranted('ROLE_ADMIN')]
 class AdminController extends AbstractController
@@ -200,50 +198,6 @@ class AdminController extends AbstractController
             'title' => 'Modifier un utilisateur',
             'user' => $user
         ]);
-    }
-
-    #[Route('/admin-user-photo/{id}', name: 'app_admin_user_photo', methods: ['POST'])]
-    public function uploadUserPhoto(Utilisateur $user, Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
-    {
-        $photoFile = $request->files->get('photo');
-
-        if ($photoFile) {
-            $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-            if (!in_array($photoFile->getMimeType(), $allowedMimeTypes)) {
-                $this->addFlash('error', 'Format de fichier non autorisé. Utilisez JPG, PNG, GIF ou WEBP.');
-                return $this->redirectToRoute('app_admin_user_edit', ['id' => $user->getId()]);
-            }
-
-            $originalFilename = pathinfo($photoFile->getClientOriginalName(), PATHINFO_FILENAME);
-            $safeFilename = $slugger->slug($originalFilename);
-            $newFilename = $safeFilename . '-' . uniqid() . '.' . $photoFile->guessExtension();
-
-            try {
-                $photoFile->move(
-                    $this->getParameter('photos_directory'),
-                    $newFilename
-                );
-
-                // Delete old photo if exists
-                if ($user->getPhoto()) {
-                    $oldPhotoPath = $this->getParameter('photos_directory') . '/' . $user->getPhoto();
-                    if (file_exists($oldPhotoPath)) {
-                        unlink($oldPhotoPath);
-                    }
-                }
-
-                $user->setPhoto($newFilename);
-                $entityManager->flush();
-
-                $this->addFlash('success', 'Photo de profil mise à jour !');
-            } catch (FileException $e) {
-                $this->addFlash('error', 'Erreur lors du téléchargement de la photo.');
-            }
-        } else {
-            $this->addFlash('error', 'Aucun fichier sélectionné.');
-        }
-
-        return $this->redirectToRoute('app_admin_user_edit', ['id' => $user->getId()]);
     }
 
     #[Route('/admin-users/pdf', name: 'app_admin_users_pdf', methods: ['GET'])]

@@ -1,516 +1,138 @@
 {% extends 'base_back.html.twig' %}
 
-{% block title %}{{ isAdminView|default(false) ? 'Profil Utilisateur' : 'Mon Profil' }} - BioSync{% endblock %}
-
-{% block stylesheets %}
-{{ parent() }}
-<style>
-    .profile-container {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 25px;
-        margin-bottom: 25px;
-    }
-    
-    /* Profile Card */
-    .profile-card {
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        padding: 30px;
-    }
-    
-    .profile-header {
-        text-align: center;
-        padding-bottom: 25px;
-        border-bottom: 2px solid #F1F5F9;
-        margin-bottom: 25px;
-    }
-    
-    .profile-avatar {
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #6C5CE7, #A29BFE);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: 700;
-        font-size: 32px;
-        margin: 0 auto 15px;
-        box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
-        position: relative;
-        cursor: pointer;
-        overflow: hidden;
-        transition: all 0.3s;
-    }
-    
-    .profile-avatar:hover {
-        transform: scale(1.05);
-    }
-    
-    .profile-avatar img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        border-radius: 50%;
-    }
-    
-    .profile-avatar .avatar-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        opacity: 0;
-        transition: opacity 0.3s;
-        border-radius: 50%;
-    }
-    
-    .profile-avatar:hover .avatar-overlay {
-        opacity: 1;
-    }
-    
-    .avatar-overlay svg {
-        color: white;
-    }
-    
-    .photo-upload-form {
-        display: none;
-    }
-    
-    .profile-name {
-        font-size: 22px;
-        font-weight: 700;
-        color: #2D3748;
-        margin-bottom: 5px;
-    }
-    
-    .profile-role {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 13px;
-        color: #718096;
-    }
-    
-    .role-badge {
-        display: inline-block;
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 11px;
-        font-weight: 600;
-        text-transform: uppercase;
-    }
-    .role-badge.admin {
-        background: #FED7D7;
-        color: #9B2C2C;
-    }
-    .role-badge.coach {
-        background: #C6F6D5;
-        color: #22543D;
-    }
-    .role-badge.specialist {
-        background: #FEEBC8;
-        color: #744210;
-    }
-    .role-badge.user {
-        background: #E2E8F0;
-        color: #4A5568;
-    }
-    
-    /* Info Items */
-    .info-list {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-    }
-    
-    .info-item {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        padding: 14px;
-        background: #F7FAFC;
-        border-radius: 12px;
-    }
-    
-    .info-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-    }
-    .info-icon.blue {
-        background: rgba(59, 130, 246, 0.1);
-        color: #3B82F6;
-    }
-    .info-icon.purple {
-        background: rgba(108, 92, 231, 0.1);
-        color: #6C5CE7;
-    }
-    .info-icon.green {
-        background: rgba(16, 185, 129, 0.1);
-        color: #10B981;
-    }
-    .info-icon.orange {
-        background: rgba(245, 158, 11, 0.1);
-        color: #F59E0B;
-    }
-    
-    .info-content {
-        flex: 1;
-    }
-    
-    .info-label {
-        font-size: 12px;
-        color: #718096;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 2px;
-    }
-    
-    .info-value {
-        font-size: 15px;
-        font-weight: 600;
-        color: #2D3748;
-    }
-    
-    /* Health Profile */
-    .health-card {
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        padding: 30px;
-    }
-    
-    .card-title {
-        font-size: 16px;
-        font-weight: 700;
-        color: #2D3748;
-        margin-bottom: 20px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    
-    .card-title svg {
-        color: #10B981;
-    }
-    
-    /* Stats Grid */
-    .stats-container {
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        padding: 30px;
-    }
-    
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 20px;
-    }
-    
-    .stat-box {
-        text-align: center;
-        padding: 20px;
-        background: #F7FAFC;
-        border-radius: 12px;
-        transition: all 0.2s;
-    }
-    
-    .stat-box:hover {
-        background: #EDF2F7;
-        transform: translateY(-2px);
-    }
-    
-    .stat-icon-box {
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 12px;
-    }
-    .stat-icon-box.blue {
-        background: rgba(59, 130, 246, 0.1);
-        color: #3B82F6;
-    }
-    .stat-icon-box.green {
-        background: rgba(16, 185, 129, 0.1);
-        color: #10B981;
-    }
-    .stat-icon-box.purple {
-        background: rgba(108, 92, 231, 0.1);
-        color: #6C5CE7;
-    }
-    .stat-icon-box.orange {
-        background: rgba(245, 158, 11, 0.1);
-        color: #F59E0B;
-    }
-    .stat-icon-box.red {
-        background: rgba(239, 68, 68, 0.1);
-        color: #EF4444;
-    }
-    
-    .stat-value {
-        font-size: 24px;
-        font-weight: 700;
-        color: #2D3748;
-        margin-bottom: 4px;
-    }
-    
-    .stat-label {
-        font-size: 13px;
-        color: #718096;
-    }
-    
-    /* Empty State */
-    .empty-state {
-        text-align: center;
-        padding: 40px 20px;
-    }
-    
-    .empty-state-icon {
-        width: 60px;
-        height: 60px;
-        background: #F7FAFC;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 15px;
-        color: #A0AEC0;
-    }
-    
-    .empty-text {
-        font-size: 14px;
-        color: #718096;
-    }
-    
-    @media (max-width: 1024px) {
-        .profile-container {
-            grid-template-columns: 1fr;
-        }
-        .stats-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-    }
-    
-    @media (max-width: 640px) {
-        .stats-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-</style>
-{% endblock %}
+{% block title %}Profil de {{ user.nomComplet }} - BioSync{% endblock %}
 
 {% block body %}
-<div class="bo-mental-dashboard">
-    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-        <div>
-            <h1 class="page-title">{{ isAdminView|default(false) ? 'Profil Utilisateur' : 'Mon Profil' }}</h1>
-            <p class="page-subtitle">Détails et informations de {{ user.nomComplet }}</p>
-        </div>
-        {% if isAdminView|default(false) %}
-            <div style="display: flex; gap: 10px;">
-                <a href="{{ path('app_admin_user_edit', {id: user.id}) }}" class="btn btn-primary" style="background-color: #F59E0B; border-color: #F59E0B; color: white; display: flex; align-items: center; gap: 8px;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                    Modifier
-                </a>
-                <a href="{{ path('app_admin_users') }}" class="btn btn-secondary" style="background-color: #EDF2F7; border-color: #EDF2F7; color: #4A5568; display: flex; align-items: center; gap: 8px;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-                    Retour
-                </a>
+        <div class="page-header flex-between">
+            <div>
+                <h1 class="page-title">{{ isAdminView|default(false) ? 'Profil Utilisateur' : 'Mon Profil' }}</h1>
+                <p class="page-subtitle">Détails et profil santé de {{ user.nomComplet }}.</p>
             </div>
-        {% else %}
-            <a href="{{ path('app_profile_edit') }}" class="btn btn-primary" style="background-color: #6C5CE7; border-color: #6C5CE7; display: flex; align-items: center; gap: 8px;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                Modifier mon profil
-            </a>
-        {% endif %}
-    </div>
-
-    <div class="profile-container">
-        {# Profile Info #}
-        <div class="profile-card">
-            <div class="profile-header">
-                <form action="{{ path('app_profile_photo') }}" method="POST" enctype="multipart/form-data" id="photoForm" class="photo-upload-form">
-                    <input type="file" name="photo" id="photoInput" accept="image/*" onchange="document.getElementById('photoForm').submit();">
-                </form>
-                <div class="profile-avatar" onclick="document.getElementById('photoInput').click();" title="Cliquez pour changer votre photo">
-                    {% if user.photo %}
-                        <img src="{{ asset('uploads/photos/' ~ user.photo) }}" alt="Photo de profil">
-                    {% else %}
-                        {{ user.nomComplet|slice(0, 2)|upper }}
-                    {% endif %}
-                    <div class="avatar-overlay">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-                    </div>
-                </div>
-                <div class="profile-name">{{ user.nomComplet }}</div>
-                <div class="profile-role">
-                    Membre depuis {{ user.dateInscription|date('d/m/Y') }}
-                    <span style="margin: 0 8px;">•</span>
-                    {% if 'ROLE_ADMIN' in user.roles %}
-                        <span class="role-badge admin">Admin</span>
-                    {% elseif 'ROLE_COACH' in user.roles %}
-                        <span class="role-badge coach">Coach</span>
-                    {% elseif 'ROLE_SPECIALISTE' in user.roles %}
-                        <span class="role-badge specialist">Spécialiste</span>
-                    {% else %}
-                        <span class="role-badge user">Utilisateur</span>
-                    {% endif %}
-                </div>
-            </div>
-            
-            <div class="info-list">
-                <div class="info-item">
-                    <div class="info-icon blue">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                    </div>
-                    <div class="info-content">
-                        <div class="info-label">Email</div>
-                        <div class="info-value">{{ user.email }}</div>
-                    </div>
-                </div>
-                
-                <div class="info-item">
-                    <div class="info-icon purple">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                    </div>
-                    <div class="info-content">
-                        <div class="info-label">Score Global</div>
-                        <div class="info-value">{{ user.scoreGlobal }} points</div>
-                    </div>
-                </div>
-                
-                <div class="info-item">
-                    <div class="info-icon green">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                    </div>
-                    <div class="info-content">
-                        <div class="info-label">Inscrit le</div>
-                        <div class="info-value">{{ user.dateInscription|date('d/m/Y') }}</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        {# Health Profile #}
-        <div class="health-card">
-            <div class="card-title" style="justify-content: space-between;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
-                    Profil Santé
-                </div>
-                <a href="{{ path('app_profile_health') }}" class="btn btn-sm" style="background: #10B981; color: white; padding: 6px 12px; border-radius: 6px; font-size: 12px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                    Modifier
-                </a>
-            </div>
-            
-            {% if user.profilSante %}
-                <div class="info-list">
-                    <div class="info-item">
-                        <div class="info-icon blue">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                        </div>
-                        <div class="info-content">
-                            <div class="info-label">Âge</div>
-                            <div class="info-value">{{ user.profilSante.age }} ans</div>
-                        </div>
-                    </div>
-                    
-                    <div class="info-item">
-                        <div class="info-icon green">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
-                        </div>
-                        <div class="info-content">
-                            <div class="info-label">Poids</div>
-                            <div class="info-value">{{ user.profilSante.poids }} kg</div>
-                        </div>
-                    </div>
-                    
-                    <div class="info-item">
-                        <div class="info-icon purple">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                        </div>
-                        <div class="info-content">
-                            <div class="info-label">Heure de réveil</div>
-                            <div class="info-value">{{ user.profilSante.heureReveil|date('H:i') }}</div>
-                        </div>
-                    </div>
-                </div>
-            {% else %}
-                <div class="empty-state">
-                    <div class="empty-state-icon">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
-                    </div>
-                    <p class="empty-text">Aucun profil santé configuré</p>
-                </div>
+            {% if isAdminView|default(false) %}
+                <a href="{{ path('app_admin_users') }}" class="btn btn-secondary">← Retour à la liste</a>
             {% endif %}
         </div>
-    </div>
 
-    {# Stats Section #}
-    <div class="stats-container">
-        <div class="card-title">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-            Statistiques d'activité
+        <div class="grid grid-cols-2 gap-6">
+            {# Informations personnelles #}
+            <div class="card">
+                <div class="card-header flex-between">
+                    <h4 class="card-title">Informations personnelles</h4>
+                    {% if not isAdminView|default(false) %}
+                        <a href="{{ path('app_profile_edit') }}" class="btn btn-sm btn-ghost">Modifier</a>
+                    {% endif %}
+                </div>
+                <div class="mb-4">
+                    <div class="sidebar-user" style="background: var(--background);">
+                        <div class="sidebar-user-avatar" style="width: 64px; height: 64px; font-size: 1.5rem;">
+                            {{ user.initials }}
+                        </div>
+                        <div>
+                            <div class="sidebar-user-name" style="font-size: 1.25rem;">{{ user.nomComplet }}</div>
+                            <div class="sidebar-user-role">Membre depuis {{ user.dateInscription|date('d/m/Y') }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="list-item">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gray-500)" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                        <polyline points="22,6 12,13 2,6"/>
+                    </svg>
+                    <div class="list-item-content">
+                        <div class="list-item-subtitle">Email</div>
+                        <div class="list-item-title">{{ user.email }}</div>
+                    </div>
+                </div>
+                <div class="list-item">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gray-500)" stroke-width="2">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    </svg>
+                    <div class="list-item-content">
+                        <div class="list-item-subtitle">Score global</div>
+                        <div class="list-item-title">{{ user.scoreGlobal }} points</div>
+                    </div>
+                </div>
+            </div>
+
+            {# Profil Sante #}
+            <div class="card">
+                <div class="card-header flex-between">
+                    <h4 class="card-title">Profil Sante</h4>
+                    {% if not isAdminView|default(false) %}
+                        <a href="{{ path('app_profile_health') }}" class="btn btn-sm btn-ghost">
+                            {{ user.profilSante ? 'Modifier' : 'Configurer' }}
+                        </a>
+                    {% endif %}
+                </div>
+                {% if user.profilSante %}
+                    <div class="list-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="16" y1="2" x2="16" y2="6"/>
+                            <line x1="8" y1="2" x2="8" y2="6"/>
+                            <line x1="3" y1="10" x2="21" y2="10"/>
+                        </svg>
+                        <div class="list-item-content">
+                            <div class="list-item-subtitle">Age</div>
+                            <div class="list-item-title">{{ user.profilSante.age }} ans</div>
+                        </div>
+                    </div>
+                    <div class="list-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--secondary)" stroke-width="2">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                        </svg>
+                        <div class="list-item-content">
+                            <div class="list-item-subtitle">Poids</div>
+                            <div class="list-item-title">{{ user.profilSante.poids }} kg</div>
+                        </div>
+                    </div>
+                    <div class="list-item">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                        <div class="list-item-content">
+                            <div class="list-item-subtitle">Heure de reveil</div>
+                            <div class="list-item-title">{{ user.profilSante.heureReveil|date('H:i') }}</div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--gray-300)" stroke-width="2">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                        </svg>
+                        <p class="text-gray mt-4">Aucun profil santé configuré.</p>
+                    </div>
+                {% endif %}
+            </div>
         </div>
-        
-        <div class="stats-grid">
-            <div class="stat-box">
-                <div class="stat-icon-box green">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3zM9 9h6v6H9zM9 1v4M15 1v4M9 19v4M15 19v4M19 9h4M19 15h4M1 9h4M1 15h4"></path></svg>
-                </div>
-                <div class="stat-value">{{ user.repas|length }}</div>
-                <div class="stat-label">Repas</div>
+
+        {# Statistiques #}
+        <div class="card mt-6">
+            <div class="card-header">
+                <h4 class="card-title">Statistiques d'activité</h4>
             </div>
-            
-            <div class="stat-box">
-                <div class="stat-icon-box blue">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6.5 17H4.5C3.67 17 3 16.33 3 15.5V5.5C3 4.67 3.67 4 4.5 4H6.5"></path><path d="M17.5 17H19.5C20.33 17 21 16.33 21 15.5V5.5C21 4.67 20.33 4 19.5 4H17.5"></path><circle cx="12" cy="12" r="3"></circle><path d="M12 7V4M12 20V17"></path></svg>
+            <div class="grid grid-cols-4 gap-4">
+                <div class="stat-card">
+                    <div class="stat-card-value">{{ user.repas|length }}</div>
+                    <div class="stat-card-label">Repas</div>
                 </div>
-                <div class="stat-value">{{ user.seancesSport|length }}</div>
-                <div class="stat-label">Séances Sport</div>
-            </div>
-            
-            <div class="stat-box">
-                <div class="stat-icon-box purple">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.39 5.39 0 0 1-4.3-4.3A9.86 9.86 0 0 0 12 3z"></path><circle cx="12" cy="12" r="1"></circle><path d="M12 8v4l3 3"></path></svg>
+                <div class="stat-card">
+                    <div class="stat-card-value">{{ user.seancesSport|length }}</div>
+                    <div class="stat-card-label">Sport</div>
                 </div>
-                <div class="stat-value">{{ user.quizMentaux|length }}</div>
-                <div class="stat-label">Quiz Mentaux</div>
-            </div>
-            
-            <div class="stat-box">
-                <div class="stat-icon-box orange">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                <div class="stat-card">
+                    <div class="stat-card-value">{{ user.quizMentaux|length }}</div>
+                    <div class="stat-card-label">Quiz</div>
                 </div>
-                <div class="stat-value">{{ user.rendezVousPatient|length }}</div>
-                <div class="stat-label">RDV Patient</div>
-            </div>
-            
-            <div class="stat-box">
-                <div class="stat-icon-box red">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <div class="stat-card">
+                    <div class="stat-card-value">{{ user.rendezVousPatient|length }}</div>
+                    <div class="stat-card-label">RDV Patient</div>
                 </div>
-                <div class="stat-value">{{ user.rendezVousSpecialiste|length }}</div>
-                <div class="stat-label">RDV Spécialiste</div>
+                <div class="stat-card">
+                    <div class="stat-card-value">{{ user.rendezVousSpecialiste|length }}</div>
+                    <div class="stat-card-label">RDV Spécialiste</div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
 {% endblock %}

@@ -11,86 +11,9 @@
         th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
         th { background-color: #f8f9fa; color: #4a5568; font-weight: bold; }
         tr:nth-child(even) { background-color: #fcfcfc; }
-        
-        /* Badges colorés cohérents pour PDF */
-        .badge-login {
-            background-color: #C6F6D5;
-            color: #22543D;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-weight: bold;
-            display: inline-block;
-        }
-        .badge-logout {
-            background-color: #BEE3F8;
-            color: #2A4365;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-weight: bold;
-            display: inline-block;
-        }
-        .badge-failed {
-            background-color: #FED7D7;
-            color: #742A2A;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-weight: bold;
-            display: inline-block;
-        }
-        .badge-suspicious {
-            background-color: #FEEBC8;
-            color: #7C2D12;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-weight: bold;
-            display: inline-block;
-        }
-        .badge-password {
-            background-color: #E9D8FD;
-            color: #44337A;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-weight: bold;
-            display: inline-block;
-        }
-        .badge-default {
-            background-color: #E2E8F0;
-            color: #2D3748;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-weight: bold;
-            display: inline-block;
-        }
-        
-        /* Role badges */
-        .badge-role-admin {
-            background-color: #FED7D7;
-            color: #742A2A;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-        .badge-role-user {
-            background-color: #C6F6D5;
-            color: #22543D;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-        .badge-role-coach {
-            background-color: #FEEBC8;
-            color: #7C2D12;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-        .badge-role-specialist {
-            background-color: #E9D8FD;
-            color: #44337A;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
+        .success { color: #38a169; }
+        .danger { color: #e53e3e; }
+        .info { color: #3182ce; }
     </style>
 </head>
 <body>
@@ -114,16 +37,12 @@
             <tr>
                 <td>{{ log.createdAt|date('d/m/Y H:i:s') }}</td>
                 <td>
-                    {% if 'Connexion réussie' in log.action %}
-                        <span class="badge-login">[OK] {{ log.action }}</span>
-                    {% elseif 'Déconnexion' in log.action %}
-                        <span class="badge-logout">[OUT] {{ log.action }}</span>
-                    {% elseif 'échouée' in log.action or 'failed' in log.action|lower %}
-                        <span class="badge-failed">[KO] {{ log.action }}</span>
-                    {% elseif 'mot de passe' in log.action|lower or 'password' in log.action|lower %}
-                        <span class="badge-password">[PWD] {{ log.action }}</span>
+                    {% if 'Connexion' in log.action %}
+                        <strong class="success">{{ log.action }}</strong>
+                    {% elseif 'Suppression' in log.action or 'Refusé' in log.action %}
+                        <strong class="danger">{{ log.action }}</strong>
                     {% else %}
-                        <span class="badge-default">[--] {{ log.action }}</span>
+                        <strong class="info">{{ log.action }}</strong>
                     {% endif %}
                 </td>
                 <td>
@@ -136,16 +55,7 @@
                 </td>
                 <td>
                     {% if log.utilisateur and log.utilisateur.roles|length > 0 %}
-                        {% set role = log.utilisateur.roles|first %}
-                        {% if 'ROLE_ADMIN' in role %}
-                            <span class="badge-role-admin">{{ role }}</span>
-                        {% elseif 'ROLE_COACH' in role %}
-                            <span class="badge-role-coach">{{ role }}</span>
-                        {% elseif 'ROLE_SPECIALISTE' in role %}
-                            <span class="badge-role-specialist">{{ role }}</span>
-                        {% else %}
-                            <span class="badge-role-user">{{ role }}</span>
-                        {% endif %}
+                        {{ log.utilisateur.roles|first }}
                     {% else %}
                         -
                     {% endif %}

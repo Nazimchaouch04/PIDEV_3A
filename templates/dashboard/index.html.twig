@@ -1,398 +1,20 @@
 {% extends 'base_back.html.twig' %}
 
-{% block title %}Tableau de bord - BioSync{% endblock %}
-
-{% block stylesheets %}
-{{ parent() }}
-<style>
-    .dashboard-container {
-        padding: 20px 0;
-    }
-    
-    .welcome-section {
-        background: linear-gradient(135deg, #6C5CE7 0%, #A29BFE 100%);
-        border-radius: 16px;
-        padding: 30px 35px;
-        color: white;
-        margin-bottom: 30px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    
-    .welcome-text h1 {
-        font-size: 28px;
-        font-weight: 700;
-        margin-bottom: 8px;
-    }
-    
-    .welcome-text p {
-        font-size: 15px;
-        opacity: 0.9;
-    }
-    
-    .welcome-avatar {
-        width: 60px;
-        height: 60px;
-        background: rgba(255,255,255,0.2);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 24px;
-        font-weight: 700;
-    }
-    
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 20px;
-        margin-bottom: 30px;
-    }
-    
-    .stat-card {
-        background: white;
-        border-radius: 16px;
-        padding: 25px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        transition: all 0.2s;
-    }
-    
-    .stat-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-    }
-    
-    .stat-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 15px;
-    }
-    
-    .stat-icon.nutrition {
-        background: rgba(16, 185, 129, 0.1);
-        color: #10B981;
-    }
-    
-    .stat-icon.sport {
-        background: rgba(59, 130, 246, 0.1);
-        color: #3B82F6;
-    }
-    
-    .stat-icon.appointment {
-        background: rgba(245, 158, 11, 0.1);
-        color: #F59E0B;
-    }
-    
-    .stat-icon.score {
-        background: rgba(108, 92, 231, 0.1);
-        color: #6C5CE7;
-    }
-    
-    .stat-value {
-        font-size: 32px;
-        font-weight: 700;
-        color: #2D3748;
-        margin-bottom: 4px;
-    }
-    
-    .stat-label {
-        font-size: 13px;
-        color: #718096;
-    }
-    
-    .content-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
-        margin-bottom: 30px;
-    }
-    
-    .dashboard-card {
-        background: white;
-        border-radius: 16px;
-        padding: 25px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    }
-    
-    .card-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-    }
-    
-    .card-title {
-        font-size: 18px;
-        font-weight: 700;
-        color: #2D3748;
-    }
-    
-    .card-subtitle {
-        font-size: 13px;
-        color: #718096;
-        margin-top: 4px;
-    }
-    
-    .btn-sm {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 8px 16px;
-        border-radius: 8px;
-        font-size: 13px;
-        font-weight: 600;
-        text-decoration: none;
-        transition: all 0.2s;
-    }
-    
-    .btn-primary {
-        background: #6C5CE7;
-        color: white;
-    }
-    
-    .btn-primary:hover {
-        background: #5A4FCF;
-    }
-    
-    .btn-outline {
-        background: transparent;
-        color: #6C5CE7;
-        border: 2px solid #6C5CE7;
-    }
-    
-    .btn-outline:hover {
-        background: #6C5CE7;
-        color: white;
-    }
-    
-    .list-item {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        padding: 15px;
-        background: #F7FAFC;
-        border-radius: 12px;
-        margin-bottom: 10px;
-        transition: all 0.2s;
-    }
-    
-    .list-item:hover {
-        background: #EDF2F7;
-    }
-    
-    .list-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-    }
-    
-    .list-icon.green {
-        background: rgba(16, 185, 129, 0.1);
-        color: #10B981;
-    }
-    
-    .list-icon.blue {
-        background: rgba(59, 130, 246, 0.1);
-        color: #3B82F6;
-    }
-    
-    .list-icon.orange {
-        background: rgba(245, 158, 11, 0.1);
-        color: #F59E0B;
-    }
-    
-    .list-content {
-        flex: 1;
-    }
-    
-    .list-title {
-        font-size: 14px;
-        font-weight: 600;
-        color: #2D3748;
-        margin-bottom: 2px;
-    }
-    
-    .list-subtitle {
-        font-size: 12px;
-        color: #718096;
-    }
-    
-    .empty-state {
-        text-align: center;
-        padding: 40px 20px;
-    }
-    
-    .empty-icon {
-        width: 60px;
-        height: 60px;
-        background: #F7FAFC;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 15px;
-        color: #A0AEC0;
-    }
-    
-    .empty-text {
-        font-size: 14px;
-        color: #718096;
-        margin-bottom: 15px;
-    }
-    
-    .appointments-card {
-        background: white;
-        border-radius: 16px;
-        padding: 25px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        margin-bottom: 20px;
-    }
-    
-    .appointments-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 15px;
-    }
-    
-    .quick-actions {
-        background: linear-gradient(135deg, #2D3748 0%, #4A5568 100%);
-        border-radius: 16px;
-        padding: 25px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    
-    .quick-actions h3 {
-        font-size: 18px;
-        font-weight: 700;
-        color: white;
-        margin-bottom: 4px;
-    }
-    
-    .quick-actions p {
-        font-size: 14px;
-        color: rgba(255,255,255,0.8);
-    }
-    
-    .quick-links {
-        display: flex;
-        gap: 12px;
-    }
-    
-    .quick-link {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 10px 20px;
-        background: white;
-        color: #2D3748;
-        border-radius: 10px;
-        font-size: 14px;
-        font-weight: 600;
-        text-decoration: none;
-        transition: all 0.2s;
-    }
-    
-    .quick-link:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-    
-    .specialty-badge {
-        position: fixed;
-        bottom: 20px;
-        left: 20px;
-        background: linear-gradient(135deg, #6C5CE7 0%, #A29BFE 100%);
-        color: white;
-        padding: 12px 20px;
-        border-radius: 25px;
-        box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-weight: 600;
-        z-index: 1000;
-    }
-    
-    .btn-certify {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 12px 24px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border-radius: 25px;
-        font-size: 14px;
-        font-weight: 600;
-        text-decoration: none;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        transition: all 0.2s;
-    }
-    
-    .btn-certify:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-    }
-    
-    @media (max-width: 1024px) {
-        .stats-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-        .content-grid {
-            grid-template-columns: 1fr;
-        }
-        .appointments-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-    }
-    
-    @media (max-width: 640px) {
-        .stats-grid {
-            grid-template-columns: 1fr;
-        }
-        .appointments-grid {
-            grid-template-columns: 1fr;
-        }
-        .quick-actions {
-            flex-direction: column;
-            gap: 20px;
-            text-align: center;
-        }
-        .welcome-section {
-            flex-direction: column;
-            text-align: center;
-            gap: 15px;
-        }
-    }
-</style>
-{% endblock %}
+{% block title %}Dashboard - BioSync{% endblock %}
 
 {% block body %}
-<div class="dashboard-container">
-    <div class="welcome-section">
-        <div class="welcome-text">
-            <h1>Bonjour, {{ user.nomComplet|split(' ')|first }} ! 👋</h1>
-            <p>Voici un aperçu de votre santé et de vos activités aujourd'hui.</p>
-        </div>
-        <div class="welcome-avatar">
-            {{ user.nomComplet|slice(0, 1)|upper }}
-        </div>
-    </div>
+        <div class="page-header flex-between mb-8" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1 class="page-title">Bonjour, {{ user.nomComplet|split(' ')|first }} !</h1>
+                <p class="page-subtitle">Voici un apercu de votre sante aujourd'hui.</p>
+            </div>
             
             {% if 'ROLE_COACH' not in user.roles and 'ROLE_SPECIALISTE' not in user.roles and 'ROLE_ADMIN' not in user.roles and not user.certification %}
             <div>
-                <a href="{{ path('app_certification') }}" class="btn-certify">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <a href="{{ path('app_certification') }}" class="btn btn-primary" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; padding: 10px 20px; border-radius: 20px; color: white; font-weight: 600; display: inline-flex; align-items: center; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);">
+                    <svg viewBox="0 0 24 24" fill="currentColor" style="width: 18px; height: 18px; margin-right: 8px;">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
                     Devenir Spécialiste / Coach
                 </a>
             </div>
@@ -400,125 +22,144 @@
         </div>
 
         {# Stats Cards #}
-        <div class="stats-grid">
+        <div class="grid grid-cols-4 gap-4 mb-8">
             <div class="stat-card">
-                <div class="stat-icon nutrition">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>
+                <div class="stat-card-header">
+                    <div class="stat-card-icon primary">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 8h1a4 4 0 0 1 0 8h-1"/>
+                            <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>
+                        </svg>
+                    </div>
                 </div>
-                <div class="stat-value">{{ totalCaloriesToday }}</div>
-                <div class="stat-label">Calories aujourd'hui</div>
+                <div class="stat-card-value">{{ totalCaloriesToday }}</div>
+                <div class="stat-card-label">Calories aujourd'hui</div>
             </div>
 
             <div class="stat-card">
-                <div class="stat-icon sport">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <div class="stat-card-header">
+                    <div class="stat-card-icon secondary">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                    </div>
                 </div>
-                <div class="stat-value">{{ totalMinutesSport }}</div>
-                <div class="stat-label">Minutes de sport cette semaine</div>
+                <div class="stat-card-value">{{ totalMinutesSport }}</div>
+                <div class="stat-card-label">Minutes de sport cette semaine</div>
             </div>
 
             <div class="stat-card">
-                <div class="stat-icon appointment">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                <div class="stat-card-header">
+                    <div class="stat-card-icon warning">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                        </svg>
+                    </div>
                 </div>
-                <div class="stat-value">{{ upcomingRdv|length }}</div>
-                <div class="stat-label">Rendez-vous à venir</div>
+                <div class="stat-card-value">{{ upcomingRdv|length }}</div>
+                <div class="stat-card-label">Rendez-vous a venir</div>
             </div>
 
             <div class="stat-card">
-                <div class="stat-icon score">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <div class="stat-card-header">
+                    <div class="stat-card-icon primary">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                        </svg>
+                    </div>
                 </div>
-                <div class="stat-value">{{ user.scoreGlobal }}</div>
-                <div class="stat-label">Points accumulés</div>
+                <div class="stat-card-value">{{ user.scoreGlobal }}</div>
+                <div class="stat-card-label">Points accumules</div>
             </div>
         </div>
 
-        <div class="content-grid">
+        <div class="grid grid-cols-2 gap-6">
             {# Repas du jour #}
-            <div class="dashboard-card">
-                <div class="card-header">
+            <div class="card">
+                <div class="card-header flex-between">
                     <div>
-                        <div class="card-title">Repas du jour</div>
-                        <div class="card-subtitle">{{ todayRepas|length }} repas enregistrés</div>
+                        <h4 class="card-title">Repas du jour</h4>
+                        <p class="card-subtitle">{{ todayRepas|length }} repas enregistres</p>
                     </div>
-                    <a href="{{ path('app_nutrition_new') }}" class="btn-sm btn-primary">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                        Ajouter
-                    </a>
+                    <a href="{{ path('app_nutrition_new') }}" class="btn btn-sm btn-primary">+ Ajouter</a>
                 </div>
                 {% if todayRepas|length > 0 %}
                     {% for repas in todayRepas %}
                         <div class="list-item">
-                            <div class="list-icon green">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>
+                            <div class="list-item-icon" style="background: rgba(110, 197, 166, 0.1); color: var(--primary);">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M18 8h1a4 4 0 0 1 0 8h-1"/>
+                                    <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>
+                                </svg>
                             </div>
-                            <div class="list-content">
-                                <div class="list-title">{{ repas.titreRepas }}</div>
-                                <div class="list-subtitle">{{ repas.typeMoment.label }} - {{ repas.totalCalories }} cal</div>
+                            <div class="list-item-content">
+                                <div class="list-item-title">{{ repas.titreRepas }}</div>
+                                <div class="list-item-subtitle">{{ repas.typeMoment.label }} - {{ repas.totalCalories }} cal</div>
                             </div>
                         </div>
                     {% endfor %}
                 {% else %}
                     <div class="empty-state">
-                        <div class="empty-icon">
-                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>
-                        </div>
-                        <p class="empty-text">Aucun repas enregistré aujourd'hui</p>
-                        <a href="{{ path('app_nutrition_new') }}" class="btn-sm btn-outline">Ajouter un repas</a>
+                        <p class="text-gray">Aucun repas enregistre aujourd'hui</p>
+                        <a href="{{ path('app_nutrition_new') }}" class="btn btn-sm btn-outline-primary mt-4">Ajouter un repas</a>
                     </div>
                 {% endif %}
             </div>
 
-            {# Séances de la semaine #}
-            <div class="dashboard-card">
-                <div class="card-header">
+            {# Seances de la semaine #}
+            <div class="card">
+                <div class="card-header flex-between">
                     <div>
-                        <div class="card-title">Sport cette semaine</div>
-                        <div class="card-subtitle">{{ weekSeances|length }} séances</div>
+                        <h4 class="card-title">Sport cette semaine</h4>
+                        <p class="card-subtitle">{{ weekSeances|length }} seances</p>
                     </div>
-                    <a href="{{ path('app_sports_new') }}" class="btn-sm btn-primary">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                        Ajouter
-                    </a>
+                    <a href="{{ path('app_sports_new') }}" class="btn btn-sm btn-secondary">+ Ajouter</a>
                 </div>
                 {% if weekSeances|length > 0 %}
                     {% for seance in weekSeances|slice(0, 3) %}
                         <div class="list-item">
-                            <div class="list-icon blue">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            <div class="list-item-icon" style="background: rgba(54, 124, 254, 0.1); color: var(--secondary);">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <polyline points="12 6 12 12 16 14"/>
+                                </svg>
                             </div>
-                            <div class="list-content">
-                                <div class="list-title">{{ seance.nomSeance }}</div>
-                                <div class="list-subtitle">{{ seance.dateSeance|date('d/m') }} - {{ seance.dureeMinutes }} min</div>
+                            <div class="list-item-content">
+                                <div class="list-item-title">{{ seance.nomSeance }}</div>
+                                <div class="list-item-subtitle">{{ seance.dateSeance|date('d/m') }} - {{ seance.dureeMinutes }} min</div>
                             </div>
                         </div>
                     {% endfor %}
                 {% else %}
                     <div class="empty-state">
-                        <div class="empty-icon">
-                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                        </div>
-                        <p class="empty-text">Aucune séance cette semaine</p>
-                        <a href="{{ path('app_sports_new') }}" class="btn-sm btn-outline">Planifier une séance</a>
+                        <p class="text-gray">Aucune seance cette semaine</p>
+                        <a href="{{ path('app_sports_new') }}" class="btn btn-sm btn-outline-secondary mt-4">Planifier une seance</a>
                     </div>
                 {% endif %}
             </div>
+        </div>
+
         {# Prochains RDV #}
         {% if upcomingRdv|length > 0 %}
-        <div class="appointments-card">
+        <div class="card mt-6">
             <div class="card-header">
-                <div class="card-title">Prochains rendez-vous</div>
+                <h4 class="card-title">Prochains rendez-vous</h4>
             </div>
-            <div class="appointments-grid">
+            <div class="grid grid-cols-3 gap-4">
                 {% for rdv in upcomingRdv %}
                     <div class="list-item">
-                        <div class="list-icon orange">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        <div class="list-item-icon" style="background: rgba(239, 68, 68, 0.1); color: var(--danger);">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                <line x1="16" y1="2" x2="16" y2="6"/>
+                                <line x1="8" y1="2" x2="8" y2="6"/>
+                                <line x1="3" y1="10" x2="21" y2="10"/>
+                            </svg>
                         </div>
-                        <div class="list-content">
-                            <div class="list-title">Dr. {{ rdv.specialiste.nomComplet }}</div>
-                            <div class="list-subtitle">{{ rdv.dateHeure|date('d/m/Y H:i') }}</div>
+                        <div class="list-item-content">
+                            <div class="list-item-title">Dr. {{ rdv.specialiste.nomComplet }}</div>
+                            <div class="list-item-subtitle">{{ rdv.dateHeure|date('d/m/Y H:i') }}</div>
                         </div>
                     </div>
                 {% endfor %}
@@ -527,33 +168,27 @@
         {% endif %}
 
         {# Quick Actions #}
-        <div class="quick-actions">
-            <div>
-                <h3>Accès rapide</h3>
-                <p>Naviguez rapidement vers vos modules préférés</p>
-            </div>
-            <div class="quick-links">
-                <a href="{{ path('app_nutrition') }}" class="quick-link">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>
-                    Nutrition
-                </a>
-                <a href="{{ path('app_sports') }}" class="quick-link">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    Sport
-                </a>
-                <a href="{{ path('app_mental') }}" class="quick-link">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-                    Mental
-                </a>
+        <div class="gradient-card mt-6">
+            <div class="flex-between">
+                <div>
+                    <h3>Acces rapide</h3>
+                    <p style="opacity: 0.9;">Naviguez rapidement vers vos modules preferes</p>
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <a href="{{ path('app_nutrition') }}" class="btn" style="background: white; color: var(--secondary);">Nutrition</a>
+                    <a href="{{ path('app_sports') }}" class="btn" style="background: white; color: var(--secondary);">Sport</a>
+                    <a href="{{ path('app_mental') }}" class="btn" style="background: white; color: var(--secondary);">Mental</a>
+                </div>
             </div>
         </div>
-    </div>
 
-    {# Statut de spécialité #}
-    {% if user.certification and user.certification.statut == 'APPROVED' %}
-    <div class="specialty-badge">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-        <span>{{ user.certification.type == 'COACH' ? 'Coach' : 'Spécialiste' }} - {{ user.certification.specialite }}</span>
-    </div>
-    {% endif %}
+        {# Statut de spécialité #}
+        {% if user.certification and user.certification.statut == 'APPROVED' %}
+        <div class="specialty-status-card" style="position: fixed; bottom: 20px; left: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 20px; border-radius: 25px; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); display: flex; align-items: center; gap: 8px; font-weight: 500; z-index: 1000;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+            <span>{{ user.certification.type == 'COACH' ? 'Coach' : 'Spécialiste' }} - {{ user.certification.specialite }}</span>
+        </div>
+        {% endif %}
 {% endblock %}

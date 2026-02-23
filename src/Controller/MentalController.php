@@ -16,10 +16,9 @@ use Symfony\Component\Routing\Attribute\Route;
 class MentalController extends AbstractController
 {
     #[Route('', name: 'app_mental')]
-    public function index(QuizMentalRepository $quizMentalRepository, \App\Service\WellnessService $wellnessService): Response
+    public function index(QuizMentalRepository $quizMentalRepository): Response
     {
         $user = $this->getUser();
-        $quote = $wellnessService->getDailyQuote();
         
         // Quiz disponibles créés par admin pour cet utilisateur
         $quizzesDisponibles = $quizMentalRepository->findBy(
@@ -56,7 +55,6 @@ class MentalController extends AbstractController
             'quizzesPasses' => $quizzesPasses,
             'totalScore' => $totalScore,
             'achievements' => $achievements,
-            'quote' => $quote,
         ]);
     }
 
@@ -231,15 +229,12 @@ class MentalController extends AbstractController
         // Gérer la soumission de la réponse
         if ($request->isMethod('POST')) {
             $answer = $request->request->get('answer');
-            $timeSpent = (float) $request->request->get('time_spent', 0); // Temps en secondes
-            
             $answers = $session->get('quiz_answers', []);
             $answers[$currentIndex] = [
                 'question_id' => $question->getId(),
                 'answer' => $answer,
                 'correct' => $answer === $question->getReponseCorrecte(),
                 'points' => $answer === $question->getReponseCorrecte() ? $question->getPointsValeur() : 0,
-                'time_spent' => $timeSpent,
             ];
             $session->set('quiz_answers', $answers);
             $session->set('quiz_current_index', $currentIndex + 1);
@@ -258,11 +253,7 @@ class MentalController extends AbstractController
     }
 
     #[Route('/quiz/result', name: 'app_mental_quiz_result')]
-    public function quizResult(
-        Request $request, 
-        EntityManagerInterface $em,
-        \App\Service\CognitiveInsightService $insightService
-    ): Response
+    public function quizResult(Request $request, EntityManagerInterface $em): Response
     {
         $session = $request->getSession();
         $answers = $session->get('quiz_answers', []);
@@ -271,13 +262,6 @@ class MentalController extends AbstractController
         if (empty($answers) || !$quizId) {
             return $this->redirectToRoute('app_mental');
         }
-
-        $user = $this->getUser();
-        /** @var \App\Entity\Utilisateur $user */
-        
-        // Optionnel : Générer un insight si c'est le 3ème quiz par exemple
-        // Pour la démo, on le fait à chaque fois
-        $insightService->generateInsightForUser($user);
 
         // Calculer le score
         $totalScore = array_sum(array_column($answers, 'points'));
@@ -295,17 +279,6 @@ class MentalController extends AbstractController
             $medaille = 'Apprenti';
         }
 
-        // Calculer les métriques de performance
-        $times = array_column($answers, 'time_spent');
-        $averageTime = !empty($times) ? array_sum($times) / count($times) : 0;
-        
-        $agilite = 'Normal';
-        if ($averageTime < 5) {
-            $agilite = 'Rapide - Connecté';
-        } elseif ($averageTime > 20) {
-            $agilite = 'Analytique / Lent';
-        }
-
         // Mettre à jour le quiz existant avec le résultat
         $quiz = $em->getRepository(QuizMental::class)->find($quizId);
         if (!$quiz) {
@@ -317,8 +290,6 @@ class MentalController extends AbstractController
         $quiz->setMedailleQuiz($medaille);
         $quiz->setStatut('complete');
         $quiz->setDateQuiz(new \DateTime()); // Date de complétion
-        $quiz->setTempsMoyenReponse($averageTime);
-        $quiz->setAgiliteCognitive($agilite);
 
         $em->flush();
 
