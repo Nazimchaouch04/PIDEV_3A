@@ -102,7 +102,6 @@ final class ExerciceController extends AbstractController
         $debutSemaine = (clone $now)->modify('monday this week 00:00:00');
         $finSemaine   = (clone $now)->modify('sunday this week 23:59:59');
 
-        // Exercices de cette semaine (via leur séance)
         $tousExercices = $exerciceRepository->findAll();
         $exercicesSemaine = array_filter($tousExercices, function($e) use ($debutSemaine, $finSemaine) {
             $date = $e->getSeance()->getDateSeance();
@@ -111,11 +110,9 @@ final class ExerciceController extends AbstractController
 
         $nbExercicesSemaine = count($exercicesSemaine);
 
-        // Noms différents
-        $nomsUniques = array_unique(array_map(fn($e) => $e->getNomExercice(), $exercicesSemaine));
+        $nomsUniques  = array_unique(array_map(fn($e) => $e->getNomExercice(), $exercicesSemaine));
         $nbDifferents = count($nomsUniques);
 
-        // Max calories/min cette semaine
         $maxCaloriesMinute = 0;
         foreach ($exercicesSemaine as $e) {
             if ($e->getCaloriesParMinute() > $maxCaloriesMinute) {
@@ -123,13 +120,11 @@ final class ExerciceController extends AbstractController
             }
         }
 
-        // Intensité élevée
         $nbIntensiteElevee = count(array_filter($exercicesSemaine,
             fn($e) => $e->getIntensite()->value === 'eleve'
         ));
 
-        // Durée max d'une séance cette semaine
-        $toutesSeances = $seanceSportRepository->findAll();
+        $toutesSeances  = $seanceSportRepository->findAll();
         $maxDureeSeance = 0;
         foreach ($toutesSeances as $s) {
             if ($s->getDateSeance() >= $debutSemaine && $s->getDateSeance() <= $finSemaine) {
@@ -139,32 +134,18 @@ final class ExerciceController extends AbstractController
             }
         }
 
-        // ── Calcul progression chaque défi ───────────────────────────────────
         $defisAvecProgression = [];
         foreach (self::DEFIS_EXERCICE as $defi) {
             $valeurActuelle = 0;
-
             switch ($defi['condition']) {
-                case 'exercices_semaine':
-                    $valeurActuelle = $nbExercicesSemaine;
-                    break;
-                case 'exercices_differents':
-                    $valeurActuelle = $nbDifferents;
-                    break;
-                case 'calories_minute':
-                    $valeurActuelle = round($maxCaloriesMinute, 1);
-                    break;
-                case 'intensite_elevee':
-                    $valeurActuelle = $nbIntensiteElevee;
-                    break;
-                case 'duree_seance':
-                    $valeurActuelle = $maxDureeSeance;
-                    break;
+                case 'exercices_semaine':    $valeurActuelle = $nbExercicesSemaine;  break;
+                case 'exercices_differents': $valeurActuelle = $nbDifferents;        break;
+                case 'calories_minute':      $valeurActuelle = round($maxCaloriesMinute, 1); break;
+                case 'intensite_elevee':     $valeurActuelle = $nbIntensiteElevee;   break;
+                case 'duree_seance':         $valeurActuelle = $maxDureeSeance;      break;
             }
-
             $progression = min(100, round(($valeurActuelle / $defi['valeur']) * 100));
             $atteint     = $progression >= 100;
-
             $defisAvecProgression[] = array_merge($defi, [
                 'progression'    => $progression,
                 'valeurActuelle' => $valeurActuelle,
@@ -172,7 +153,6 @@ final class ExerciceController extends AbstractController
             ]);
         }
 
-        // ── Médailles obtenues via séances de la semaine ──────────────────────
         $medaillesObtenues = [];
         foreach ($toutesSeances as $s) {
             if ($s->getDateSeance() >= $debutSemaine
@@ -183,7 +163,6 @@ final class ExerciceController extends AbstractController
         }
         $medaillesObtenues = array_unique($medaillesObtenues);
 
-        // ── Message Groq si défi atteint ─────────────────────────────────────
         $messageGroq   = null;
         $defisAtteints = array_filter($defisAvecProgression, fn($d) => $d['atteint']);
         if (!empty($defisAtteints)) {
@@ -195,12 +174,12 @@ final class ExerciceController extends AbstractController
         }
 
         return $this->render('exercice/defis.html.twig', [
-            'defis'               => $defisAvecProgression,
-            'nbExercicesSemaine'  => $nbExercicesSemaine,
-            'medaillesObtenues'   => array_values($medaillesObtenues),
-            'messageGroq'         => $messageGroq,
-            'debutSemaine'        => $debutSemaine,
-            'finSemaine'          => $finSemaine,
+            'defis'              => $defisAvecProgression,
+            'nbExercicesSemaine' => $nbExercicesSemaine,
+            'medaillesObtenues'  => array_values($medaillesObtenues),
+            'messageGroq'        => $messageGroq,
+            'debutSemaine'       => $debutSemaine,
+            'finSemaine'         => $finSemaine,
         ]);
     }
 
@@ -213,7 +192,7 @@ final class ExerciceController extends AbstractController
         $groqApiKey = $_SERVER['GROQ_API_KEY'] ?? $_ENV['GROQ_API_KEY'] ?? null;
         if (!$groqApiKey) return null;
 
-        $defisNoms    = implode(', ', array_column($data['defisAtteints'], 'titre'));
+        $defisNoms     = implode(', ', array_column($data['defisAtteints'], 'titre'));
         $medaillesNoms = implode(', ', $data['medailles']);
 
         $prompt = sprintf(
@@ -391,7 +370,6 @@ Utilise des emojis sportifs. Termine par un encouragement pour la semaine procha
 
     // =========================================================================
     // ══════════  STATISTIQUES USER — Groq IA + ExerciseDB  ═══════════════════
-    // ⚠️  AVANT les routes /{id}
     // =========================================================================
 
     #[Route('/statistiques/user', name: 'app_exercice_stats', methods: ['GET'])]
@@ -576,14 +554,50 @@ Utilise des emojis sportifs. Termine par un encouragement pour la semaine procha
         }
 
         return $this->render('exercice/objectif.html.twig', [
-            'prediction'               => $prediction,
-            'totalSeances'             => $totalSeances,
-            'seanceCeMois'             => $seanceCeMois,
-            'dureeMoyenne'             => $dureeMoyenne,
-            'caloriesTotales'          => $caloriesTotales,
-            'caloriesMoyennesParMinute'=> $caloriesMoyennesParMinute,
-            'exercicePlusPratique'     => $exercicePlusPratique,
-            'intensitePlusCourante'    => $intensitePlusCourante,
+            'prediction'                => $prediction,
+            'totalSeances'              => $totalSeances,
+            'seanceCeMois'              => $seanceCeMois,
+            'dureeMoyenne'              => $dureeMoyenne,
+            'caloriesTotales'           => $caloriesTotales,
+            'caloriesMoyennesParMinute' => $caloriesMoyennesParMinute,
+            'exercicePlusPratique'      => $exercicePlusPratique,
+            'intensitePlusCourante'     => $intensitePlusCourante,
+        ]);
+    }
+
+    // =========================================================================
+    // ════════════════  MOTIVATION & SUIVI PSYCHOLOGIQUE — User  ══════════════
+    // =========================================================================
+
+    #[Route('/motivation', name: 'app_exercice_motivation', methods: ['GET'])]
+    public function motivationForm(): Response
+    {
+        return $this->render('exercice/motivation.html.twig');
+    }
+
+    #[Route('/motivation/analyser', name: 'app_exercice_motivation_analyser', methods: ['POST'])]
+    public function motivationAnalyser(
+        Request $request,
+        HttpClientInterface $httpClient
+    ): Response {
+        $humeur  = $request->request->get('humeur');
+        $energie = $request->request->get('energie');
+        $sommeil = $request->request->get('sommeil');
+        $stress  = $request->request->get('stress');
+
+        $resultat = $this->getMotivationGroq($httpClient, [
+            'humeur'  => $humeur,
+            'energie' => $energie,
+            'sommeil' => $sommeil,
+            'stress'  => $stress,
+        ]);
+
+        return $this->render('exercice/motivation_resultat.html.twig', [
+            'resultat' => $resultat,
+            'humeur'   => $humeur,
+            'energie'  => $energie,
+            'sommeil'  => $sommeil,
+            'stress'   => $stress,
         ]);
     }
 
@@ -702,6 +716,56 @@ Donne 3 conseils courts et motivants en français. Emoji sportif par conseil. Ma
             return $d['choices'][0]['message']['content'] ?? "Continuez vos efforts ! 💪";
         } catch (\Exception $e) {
             return "💪 Erreur Groq : ".$e->getMessage();
+        }
+    }
+
+    // =========================================================================
+    // ════════════════  GROQ — Motivation & Suivi Psychologique  ══════════════
+    // =========================================================================
+
+    private function getMotivationGroq(HttpClientInterface $httpClient, array $data): string
+    {
+        $groqApiKey = $_SERVER['GROQ_API_KEY'] ?? $_ENV['GROQ_API_KEY'] ?? null;
+        if (!$groqApiKey) return "💡 Clé GROQ_API_KEY manquante dans .env";
+
+        $prompt = sprintf(
+            "Tu es un coach sportif et psychologue du sport bienveillant.
+L'utilisateur veut faire une séance de sport avec cet état :
+- Humeur : %s
+- Niveau d'énergie : %s/5
+- Heures de sommeil : %s heures
+- Niveau de stress : %s
+
+Génère une réponse structurée avec exactement ces 4 sections :
+1. 💬 MESSAGE MOTIVANT : (message personnalisé selon son humeur)
+2. 🏋️ SÉANCE ADAPTÉE : (exercices adaptés à son état du moment)
+3. ⏱️ DURÉE RECOMMANDÉE : (durée conseillée en minutes)
+4. 😴 CONSEIL RÉCUPÉRATION : (conseil bien-être si fatigué ou stressé)
+
+Réponds en français, de manière bienveillante et encourageante. Utilise des emojis.",
+            $data['humeur'],
+            $data['energie'],
+            $data['sommeil'],
+            $data['stress']
+        );
+
+        try {
+            $response = $httpClient->request('POST', 'https://api.groq.com/openai/v1/chat/completions', [
+                'headers' => [
+                    'Authorization' => 'Bearer '.$groqApiKey,
+                    'Content-Type'  => 'application/json',
+                ],
+                'json' => [
+                    'model'       => 'llama-3.3-70b-versatile',
+                    'messages'    => [['role' => 'user', 'content' => $prompt]],
+                    'max_tokens'  => 500,
+                    'temperature' => 0.8,
+                ],
+            ]);
+            $d = $response->toArray();
+            return $d['choices'][0]['message']['content'] ?? "Résultat indisponible.";
+        } catch (\Exception $e) {
+            return "❌ Erreur Groq : ".$e->getMessage();
         }
     }
 }
