@@ -2,47 +2,127 @@
 
 {% block title %}Nouvelle prescription{% endblock %}
 
+{% block stylesheets %}
+<style>
+.consultation-info {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+.suggestion-item {
+    background: white;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 4px;
+    border-left: 3px solid #007bff;
+    margin-bottom: 10px;
+}
+.alert-info {
+    background: #d1ecf1;
+    border: 1px solid #bee5eb;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+</style>
+{% endblock %}
+
 {% block body %}
 
 <div class="container mt-4">
 
     <h2 class="mb-4">Nouvelle prescription</h2>
+    
+    {% if consultation %}
+        <div class="consultation-info mb-4 p-3 bg-light">
+            <h4>Consultation pour: {{ consultation.rendezVous.patient.nomComplet }}</h4>
+            <p><strong>Date:</strong> {{ consultation.dateConsultation ? consultation.dateConsultation|date('d/m/Y H:i') : '' }}</p>
+            <p><strong>Symptômes:</strong> {{ consultation.symptomes }}</p>
+            <p><strong>Diagnostic:</strong> {{ consultation.diagnostic }}</p>
+        </div>
+    {% endif %}
+
+    {% if ai_data %}
+        <div class="alert alert-info mb-4">
+            <h4>💊 Suggestions IA générées</h4>
+            {% if ai_data.suggestions %}
+                {% for suggestion in ai_data.suggestions %}
+                    <div class="suggestion-item">
+                        <strong>{{ suggestion.name }}</strong><br>
+                        <small>Dose: {{ suggestion.dosage }}, Fréquence: {{ suggestion.frequency }}, Durée: {{ suggestion.duration }} jours</small>
+                        {% if suggestion.precautions %}
+                            <br><small>⚠️ {{ suggestion.precautions }}</small>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>Aucune suggestion générée</p>
+            {% endif %}
+        </div>
+    {% endif %}
 
     <div class="consultation-card">
-
         {{ form_start(form) }}
 
         <div class="mb-3">
             {{ form_label(form.nomMedicament) }}
             {{ form_widget(form.nomMedicament, {'attr': {'class':'form-control'}}) }}
+            {{ form_errors(form.nomMedicament) }}
         </div>
 
         <div class="mb-3">
             {{ form_label(form.dose) }}
             {{ form_widget(form.dose, {'attr': {'class':'form-control'}}) }}
+            {{ form_errors(form.dose) }}
         </div>
 
         <div class="mb-3">
             {{ form_label(form.frequence) }}
-            {{ form_widget(form.frequence, {'attr': {'class':'form-control'}}) }}
+            <div class="input-group">
+                {{ form_widget(form.frequence, {'attr': {'class':'form-control'}}) }}
+                <div class="input-group-text">par jour</div>
+            </div>
+            {{ form_errors(form.frequence) }}
         </div>
 
         <div class="mb-3">
             {{ form_label(form.duree) }}
             {{ form_widget(form.duree, {'attr': {'class':'form-control'}}) }}
+            {{ form_errors(form.duree) }}
         </div>
 
-        <div class="mb-3">
-            {{ form_label(form.instructions) }}
-            {{ form_widget(form.instructions, {'attr': {'class':'form-control'}}) }}
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+            <a href="{{ consultation ? path('app_consultation_show', {'id': consultation.id}) : path('app_specialiste') }}" class="btn btn-secondary">
+                {{ consultation ? 'Retour consultation' : 'Retour dashboard' }}
+            </a>
         </div>
-
-        <button class="btn btn-primary">Enregistrer</button>
 
         {{ form_end(form) }}
-
     </div>
 
 </div>
 
+{% endblock %}
+
+{% block javascripts %}
+<script>
+function autoSaveWithAI() {
+    {% if ai_data and ai_data.suggestions %}
+        // Auto-fill form with first AI suggestion
+        var firstSuggestion = {{ ai_data.suggestions|first|json_encode|raw }};
+        
+        document.querySelector('[name*="nomMedicament"]').value = firstSuggestion.name || '';
+        document.querySelector('[name*="dose"]').value = firstSuggestion.dosage || '';
+        document.querySelector('[name*="frequence"]').value = firstSuggestion.frequency || '';
+        document.querySelector('[name*="duree"]').value = firstSuggestion.duration || '';
+        document.querySelector('[name*="instructions"]').value = firstSuggestion.precautions || '';
+        
+        // Submit the form
+        document.querySelector('form').submit();
+    {% endif %}
+}
+</script>
 {% endblock %}

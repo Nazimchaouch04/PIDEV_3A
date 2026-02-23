@@ -16,6 +16,18 @@ class PrescriptionRepository extends ServiceEntityRepository
         parent::__construct($registry, Prescription::class);
     }
 
+    public function findBySpecialist($specialist): array
+    {
+        return $this->createQueryBuilder('p')
+            ->join('p.consultation', 'c')
+            ->join('c.rendezVous', 'r')
+            ->where('r.specialiste = :specialist')
+            ->setParameter('specialist', $specialist)
+            ->orderBy('p.id', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
 //    /**
 //     * @return Prescription[] Returns an array of Prescription objects
 //     */

@@ -36,7 +36,13 @@ class ConsultationController extends AbstractController
             $em->persist($consultation);
             $em->flush();
 
-            return $this->redirectToRoute('app_specialiste');
+            // Redirect directly to prescription creation with AI data
+            return $this->redirectToRoute('app_prescription_new', [
+                'id' => $consultation->getId(),
+                'ai_generate' => 'true',
+                'symptoms' => $consultation->getSymptomes() ?: '',
+                'diagnostic' => $consultation->getDiagnostic() ?: ''
+            ]);
         }
 
         return $this->render('consultation/new.html.twig', [

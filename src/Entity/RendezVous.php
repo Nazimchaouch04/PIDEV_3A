@@ -50,6 +50,10 @@ class RendezVous
     #[ORM\OneToOne(mappedBy: 'rendezVous', cascade: ['persist', 'remove'])]
     private ?Consultation $consultation = null;
 
+    // EMERGENCY LEVEL (1-10 scale)
+    #[ORM\Column(type: 'integer', nullable: true)]
+    private ?int $niveauUrgence = null;
+
     public function __construct()
     {
         $this->statut = 'DEMANDE';
@@ -138,6 +142,17 @@ class RendezVous
         }
 
         $this->consultation = $consultation;
+        return $this;
+    }
+
+    public function getNiveauUrgence(): ?int
+    {
+        return $this->niveauUrgence;
+    }
+
+    public function setNiveauUrgence(?int $niveauUrgence): static
+    {
+        $this->niveauUrgence = $niveauUrgence;
         return $this;
     }
 

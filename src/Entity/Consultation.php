@@ -19,22 +19,18 @@ class Consultation
 
     #[ORM\Column]
     #[Assert\NotBlank(message: "La date de consultation est obligatoire")]
-    #[Assert\LessThanOrEqual("today", message: "La date de consultation ne peut pas être dans le futur")]
     private ?\DateTime $dateConsultation = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Assert\Length(min: 10, max: 2000, minMessage: "Les symptômes doivent faire au moins 10 caractères", maxMessage: "Les symptômes ne doivent pas dépasser 2000 caractères")]
-    #[Assert\Regex(pattern: "/^[a-zA-Z0-9\s\-.,;:àâäéèêëïîôöùûç]+$/", message: "Les symptômes contiennent des caractères non valides")]
+    #[Assert\Length(min: 3, max: 2000, minMessage: "Les symptômes doivent faire au moins 3 caractères", maxMessage: "Les symptômes ne doivent pas dépasser 2000 caractères")]
     private ?string $symptomes = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Assert\Length(min: 10, max: 2000, minMessage: "Le diagnostic doit faire au moins 10 caractères", maxMessage: "Le diagnostic ne doit pas dépasser 2000 caractères")]
-    #[Assert\Regex(pattern: "/^[a-zA-Z0-9\s\-.,;:àâäéèêëïîôöùûç]+$/", message: "Le diagnostic contient des caractères non valides")]
+    #[Assert\Length(min: 3, max: 2000, minMessage: "Le diagnostic doit faire au moins 3 caractères", maxMessage: "Le diagnostic ne doit pas dépasser 2000 caractères")]
     private ?string $diagnostic = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Assert\Length(min: 10, max: 2000, minMessage: "Les recommandations doivent faire au moins 10 caractères", maxMessage: "Les recommandations ne doivent pas dépasser 2000 caractères")]
-    #[Assert\Regex(pattern: "/^[a-zA-Z0-9\s\-.,;:àâäéèêëïîôöùûç]+$/", message: "Les recommandations contiennent des caractères non valides")]
+    #[Assert\Length(min: 3, max: 2000, minMessage: "Les recommandations doivent faire au moins 3 caractères", maxMessage: "Les recommandations ne doivent pas dépasser 2000 caractères")]
     private ?string $recommandations = null;
 
     // ✅ ONE consultation belongs to ONE rendez-vous

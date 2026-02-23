@@ -30,7 +30,6 @@
 
 </div>
 
-
 <h3>Prescriptions</h3>
 
 <table class="table table-bordered">
@@ -40,6 +39,7 @@
             <th>Dose</th>
             <th>Fréquence</th>
             <th>Durée</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -47,22 +47,29 @@
             <tr>
                 <td>{{ p.nomMedicament }}</td>
                 <td>{{ p.dose }}</td>
-                <td>{{ p.frequence }}</td>
+                <td>{{ p.frequence }} par jour</td>
                 <td>{{ p.duree }} jours</td>
+                <td>
+                    <a class="btn btn-sm btn-primary" href="{{ path('app_prescription_edit', {'id': p.id}) }}">
+                        Modifier
+                    </a>
+                </td>
             </tr>
         {% else %}
             <tr>
-                <td colspan="4">Aucune prescription</td>
+                <td colspan="5">Aucune prescription</td>
             </tr>
         {% endfor %}
     </tbody>
 </table>
 
-
-<a class="btn btn-success"
-   href="{{ path('app_prescription_new', {'id': consultation.id}) }}">
-   Ajouter prescription
-</a>
+{% if consultation.prescriptions|length == 0 %}
+    
+    <a class="btn btn-primary"
+       href="{{ path('app_prescription_new', {'id': consultation.id, 'ai_generate': 'true', 'symptoms': consultation.symptomes, 'diagnostic': consultation.diagnostic}) }}">
+       Créer prescription IA
+    </a>
+{% endif %}
 
 <br><br>
 
@@ -76,4 +83,4 @@
    Modifier consultation
 </a>
 
-{% endblock %} 
+{% endblock %}

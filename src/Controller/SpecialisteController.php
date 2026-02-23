@@ -20,13 +20,13 @@ final class SpecialisteController extends AbstractController
         if ($this->isGranted('ROLE_ADMIN')) {
             $rendezVous = $repo->findBy(
                 [],
-                ['dateHeure' => 'ASC']
+                ['niveauUrgence' => 'DESC', 'dateHeure' => 'ASC']
             );
         } else {
             // Sinon, le spécialiste ne voit que ses rendez-vous
             $rendezVous = $repo->findBy(
                 ['specialiste' => $this->getUser()],
-                ['dateHeure' => 'ASC']
+                ['niveauUrgence' => 'DESC', 'dateHeure' => 'ASC']
             );
         }
 

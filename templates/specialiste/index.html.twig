@@ -9,6 +9,11 @@
         <h1 class="page-title">{% if isAdmin %}Tous les rendez-vous{% else %}Mes rendez-vous{% endif %}</h1>
         <p class="page-subtitle">{% if isAdmin %}Gestion de tous les rendez-vous patients{% else %}Gestion de mes consultations et rendez-vous patients{% endif %}</p>
     </div>
+    <div>
+        <a href="{{ path('app_prescription_index') }}" class="btn btn-success">
+            Toutes les prescriptions
+        </a>
+    </div>
 </div>
 
 <div class="rdv-card">
@@ -20,6 +25,7 @@
             {% if isAdmin %}<th>Spécialiste</th>{% endif %}
             <th>Date</th>
             <th>Motif</th>
+            <th>Urgence</th>
             <th>Statut</th>
             <th>Actions</th>
         </tr>
@@ -28,10 +34,21 @@
     <tbody>
     {% for rdv in rendezVous %}
         <tr>
-            <td>{{ rdv.patient.NomComplet }}</td>
+            <td>{{ rdv.patient.nomComplet }}</td>
             {% if isAdmin %}<td>{{ rdv.specialiste.nomComplet }}</td>{% endif %}
             <td>{{ rdv.dateHeure|date('d/m/Y H:i') }}</td>
             <td>{{ rdv.motif }}</td>
+
+            <td>
+                {% if rdv.niveauUrgence %}
+                    {% set urgencyClass = rdv.niveauUrgence >= 8 ? 'danger' : rdv.niveauUrgence >= 5 ? 'warning' : 'info' %}
+                    <span class="badge bg-{{ urgencyClass }}">
+                        {{ rdv.niveauUrgence }}/10
+                    </span>
+                {% else %}
+                    <span class="text-muted">—</span>
+                {% endif %}
+            </td>
 
             <td>
                 <span class="badge bg-success">
@@ -39,40 +56,36 @@
                 </span>
             </td>
 
-                 <td>
-
-                    {% if rdv.statut == 'DEMANDE' %}
-
-                        <a class="btn btn-success btn-sm"
-                        href="{{ path('app_rendezvous_confirmer', {id: rdv.id}) }}">
-                            Confirmer
-                        </a>
-
-                        <a class="btn btn-danger btn-sm"
-                        href="{{ path('app_rendezvous_annuler', {id: rdv.id}) }}">
-                            Annuler
-                        </a>
-
-                    {% elseif rdv.statut == 'CONFIRME' and not rdv.consultation %}
-
-                        <a class="btn btn-primary btn-sm"
-                      href="{{ path('app_consultation_new', {id: rdv.id}) }}">
-                            Commencer consultation
-                        </a>
-
-                    {% elseif rdv.consultation %}
-
-                        <a class="btn btn-primary btn-sm"
-                        href="{{ path('app_consultation_show', {id: rdv.consultation.id}) }}">
-                            Voir consultation
-                        </a>
-
-                    {% else %}
-                        <span class="text-muted">—</span>
+            <td>
+                {% if rdv.statut == 'DEMANDE' %}
+                    <a class="btn btn-success btn-sm"
+                    href="{{ path('app_rendezvous_confirmer', {id: rdv.id}) }}">
+                        Confirmer
+                    </a>
+                    <a class="btn btn-danger btn-sm"
+                    href="{{ path('app_rendezvous_annuler', {id: rdv.id}) }}">
+                        Annuler
+                    </a>
+                {% elseif rdv.statut == 'CONFIRME' and not rdv.consultation %}
+                    <a class="btn btn-primary btn-sm"
+                    href="{{ path('app_consultation_new', {id: rdv.id}) }}">
+                        Commencer consultation
+                    </a>
+                    {% if rdv.niveauUrgence and rdv.niveauUrgence >= 7 %}
+                    <a class="btn btn-warning btn-sm"
+                    href="{{ path('app_rendezvous_reschedule', {id: rdv.id}) }}">
+                        Avancer
+                    </a>
                     {% endif %}
-
-                    </td>
-
+                {% elseif rdv.consultation %}
+                    <a class="btn btn-primary btn-sm"
+                    href="{{ path('app_consultation_show', {id: rdv.consultation.id}) }}">
+                        Voir consultation
+                    </a>
+                {% else %}
+                    <span class="text-muted">—</span>
+                {% endif %}
+            </td>
 
         </tr>
     {% endfor %}

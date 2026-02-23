@@ -158,6 +158,69 @@ symfony server:log
 
 ---
 
+## 🤖 AI Medical Services Setup
+
+### Prerequisites
+- Python 3.8+ installed
+- pip package manager
+
+### Installation Steps
+
+1. **Setup AI Services (Windows):**
+```bash
+setup_ai.bat
+```
+
+2. **Setup AI Services (Linux/Mac):**
+```bash
+chmod +x setup_ai.sh
+./setup_ai.sh
+```
+
+3. **Manual Setup:**
+```bash
+pip install -r requirements.txt
+python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
+python -m spacy download fr_core_news_sm
+```
+
+### AI Features Available
+
+#### 1. **AI Triage System** 🚨
+- **Location**: Rendez-vous creation form
+- **Function**: Analyzes appointment urgency (high/medium/low)
+- **Usage**: Click "🚨 Analyse d'urgence IA" button
+
+#### 2. **AI Prescription Suggestions** 💊
+- **Location**: Consultation form
+- **Function**: Suggests medications based on symptoms
+- **Usage**: Click "💊 Suggestions AI" button
+
+#### 3. **AI Consultation Summary** 📝
+- **Location**: Consultation form  
+- **Function**: Generates structured summaries from notes
+- **Usage**: Click "📝 Résumé IA" button
+
+### API Endpoints
+- `/api/ai/triage` - Triage analysis
+- `/api/ai/prescription` - Prescription suggestions
+- `/api/ai/summary` - Consultation summary
+- `/api/ai/health` - Health check
+
+### Testing AI Services
+```bash
+# Test triage system
+python ai_services/triage_system.py "douleur intense" "patient avec historique"
+
+# Test prescription suggester
+python ai_services/prescription_suggester.py "fièvre et toux" "consultation"
+
+# Test consultation summarizer
+python ai_services/consultation_summarizer.py "Patient présente douleur thoracique..."
+```
+
+---
+
 ## Rappel: Navigation
 
 Toutes les pages authentifiees utilisent la sidebar avec navigation vers:

@@ -16,26 +16,34 @@
         <div class="mb-3">
             {{ form_label(form.nomMedicament) }}
             {{ form_widget(form.nomMedicament, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.nomMedicament) }}
         </div>
 
         <div class="mb-3">
             {{ form_label(form.dose) }}
             {{ form_widget(form.dose, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.dose) }}
         </div>
 
         <div class="mb-3">
             {{ form_label(form.frequence) }}
-            {{ form_widget(form.frequence, {'attr': {'class': 'form-control'}}) }}
+            <div class="input-group">
+                {{ form_widget(form.frequence, {'attr': {'class': 'form-control', 'pattern': '[0-9]*', 'inputmode': 'numeric', 'placeholder': 'Entrez un nombre'}}) }}
+                <div class="input-group-text">par jour</div>
+            </div>
+            {{ form_errors(form.frequence) }}
         </div>
 
         <div class="mb-3">
             {{ form_label(form.duree) }}
             {{ form_widget(form.duree, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.duree) }}
         </div>
 
         <div class="mb-3">
             {{ form_label(form.instructions) }}
             {{ form_widget(form.instructions, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.instructions) }}
         </div>
 
         <button class="btn btn-primary">Mettre à jour</button>

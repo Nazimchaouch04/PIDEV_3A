@@ -1,0 +1,46 @@
+# English translations for BioSync
+# Messages domain
+
+# Form labels
+Spécialiste: 'Specialist'
+Date et heure: 'Date and time'
+Mode de consultation: 'Consultation mode'
+Présentiel: 'In-person'
+Téléconsultation: 'Teleconsultation'
+Motif: 'Reason'
+Patient: 'Patient'
+Date de consultation: 'Consultation date'
+Recommandations: 'Recommendations'
+
+# Common UI elements
+Confirmer le RDV: 'Confirm Appointment'
+Annuler: 'Cancel'
+Nouveau rendez-vous: 'New Appointment'
+Planifiez un rendez-vous avec un spécialiste: 'Schedule an appointment with a specialist'
+
+# Navigation and general
+Dashboard: 'Dashboard'
+Profile: 'Profile'
+Logout: 'Logout'
+Login: 'Login'
+Register: 'Register'
+
+# Medical terms
+Consultation: 'Consultation'
+Rendez-vous: 'Appointment'
+Symptômes: 'Symptoms'
+Diagnostic: 'Diagnosis'
+Traitement: 'Treatment'
+
+# Status messages
+Succès: 'Success'
+Erreur: 'Error'
+Information: 'Information'
+Attention: 'Warning'
+
+# AI related
+IA: 'AI'
+Service IA: 'AI Service'
+Analyse IA: 'AI Analysis'
+Suggestions de prescription IA: 'AI Prescription Suggestions'
+Résumé de consultation IA: 'AI Consultation Summary'

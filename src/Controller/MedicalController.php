@@ -11,30 +11,38 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Repository\ConsultationRepository;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Process\Process;
 
 #[Route('/medical')]
 class MedicalController extends AbstractController
 {
+    private ParameterBagInterface $parameterBag;
 
-#[Route('/dossier', name: 'app_medical_dossier')]
-public function dossier(
-    RendezVousRepository $rdvRepo,
-    ConsultationRepository $consultRepo
-): Response {
+    public function __construct(ParameterBagInterface $parameterBag)
+    {
+        $this->parameterBag = $parameterBag;
+    }
 
-    $user = $this->getUser();
+    #[Route('/dossier', name: 'app_medical_dossier')]
+    public function dossier(
+        RendezVousRepository $rdvRepo,
+        ConsultationRepository $consultRepo
+    ): Response {
 
-    return $this->render('medical/dossier.html.twig', [
-        'rdvs' => $rdvRepo->findBy(['patient'=>$user]),
-        'consultations' => $consultRepo->createQueryBuilder('c')
-    ->join('c.rendezVous','r')
-    ->where('r.patient = :patient')
-    ->setParameter('patient',$user)
-    ->getQuery()
-    ->getResult()
+        $user = $this->getUser();
 
-    ]);
-}
+        return $this->render('medical/dossier.html.twig', [
+            'rdvs' => $rdvRepo->findBy(['patient'=>$user]),
+            'consultations' => $consultRepo->createQueryBuilder('c')
+        ->join('c.rendezVous','r')
+        ->where('r.patient = :patient')
+        ->setParameter('patient',$user)
+        ->getQuery()
+        ->getResult()
+
+        ]);
+    }
 
     // LIST MY RENDEZ-VOUS
     #[Route('', name: 'app_medical')]
@@ -69,6 +77,9 @@ public function new(Request $request, EntityManagerInterface $entityManager): Re
 
         $entityManager->persist($rdv);
         $entityManager->flush();
+
+        // Automatically analyze emergency level
+        $this->analyzeEmergencyLevel($rdv, $entityManager);
 
         return $this->redirectToRoute('app_medical');
     }
@@ -170,5 +181,55 @@ public function edit(
     ]);
 }
 
+private function analyzeEmergencyLevel(RendezVous $rendezVous, EntityManagerInterface $em): void
+{
+    try {
+        $projectDir = $this->parameterBag->get('kernel.project_dir');
+        $process = new Process(['python', $projectDir . '/ai_services/triage_system.py', 
+                               $rendezVous->getMotif(), 'Emergency assessment']);
+        $process->setWorkingDirectory($projectDir);
+        $process->run();
+
+        if ($process->isSuccessful()) {
+            $output = $process->getOutput();
+            // Convert to UTF-8 if needed
+            if (!mb_check_encoding($output, 'UTF-8')) {
+                $output = mb_convert_encoding($output, 'UTF-8', 'UTF-8, ISO-8859-1, Windows-1252');
+            }
+            
+            $result = json_decode($output, true);
+            
+            if (json_last_error() === JSON_ERROR_NONE && $result) {
+                // Calculate emergency level (1-10 scale) based on triage results
+                $emergencyLevel = $this->calculateEmergencyLevel($result);
+                $rendezVous->setNiveauUrgence($emergencyLevel);
+                $em->flush();
+            }
+        }
+    } catch (\Exception $e) {
+        // Log error but don't break the rendez-vous creation
+        // In production, you might want to log this: error_log($e->getMessage());
+    }
+}
+
+private function calculateEmergencyLevel(array $triageResult): int
+{
+    $level = 1; // Base level
+    
+    // Increase based on severity indicators
+    if (isset($triageResult['severity'])) {
+        $level += min($triageResult['severity'], 4);
+    }
+    
+    if (isset($triageResult['urgency_indicators']) && is_array($triageResult['urgency_indicators'])) {
+        $level += count($triageResult['urgency_indicators']);
+    }
+    
+    if (isset($triageResult['risk_factors']) && is_array($triageResult['risk_factors'])) {
+        $level += min(count($triageResult['risk_factors']), 2);
+    }
+    
+    return min($level, 10); // Cap at 10
+}
 
 }

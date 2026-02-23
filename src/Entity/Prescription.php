@@ -17,21 +17,17 @@ class Prescription
 
     #[ORM\Column(length: 100)]
     #[Assert\NotBlank(message: "Le nom du médicament est obligatoire")]
-    #[Assert\Length(min: 2, max: 100, minMessage: "Le nom du médicament doit faire au moins 2 caractères", maxMessage: "Le nom du médicament ne doit pas dépasser 100 caractères")]
-    #[Assert\Regex(pattern: "/^[a-zA-Z0-9\s\-àâäéèêëïîôöùûç]+$/", message: "Le nom du médicament ne peut contenir que des lettres, chiffres et espaces")]
     private ?string $nomMedicament = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column]
     #[Assert\NotBlank(message: "La dose est obligatoire")]
-    #[Assert\Length(min: 2, max: 255, minMessage: "La dose doit faire au moins 2 caractères", maxMessage: "La dose ne doit pas dépasser 255 caractères")]
-    #[Assert\Regex(pattern: "/^[a-zA-Z0-9\s\-mgml]+$/", message: "La dose contient des caractères non valides")]
-    private ?string $dose = null;
+    #[Assert\Positive(message: "La dose doit être un nombre positif")]
+    private ?int $dose = null;
 
-    #[ORM\Column(length: 100)]
+    #[ORM\Column]
     #[Assert\NotBlank(message: "La fréquence est obligatoire")]
-    #[Assert\Length(min: 2, max: 100, minMessage: "La fréquence doit faire au moins 2 caractères", maxMessage: "La fréquence ne doit pas dépasser 100 caractères")]
-    #[Assert\Regex(pattern: "/^[a-zA-Z0-9\s\-àâäéèêëïîôöùûç]+$/", message: "La fréquence contient des caractères non valides")]
-    private ?string $frequence = null;
+    #[Assert\Positive(message: "La fréquence doit être un nombre positif")]
+    private ?int $frequence = null;
 
     #[ORM\Column]
     #[Assert\NotBlank(message: "La durée est obligatoire")]
@@ -39,8 +35,6 @@ class Prescription
     private ?int $duree = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Assert\Length(max: 1000, maxMessage: "Les instructions ne doivent pas dépasser 1000 caractères")]
-    #[Assert\Regex(pattern: "/^[a-zA-Z0-9\s\-.,;:àâäéèêëïîôöùûç]+$/", message: "Les instructions contiennent des caractères non valides")]
     private ?string $instructions = null;
 
     #[ORM\ManyToOne(inversedBy: 'prescriptions')]
@@ -64,24 +58,29 @@ class Prescription
         return $this;
     }
 
-    public function getDose(): ?string
+    public function getDose(): ?int
     {
         return $this->dose;
     }
 
-    public function setDose(string $dose): static
+    public function setDose(int $dose): static
     {
         $this->dose = $dose;
 
         return $this;
     }
 
-    public function getFrequence(): ?string
+    public function getFrequence(): ?int
     {
         return $this->frequence;
     }
 
-    public function setFrequence(string $frequence): static
+    public function getFrequenceDisplay(): ?string
+    {
+        return $this->frequence ? $this->frequence . ' par jour' : null;
+    }
+
+    public function setFrequence(int $frequence): static
     {
         $this->frequence = $frequence;
 

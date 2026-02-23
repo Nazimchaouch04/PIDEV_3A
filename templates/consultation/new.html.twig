@@ -2,6 +2,53 @@
 
 {% block title %}Nouvelle Consultation{% endblock %}
 
+{% block stylesheets %}
+<style>
+.ai-suggestions {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 10px 0;
+}
+.ai-suggestions h4 {
+    color: #007bff;
+    margin-bottom: 10px;
+}
+.ai-suggestion-item {
+    background: white;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 4px;
+    border-left: 3px solid #007bff;
+}
+.ai-summary {
+    background: #e8f5e8;
+    border: 1px solid #28a745;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 10px 0;
+}
+.ai-loading {
+    display: none;
+    color: #007bff;
+    font-style: italic;
+}
+.btn-ai {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 5px;
+}
+.btn-ai:hover {
+    background: #0056b3;
+}
+</style>
+{% endblock %}
+
 {% block body %}
 
 <div class="page-header flex-between">
@@ -24,18 +71,24 @@
             {{ form_label(form.symptomes, 'Symptômes') }}
             {{ form_widget(form.symptomes) }}
             {{ form_errors(form.symptomes) }}
+            <div class="ai-loading" id="prescription-loading">💊 IA analyse les symptômes...</div>
+            <div id="prescription-suggestions" class="ai-suggestions" style="display: none;"></div>
         </div>
 
         <div class="form-group">
             {{ form_label(form.diagnostic, 'Diagnostic') }}
             {{ form_widget(form.diagnostic) }}
             {{ form_errors(form.diagnostic) }}
+            <div class="ai-loading" id="recommandations-loading">🤖 IA génère les recommandations...</div>
+            <div id="recommandations-suggestions" class="ai-suggestions" style="display: none;"></div>
         </div>
 
         <div class="form-group">
             {{ form_label(form.recommandations, 'Recommandations') }}
             {{ form_widget(form.recommandations) }}
             {{ form_errors(form.recommandations) }}
+            <div class="ai-loading" id="summary-loading">📝 IA génère le résumé...</div>
+            <div id="ai-summary" class="ai-summary" style="display: none;"></div>
         </div>
 
         <div class="form-actions">
@@ -47,6 +100,7 @@
                 </svg>
                 Enregistrer la consultation
             </button>
+            
             <a href="{{ path('app_specialiste') }}" class="btn btn-secondary">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="19" y1="12" x2="5" y2="12"/>
@@ -59,4 +113,308 @@
     {{ form_end(form) }}
 </div>
 
+{% endblock %}
+
+{% block javascripts %}
+<script>
+// Auto-trigger AI when fields are filled
+let prescriptionTimeout, recommandationsTimeout, summaryTimeout;
+let lastPrescriptionText = '', lastDiagnosticText = '';
+
+// Auto-generate prescription suggestions when symptoms are entered
+document.addEventListener('DOMContentLoaded', function() {
+    const symptomsField = document.querySelector('[name*="[symptomes]"]');
+    const diagnosticField = document.querySelector('[name*="[diagnostic]"]');
+    const recommandationsField = document.querySelector('[name*="[recommandations]"]');
+    
+    if (symptomsField) {
+        symptomsField.addEventListener('input', function() {
+            clearTimeout(prescriptionTimeout);
+            const currentText = this.value.trim();
+            
+            if (currentText.length >= 4 && currentText !== lastPrescriptionText) {
+                lastPrescriptionText = currentText;
+                prescriptionTimeout = setTimeout(() => {
+                    getPrescriptionSuggestions();
+                }, 1500); // Wait 1.5 seconds after typing stops
+            }
+        });
+    }
+    
+    if (diagnosticField) {
+        diagnosticField.addEventListener('input', function() {
+            clearTimeout(recommandationsTimeout);
+            const currentText = this.value.trim();
+            
+            if (currentText.length >= 4 && currentText !== lastDiagnosticText) {
+                lastDiagnosticText = currentText;
+                recommandationsTimeout = setTimeout(() => {
+                    getRecommandations();
+                }, 1500); // Wait 1.5 seconds after typing stops
+            }
+        });
+    }
+    
+    if (recommandationsField) {
+        recommandationsField.addEventListener('input', function() {
+            clearTimeout(summaryTimeout);
+            summaryTimeout = setTimeout(() => {
+                checkAndGenerateSummary();
+            }, 2000); // Wait 2 seconds after typing stops
+        });
+    }
+});
+
+function getPrescriptionSuggestions() {
+    const symptoms = document.querySelector('[name*="[symptomes]"]').value;
+    const consultationReason = document.querySelector('[name*="[diagnostic]"]').value || 'Consultation générale';
+    
+    if (!symptoms.trim()) return;
+    
+    document.getElementById('prescription-loading').style.display = 'block';
+    document.getElementById('prescription-suggestions').style.display = 'none';
+    
+    fetch('/api/ai/prescription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            symptoms: symptoms,
+            consultationReason: consultationReason
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('prescription-loading').style.display = 'none';
+        if (data.success) {
+            displayPrescriptionSuggestions(data.data);
+        } else {
+            document.getElementById('prescription-suggestions').innerHTML = 
+                '<p style="color: red;">Erreur: ' + data.error + '</p>';
+            document.getElementById('prescription-suggestions').style.display = 'block';
+        }
+    })
+    .catch(error => {
+        document.getElementById('prescription-loading').style.display = 'none';
+        document.getElementById('prescription-suggestions').innerHTML = 
+            '<p style="color: red;">Erreur: ' + error.message + '</p>';
+        document.getElementById('prescription-suggestions').style.display = 'block';
+    });
+}
+
+function getRecommandations() {
+    const symptoms = document.querySelector('[name*="[symptomes]"]').value;
+    const diagnostic = document.querySelector('[name*="[diagnostic]"]').value;
+    
+    if (!symptoms.trim() || !diagnostic.trim()) return;
+    
+    document.getElementById('recommandations-loading').style.display = 'block';
+    document.getElementById('recommandations-suggestions').style.display = 'none';
+    
+    fetch('/api/ai/recommandations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            symptoms: symptoms,
+            diagnostic: diagnostic
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('recommandations-loading').style.display = 'none';
+        if (data.success) {
+            displayRecommandations(data.data);
+        } else {
+            document.getElementById('recommandations-suggestions').innerHTML = 
+                '<p style="color: red;">Erreur: ' + data.error + '</p>';
+            document.getElementById('recommandations-suggestions').style.display = 'block';
+        }
+    })
+    .catch(error => {
+        document.getElementById('recommandations-loading').style.display = 'none';
+        document.getElementById('recommandations-suggestions').innerHTML = 
+            '<p style="color: red;">Erreur: ' + error.message + '</p>';
+        document.getElementById('recommandations-suggestions').style.display = 'block';
+    });
+}
+
+function displayRecommandations(data) {
+    if (!data) {
+        document.getElementById('recommandations-suggestions').innerHTML = 
+            '<p style="color: red;">Aucune recommandation générée</p>';
+        document.getElementById('recommandations-suggestions').style.display = 'block';
+        return;
+    }
+    
+    let html = '<h4>🤖 Recommandations IA</h4>';
+    
+    if (data.recommandations && data.recommandations.length > 0) {
+        data.recommandations.forEach(rec => {
+            html += `
+                <div class="ai-suggestion-item" style="cursor: pointer;" onclick="applyRecommandation('${rec.replace(/'/g, "\\'")}')">
+                    <strong>� ${rec}</strong>
+                    <br><small style="color: #666;">Cliquer pour appliquer</small>
+                </div>
+            `;
+        });
+    } else {
+        html += '<p>Aucune recommandation disponible</p>';
+    }
+    
+    document.getElementById('recommandations-suggestions').innerHTML = html;
+    document.getElementById('recommandations-suggestions').style.display = 'block';
+}
+
+function applyRecommandation(recommandation) {
+    document.querySelector('[name*="[recommandations]"]').value = recommandation;
+    document.getElementById('recommandations-suggestions').style.display = 'none';
+    
+    // Auto-generate summary after applying recommandations
+    setTimeout(() => checkAndGenerateSummary(), 1000);
+}
+
+function checkAndGenerateSummary() {
+    const symptoms = document.querySelector('[name*="[symptomes]"]').value;
+    const diagnostic = document.querySelector('[name*="[diagnostic]"]').value;
+    const recommandations = document.querySelector('[name*="[recommandations]"]').value;
+    
+    if (symptoms.trim().length >= 4 && diagnostic.trim().length >= 4 && recommandations.trim().length > 3) {
+        generateSummary();
+    }
+}
+
+function createAIPrescription() {
+    const symptoms = document.querySelector('[name*="[symptomes]"]').value;
+    const diagnostic = document.querySelector('[name*="[diagnostic]"]').value;
+    const recommandations = document.querySelector('[name*="[recommandations]"]').value;
+    
+    if (!symptoms.trim() || !diagnostic.trim()) {
+        alert('Veuillez remplir les symptômes et le diagnostic avant de créer une prescription IA');
+        return;
+    }
+    
+    // Save consultation first, then redirect to prescription creation
+    const form = document.querySelector('form');
+    
+    // Add hidden field to indicate AI prescription creation
+    const hiddenField = document.createElement('input');
+    hiddenField.type = 'hidden';
+    hiddenField.name = 'create_ai_prescription';
+    hiddenField.value = '1';
+    
+    // Remove any existing hidden field with same name
+    const existingField = form.querySelector('input[name="create_ai_prescription"]');
+    if (existingField) {
+        existingField.remove();
+    }
+    
+    form.appendChild(hiddenField);
+    
+    // Submit the form normally
+    form.submit();
+}
+
+function generateSummary() {
+    const symptoms = document.querySelector('[name*="[symptomes]"]').value;
+    const diagnostic = document.querySelector('[name*="[diagnostic]"]').value;
+    const recommandations = document.querySelector('[name*="[recommandations]"]').value;
+    
+    const notes = `Symptômes: ${symptoms}\nDiagnostic: ${diagnostic}\nRecommandations: ${recommandations}`;
+    
+    document.getElementById('summary-loading').style.display = 'block';
+    document.getElementById('ai-summary').style.display = 'none';
+    
+    fetch('/api/ai/summary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notes: notes })
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('summary-loading').style.display = 'none';
+        if (data.success) {
+            displaySummary(data.data);
+        } else {
+            document.getElementById('ai-summary').innerHTML = 
+                '<p style="color: red;">Erreur: ' + data.error + '</p>';
+            document.getElementById('ai-summary').style.display = 'block';
+        }
+    })
+    .catch(error => {
+        document.getElementById('summary-loading').style.display = 'none';
+        document.getElementById('ai-summary').innerHTML = 
+            '<p style="color: red;">Erreur: ' + error.message + '</p>';
+        document.getElementById('ai-summary').style.display = 'block';
+    });
+}
+
+function displayPrescriptionSuggestions(data) {
+    if (!data) {
+        document.getElementById('prescription-suggestions').innerHTML = 
+            '<p style="color: red;">Aucune donnée reçue du service IA</p>';
+        document.getElementById('prescription-suggestions').style.display = 'block';
+        return;
+    }
+    
+    let html = '<h4>💊 Suggestions de prescription IA</h4>';
+    
+    if (data.suggestions && data.suggestions.length > 0) {
+        data.suggestions.forEach(med => {
+            html += `
+                <div class="ai-suggestion-item">
+                    <strong>${med.name}</strong> - ${med.dosage}, ${med.frequency}
+                    ${med.duration ? '<br><small>Durée: ' + med.duration + '</small>' : ''}
+                    ${med.precautions ? '<br><small>⚠️ ' + med.precautions + '</small>' : ''}
+                    ${med.controlled ? '<br><small style="color: red;">🔒 Médicament contrôlé</small>' : ''}
+                </div>
+            `;
+        });
+    } else {
+        html += '<p>Aucune suggestion disponible pour ces symptômes</p>';
+    }
+    
+    document.getElementById('prescription-suggestions').innerHTML = html;
+    document.getElementById('prescription-suggestions').style.display = 'block';
+}
+
+function displaySummary(data) {
+    if (!data) {
+        document.getElementById('ai-summary').innerHTML = 
+            '<p style="color: red;">Aucune donnée reçue du service IA</p>';
+        document.getElementById('ai-summary').style.display = 'block';
+        return;
+    }
+    
+    let html = '<h4>📝 Résumé IA de la consultation</h4>';
+    if (data.main_symptoms && data.main_symptoms.length > 0) {
+        html += '<p><strong>Symptômes principaux:</strong></p><ul>';
+        data.main_symptoms.forEach(symptom => {
+            html += `<li>${symptom}</li>`;
+        });
+        html += '</ul>';
+    }
+    
+    if (data.diagnosis && data.diagnosis.length > 0) {
+        html += '<p><strong>Diagnostic:</strong></p><ul>';
+        data.diagnosis.forEach(diag => {
+            html += `<li>${diag}</li>`;
+        });
+        html += '</ul>';
+    }
+    
+    if (data.treatment_plan && data.treatment_plan.length > 0) {
+        html += '<p><strong>Traitement:</strong></p><ul>';
+        data.treatment_plan.forEach(treatment => {
+            html += `<li>${treatment}</li>`;
+        });
+        html += '</ul>';
+    }
+    
+    if (data.summary_text) {
+        html += `<p><strong>Résumé textuel:</strong> ${data.summary_text}</p>`;
+    }
+    
+    document.getElementById('ai-summary').innerHTML = html;
+    document.getElementById('ai-summary').style.display = 'block';
+}
+</script>
 {% endblock %}
