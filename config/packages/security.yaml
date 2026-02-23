@@ -36,6 +36,8 @@ security:
         - { path: ^/reset-password, roles: PUBLIC_ACCESS }
         - { path: ^/certification, roles: PUBLIC_ACCESS }
         - { path: ^/, roles: ROLE_USER }
+        - { path: ^/admin/community/ai, roles: ROLE_ADMIN } # or ROLE_COACH depending on your project
+
 
 when@test:
     security:

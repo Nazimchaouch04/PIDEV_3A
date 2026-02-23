@@ -35,7 +35,6 @@ class GroupeSoutien
     private ?string $description = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Assert\NotBlank(message: 'L\'image est requise')]
     private ?string $image = null;
 
     #[ORM\OneToMany(targetEntity: EvenementSante::class, mappedBy: 'groupe', orphanRemoval: true)]

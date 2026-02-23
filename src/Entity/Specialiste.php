@@ -3,12 +3,9 @@
 namespace App\Entity;
 
 use App\Repository\SpecialisteRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use App\Entity\Utilisateur;
-use App\Entity\RendezVous;
 
 #[ORM\Entity(repositoryClass: SpecialisteRepository::class)]
 #[ORM\Table(name: 'specialiste')]
@@ -42,15 +39,8 @@ class Specialiste
     #[ORM\JoinColumn(nullable: false)]
     private ?Utilisateur $utilisateur = null;
 
-    /**
-     * @var Collection<int, RendezVous>
-     */
-    #[ORM\OneToMany(targetEntity: RendezVous::class, mappedBy: 'specialiste')]
-    private Collection $rendezVous;
-
     public function __construct()
     {
-        $this->rendezVous = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -113,33 +103,6 @@ class Specialiste
     public function setUtilisateur(?Utilisateur $utilisateur): static
     {
         $this->utilisateur = $utilisateur;
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, RendezVous>
-     */
-    public function getRendezVous(): Collection
-    {
-        return $this->rendezVous;
-    }
-
-    public function addRendezVous(RendezVous $rendezVous): static
-    {
-        if (!$this->rendezVous->contains($rendezVous)) {
-            $this->rendezVous->add($rendezVous);
-            $rendezVous->setSpecialiste($this->utilisateur);
-        }
-        return $this;
-    }
-
-    public function removeRendezVous(RendezVous $rendezVous): static
-    {
-        if ($this->rendezVous->removeElement($rendezVous)) {
-            if ($rendezVous->getSpecialiste() === $this->utilisateur) {
-                $rendezVous->setSpecialiste(null);
-            }
-        }
         return $this;
     }
 }

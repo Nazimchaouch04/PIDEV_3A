@@ -69,6 +69,9 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToOne(mappedBy: 'utilisateur', targetEntity: Certification::class, cascade: ['persist', 'remove'])]
     private ?Certification $certification = null;
 
+    #[ORM\OneToOne(mappedBy: 'utilisateur', targetEntity: Specialiste::class, cascade: ['persist', 'remove'])]
+    private ?Specialiste $specialiste = null;
+
     /**
      * @var Collection<int, Repas>
      */
@@ -259,6 +262,25 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         $this->certification = $certification;
+        return $this;
+    }
+
+    public function getSpecialiste(): ?Specialiste
+    {
+        return $this->specialiste;
+    }
+
+    public function setSpecialiste(?Specialiste $specialiste): static
+    {
+        if ($specialiste === null && $this->specialiste !== null) {
+            $this->specialiste->setUtilisateur(null);
+        }
+
+        if ($specialiste !== null && $specialiste->getUtilisateur() !== $this) {
+            $specialiste->setUtilisateur($this);
+        }
+
+        $this->specialiste = $specialiste;
         return $this;
     }
 

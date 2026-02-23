@@ -1,0 +1,20 @@
+{# templates/partials/pagination.html.twig #}
+{% if pageCount > 1 %}
+    <nav style="display: flex; gap: 8px; justify-content: center; align-items: center; margin: 30px 0;">
+        {% if previous is defined %}
+            <a href="{{ path(route, query|merge({(pageParameterName): previous})) }}" class="btn btn-outline" style="padding: 8px 16px; border: 1px solid var(--primary-blue); border-radius: 8px;">&laquo; Précédent</a>
+        {% endif %}
+
+        {% for page in pagesInRange %}
+            {% if page != current %}
+                <a href="{{ path(route, query|merge({(pageParameterName): page})) }}" class="btn btn-outline" style="padding: 8px 14px; border: 1px solid var(--border-light); border-radius: 8px;">{{ page }}</a>
+            {% else %}
+                <span class="btn btn-primary" style="padding: 8px 14px; background: var(--primary-blue); color: white; border-radius: 8px; font-weight: bold; cursor: default;">{{ page }}</span>
+            {% endif %}
+        {% endfor %}
+
+        {% if next is defined %}
+            <a href="{{ path(route, query|merge({(pageParameterName): next})) }}" class="btn btn-outline" style="padding: 8px 16px; border: 1px solid var(--primary-blue); border-radius: 8px;">Suivant &raquo;</a>
+        {% endif %}
+    </nav>
+{% endif %}

@@ -4,7 +4,7 @@ doctrine:
         
         # Configuration pour phpMyAdmin avec MariaDB
         driver: 'pdo_mysql'
-        server_version: '10.4.32-MariaDB'
+        server_version: 'mariadb-10.4.32'
         charset: utf8mb4
         default_table_options:
             charset: utf8mb4
