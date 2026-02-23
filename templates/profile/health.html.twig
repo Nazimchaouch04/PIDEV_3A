@@ -1,0 +1,234 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Profil Santé - BioSync{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .health-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .health-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        padding: 35px;
+    }
+    
+    .form-header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 25px;
+        border-bottom: 2px solid #F1F5F9;
+    }
+    
+    .health-icon {
+        width: 90px;
+        height: 90px;
+        background: linear-gradient(135deg, #10B981, #34D399);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        color: white;
+    }
+    
+    .form-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #2D3748;
+        margin-bottom: 6px;
+    }
+    
+    .form-subtitle {
+        font-size: 14px;
+        color: #718096;
+    }
+    
+    .form-section {
+        margin-bottom: 25px;
+    }
+    
+    .section-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: #4A5568;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        color: #4A5568;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 14px 18px;
+        border: 2px solid #E2E8F0;
+        border-radius: 12px;
+        font-size: 15px;
+        background: white;
+        transition: all 0.2s;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #10B981;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+    }
+    
+    .form-hint {
+        font-size: 12px;
+        color: #718096;
+        margin-top: 6px;
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 30px;
+        padding-top: 25px;
+        border-top: 2px solid #F1F5F9;
+        justify-content: flex-end;
+    }
+    
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+        flex: 0 0 auto;
+    }
+    
+    .btn-primary {
+        background: #10B981;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background: #059669;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+    
+    .btn-secondary {
+        background: #EDF2F7;
+        color: #4A5568;
+    }
+    
+    .btn-secondary:hover {
+        background: #E2E8F0;
+    }
+    
+    .invalid-feedback {
+        color: #E53E3E;
+        font-size: 13px;
+        margin-top: 6px;
+    }
+    
+    @media (max-width: 640px) {
+        .health-card {
+            padding: 25px 20px;
+        }
+        .form-actions {
+            flex-direction: column;
+        }
+        .btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="bo-mental-dashboard">
+    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+        <div>
+            <h1 class="page-title">Profil Santé</h1>
+            <p class="page-subtitle">Configurez vos paramètres de santé pour un suivi personnalisé</p>
+        </div>
+        <a href="{{ path('app_profile') }}" class="btn btn-secondary" style="display: flex; align-items: center; gap: 8px; background: #EDF2F7; color: #4A5568; text-decoration: none;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            Retour
+        </a>
+    </div>
+
+    <div class="health-container">
+        <div class="health-card">
+            <div class="form-header">
+                <div class="health-icon">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+                </div>
+                <h2 class="form-title">Profil Santé</h2>
+                <p class="form-subtitle">Mettez à jour vos informations de santé</p>
+            </div>
+
+            {{ form_start(form) }}
+                <div class="form-section">
+                    <div class="section-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+                        Informations de santé
+                    </div>
+                    
+                    <div class="form-group">
+                        {{ form_label(form.age, 'Âge') }}
+                        {{ form_widget(form.age, {'attr': {'class': 'form-control', 'placeholder': 'Ex: 25'}}) }}
+                        <p class="form-hint">Votre âge en années</p>
+                        {{ form_errors(form.age) }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form_label(form.poids, 'Poids (kg)') }}
+                        {{ form_widget(form.poids, {'attr': {'class': 'form-control', 'placeholder': 'Ex: 70'}}) }}
+                        <p class="form-hint">Votre poids actuel en kilogrammes</p>
+                        {{ form_errors(form.poids) }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form_label(form.heureReveil, 'Heure de réveil habituelle') }}
+                        {{ form_widget(form.heureReveil, {'attr': {'class': 'form-control'}}) }}
+                        <p class="form-hint">L'heure à laquelle vous vous réveillez habituellement</p>
+                        {{ form_errors(form.heureReveil) }}
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a href="{{ path('app_profile') }}" class="btn btn-secondary">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        Annuler
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        Enregistrer
+                    </button>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

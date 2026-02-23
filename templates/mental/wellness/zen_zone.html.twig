@@ -1,0 +1,64 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Zen Zone - BioSync{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-12 text-center mb-5">
+            <h1 class="display-4">😌 Votre Zone Zen</h1>
+            <p class="lead">Prenez un moment pour vous détendre et vous recentrer.</p>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-md-8 offset-md-2">
+            <div class="card bg-light border-primary shadow-sm">
+                <div class="card-body text-center p-5">
+                    <i class="fas fa-quote-left fa-2x mb-3 text-primary"></i>
+                    <blockquote class="blockquote mb-0">
+                        <p class="mb-3 h3 italic">"{{ quote.text }}"</p>
+                        <footer class="blockquote-footer">{{ quote.author }}</footer>
+                    </blockquote>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <h3 class="mb-4">🌿 Ressources de Relaxation</h3>
+        </div>
+        {% for resource in resources %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm hover-elevate">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">{{ resource.title }}</h5>
+                        <p class="card-text">{{ resource.description }}</p>
+                    </div>
+                    <div class="card-footer bg-transparent border-0">
+                        <a href="{{ resource.url }}" target="_blank" class="btn btn-outline-primary btn-sm btn-block">
+                            Voir sur YouTube <i class="fab fa-youtube ml-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-12 text-center">
+            <div class="alert alert-info py-4">
+                <h4>🧠 Saviez-vous ?</h4>
+                <p class="mb-0">5 minutes de respiration profonde peuvent réduire votre taux de cortisol de 20%.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .italic { font-style: italic; }
+    .hover-elevate { transition: transform 0.2s; }
+    .hover-elevate:hover { transform: translateY(-5px); }
+</style>
+{% endblock %}

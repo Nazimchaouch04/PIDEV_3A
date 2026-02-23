@@ -1,0 +1,48 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Nouvelle prescription{% endblock %}
+
+{% block body %}
+
+<div class="container mt-4">
+
+    <h2 class="mb-4">Nouvelle prescription</h2>
+
+    <div class="consultation-card">
+
+        {{ form_start(form) }}
+
+        <div class="mb-3">
+            {{ form_label(form.nomMedicament) }}
+            {{ form_widget(form.nomMedicament, {'attr': {'class':'form-control'}}) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.dose) }}
+            {{ form_widget(form.dose, {'attr': {'class':'form-control'}}) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.frequence) }}
+            {{ form_widget(form.frequence, {'attr': {'class':'form-control'}}) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.duree) }}
+            {{ form_widget(form.duree, {'attr': {'class':'form-control'}}) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.instructions) }}
+            {{ form_widget(form.instructions, {'attr': {'class':'form-control'}}) }}
+        </div>
+
+        <button class="btn btn-primary">Enregistrer</button>
+
+        {{ form_end(form) }}
+
+    </div>
+
+</div>
+
+{% endblock %}

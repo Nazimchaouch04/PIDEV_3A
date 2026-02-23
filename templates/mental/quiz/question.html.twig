@@ -1,0 +1,97 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Quiz Mental - Question {{ currentIndex + 1 }}/{{ totalQuestions }}{% endblock %}
+
+{% block body %}
+<div class="quiz-container">
+    {# Progress Bar #}
+    <div class="quiz-progress-wrapper">
+        <div class="quiz-progress-info">
+            <span class="quiz-progress-text">Question {{ currentIndex + 1 }} sur {{ totalQuestions }}</span>
+            <span class="quiz-progress-percent">{{ progress }}%</span>
+        </div>
+        <div class="quiz-progress-bar">
+            <div class="quiz-progress-fill" style="width: {{ progress }}%"></div>
+        </div>
+    </div>
+
+    {# Question Card #}
+    <div class="quiz-question-card">
+        <div class="quiz-question-header">
+            <div class="quiz-question-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="16" x2="12" y2="12"/>
+                    <line x1="12" y1="8" x2="12.01" y2="8"/>
+                </svg>
+            </div>
+            <h2 class="quiz-question-title">{{ question.enonce }}</h2>
+        </div>
+
+        {# HTML5 validation disabled - using Symfony validators instead #}
+        <form method="post" class="quiz-options-form" id="quizForm" novalidate>
+            <input type="hidden" name="time_spent" id="timeSpentInput" value="0">
+            {% set allOptions = question.allOptions %}
+            <div class="quiz-options">
+                {% for option in allOptions %}
+                    <label class="quiz-option">
+                        <input type="radio" name="answer" value="{{ option }}">
+                        <div class="quiz-option-content">
+                            <div class="quiz-option-radio"></div>
+                            <span class="quiz-option-text">{{ option }}</span>
+                        </div>
+                    </label>
+                {% endfor %}
+            </div>
+
+            <div class="quiz-actions d-flex justify-content-between align-items-center">
+                <div class="quiz-timer" id="displayTimer">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    <span id="timerValue">0.0s</span>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg">
+                    {% if currentIndex + 1 < totalQuestions %}
+                        Question suivante
+                    {% else %}
+                        Voir les résultats
+                    {% endif %}
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                        <polyline points="12 5 19 12 12 19"/>
+                    </svg>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const startTime = performance.now();
+        const timeInput = document.getElementById('timeSpentInput');
+        const timerDisplay = document.getElementById('timerValue');
+        const form = document.getElementById('quizForm');
+
+        // Mettre à jour l'affichage du timer
+        const timerInterval = setInterval(() => {
+            const currentTime = performance.now();
+            const elapsed = ((currentTime - startTime) / 1000).toFixed(1);
+            timerDisplay.textContent = elapsed + 's';
+        }, 100);
+
+        form.addEventListener('submit', function(e) {
+            clearInterval(timerInterval);
+            const endTime = performance.now();
+            const duration = (endTime - startTime) / 1000;
+            timeInput.value = duration.toFixed(3);
+        });
+    });
+</script>
+
+<style>
+    .quiz-timer { font-family: monospace; font-size: 1.2rem; color: #666; display: flex; align-items: center; }
+</style>
+{% endblock %}

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Historique des Logs</title>
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; color: #333; }
+        h1 { color: #6C5CE7; text-align: center; margin-bottom: 20px; }
+        .header-info { text-align: right; margin-bottom: 30px; font-style: italic; color: #666; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+        th { background-color: #f8f9fa; color: #4a5568; font-weight: bold; }
+        tr:nth-child(even) { background-color: #fcfcfc; }
+        
+        /* Badges colorés cohérents pour PDF */
+        .badge-login {
+            background-color: #C6F6D5;
+            color: #22543D;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        .badge-logout {
+            background-color: #BEE3F8;
+            color: #2A4365;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        .badge-failed {
+            background-color: #FED7D7;
+            color: #742A2A;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        .badge-suspicious {
+            background-color: #FEEBC8;
+            color: #7C2D12;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        .badge-password {
+            background-color: #E9D8FD;
+            color: #44337A;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        .badge-default {
+            background-color: #E2E8F0;
+            color: #2D3748;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        
+        /* Role badges */
+        .badge-role-admin {
+            background-color: #FED7D7;
+            color: #742A2A;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .badge-role-user {
+            background-color: #C6F6D5;
+            color: #22543D;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .badge-role-coach {
+            background-color: #FEEBC8;
+            color: #7C2D12;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .badge-role-specialist {
+            background-color: #E9D8FD;
+            color: #44337A;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Administration BioSync - Historique des Activités</h1>
+    
+    <div class="header-info">
+        Généré le: {{ "now"|date("d/m/Y à H:i") }}
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Date & Heure</th>
+                <th>Action</th>
+                <th>Utilisateur (Email)</th>
+                <th>Rôle Principal</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+            <tr>
+                <td>{{ log.createdAt|date('d/m/Y H:i:s') }}</td>
+                <td>
+                    {% if 'Connexion réussie' in log.action %}
+                        <span class="badge-login">[OK] {{ log.action }}</span>
+                    {% elseif 'Déconnexion' in log.action %}
+                        <span class="badge-logout">[OUT] {{ log.action }}</span>
+                    {% elseif 'échouée' in log.action or 'failed' in log.action|lower %}
+                        <span class="badge-failed">[KO] {{ log.action }}</span>
+                    {% elseif 'mot de passe' in log.action|lower or 'password' in log.action|lower %}
+                        <span class="badge-password">[PWD] {{ log.action }}</span>
+                    {% else %}
+                        <span class="badge-default">[--] {{ log.action }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if log.utilisateur %}
+                        {{ log.utilisateur.nomComplet }}<br>
+                        <small>{{ log.utilisateur.email }}</small>
+                    {% else %}
+                        Système / Anonyme
+                    {% endif %}
+                </td>
+                <td>
+                    {% if log.utilisateur and log.utilisateur.roles|length > 0 %}
+                        {% set role = log.utilisateur.roles|first %}
+                        {% if 'ROLE_ADMIN' in role %}
+                            <span class="badge-role-admin">{{ role }}</span>
+                        {% elseif 'ROLE_COACH' in role %}
+                            <span class="badge-role-coach">{{ role }}</span>
+                        {% elseif 'ROLE_SPECIALISTE' in role %}
+                            <span class="badge-role-specialist">{{ role }}</span>
+                        {% else %}
+                            <span class="badge-role-user">{{ role }}</span>
+                        {% endif %}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

@@ -5,39 +5,45 @@ namespace App\Repository;
 use App\Entity\Utilisateur;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 
 /**
  * @extends ServiceEntityRepository<Utilisateur>
  */
-class UtilisateurRepository extends ServiceEntityRepository
+class UtilisateurRepository extends ServiceEntityRepository implements PasswordUpgraderInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Utilisateur::class);
     }
 
-//    /**
-//     * @return Utilisateur[] Returns an array of Utilisateur objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('u')
-//            ->andWhere('u.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('u.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void
+    {
+        if (!$user instanceof Utilisateur) {
+            throw new UnsupportedUserException(sprintf('Instances of "%s" are not supported.', $user::class));
+        }
 
-//    public function findOneBySomeField($value): ?Utilisateur
-//    {
-//        return $this->createQueryBuilder('u')
-//            ->andWhere('u.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+        $user->setMotDePasse($newHashedPassword);
+        $this->getEntityManager()->persist($user);
+        $this->getEntityManager()->flush();
+    }
+
+    public function findByEmail(string $email): ?Utilisateur
+    {
+        return $this->findOneBy(['email' => $email]);
+    }
+
+    /**
+     * @return Utilisateur[]
+     */
+    public function findTopScorers(int $limit = 10): array
+    {
+        return $this->createQueryBuilder('u')
+            ->orderBy('u.scoreGlobal', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
 }

@@ -1,0 +1,81 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ seance.nomSeance }} - BioSync{% endblock %}
+
+{% block body %}
+<div class="app-layout">
+    {% include 'partials/_sidebar.html.twig' with {'active': 'sports'} %}
+
+    <main class="main-content">
+        <div class="page-header flex-between">
+            <div>
+                <h1 class="page-title">{{ seance.nomSeance }}</h1>
+                <p class="page-subtitle">{{ seance.dateSeance|date('d/m/Y') }} a {{ seance.heureDebut|date('H:i') }}</p>
+            </div>
+            <div style="display: flex; gap: 0.5rem;">
+                <a href="{{ path('app_sports_edit', {id: seance.id}) }}" class="btn btn-ghost">Modifier</a>
+                <a href="{{ path('app_sports') }}" class="btn btn-secondary">Retour</a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Details de la seance</h4>
+                </div>
+                <div class="list-item">
+                    <div class="list-item-content">
+                        <div class="list-item-subtitle">Date</div>
+                        <div class="list-item-title">{{ seance.dateSeance|date('d/m/Y') }}</div>
+                    </div>
+                </div>
+                <div class="list-item">
+                    <div class="list-item-content">
+                        <div class="list-item-subtitle">Heure de debut</div>
+                        <div class="list-item-title">{{ seance.heureDebut|date('H:i') }}</div>
+                    </div>
+                </div>
+                <div class="list-item">
+                    <div class="list-item-content">
+                        <div class="list-item-subtitle">Duree</div>
+                        <div class="list-item-title">{{ seance.dureeMinutes }} minutes</div>
+                    </div>
+                </div>
+                {% if seance.medailleObtenue %}
+                <div class="list-item">
+                    <div class="list-item-content">
+                        <div class="list-item-subtitle">Medaille</div>
+                        <div class="list-item-title">
+                            <span class="badge badge-warning">{{ seance.medailleObtenue }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Exercices ({{ seance.exercices|length }})</h4>
+                </div>
+                {% if seance.exercices|length > 0 %}
+                    {% for exercice in seance.exercices %}
+                        <div class="list-item">
+                            <div class="list-item-icon" style="background: rgba(54, 124, 254, 0.1); color: var(--secondary);">
+                                {{ loop.index }}
+                            </div>
+                            <div class="list-item-content">
+                                <div class="list-item-title">{{ exercice.nomExercice }}</div>
+                                <div class="list-item-subtitle">{{ exercice.intensite.label }} - {{ exercice.caloriesParMinute }} cal/min</div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <p class="text-gray">Aucun exercice enregistre pour cette seance</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

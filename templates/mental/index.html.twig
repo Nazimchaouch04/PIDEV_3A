@@ -1,0 +1,453 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Mental Wellness - BioSync{% endblock %}
+
+{% block body %}
+<div class="mental-wellness-page">
+    {# Page Header #}
+    <div class="page-header-mental d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="page-title-mental">Mental Wellness</h1>
+            <p class="page-subtitle-mental">Choisissez un quiz thématique pour évaluer votre bien-être mental</p>
+        </div>
+        <div class="header-actions">
+            <a href="{{ path('app_mental_portrait') }}" class="btn btn-outline-primary btn-sm rounded-pill px-4 shadow-sm mr-2">
+                <i class="fas fa-id-badge mr-2"></i>Mon Portrait
+            </a>
+            <a href="{{ path('app_mental_coach') }}" class="btn btn-primary btn-sm rounded-pill px-4 shadow-sm">
+                <i class="fas fa-robot mr-2"></i>Coach IA
+            </a>
+        </div>
+    </div>
+
+    {# Moment Zen #}
+    <div class="zen-moment-card mb-5">
+        <div class="card bg-gradient-light border-0 shadow-sm overflow-hidden">
+            <div class="card-body p-4 p-md-5 position-relative">
+                <div class="zen-badge mb-3">MOMENT ZEN ✨</div>
+                <blockquote class="blockquote mb-0">
+                    <p class="h4 italic mb-2">"{{ quote.text }}"</p>
+                    <footer class="blockquote-footer text-muted">{{ quote.author }}</footer>
+                </blockquote>
+                <div class="mt-4">
+                    <a href="{{ path('app_wellness_zen_zone') }}" class="btn btn-primary-soft">
+                        Explorer la Zone Zen <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
+                <div class="zen-bg-icon">😌</div>
+            </div>
+        </div>
+    </div>
+
+    {# Quiz Disponibles créés par l'admin #}
+    {% if quizzesDisponibles|length > 0 %}
+    <div class="quiz-available-section">
+        <h2 class="section-title">Quiz Disponibles</h2>
+        <p class="section-subtitle">Quiz créés pour vous par votre coach</p>
+        
+        {# Filtres et Recherche #}
+        <div class="quiz-filters-container">
+            <div class="filter-search">
+                <input 
+                    type="text" 
+                    id="searchQuizzesDisponibles" 
+                    class="search-input" 
+                    placeholder="Rechercher un quiz par nom..."
+                    autocomplete="off"
+                >
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="m21 21-4.35-4.35"/>
+                </svg>
+            </div>
+            <div class="filter-sort">
+                <select id="sortQuizzesDisponibles" class="sort-select">
+                    <option value="date">Trier par date</option>
+                    <option value="name">Trier par nom</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="quiz-selection-grid" id="quizzesDisponiblesContainer">
+            {% for quiz in quizzesDisponibles %}
+            <a href="{{ path('app_mental_quiz_start', {quizId: quiz.id}) }}" class="quiz-theme-card">
+                <div class="quiz-theme-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                </div>
+                <h3 class="quiz-theme-title">{{ quiz.titre }}</h3>
+                <p class="quiz-theme-desc">Niveau de stress cible : {{ quiz.niveauStressCible }}/10</p>
+                <div class="quiz-theme-meta">
+                    <span class="quiz-duration">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                        {{ quiz.questions|length > 0 ? (quiz.questions|length * 2) : 5 }} min
+                    </span>
+                    <span class="quiz-questions">{{ quiz.questions|length > 0 ? quiz.questions|length : '5' }} questions</span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        <div id="noResultsDisponibles" class="empty-section" style="display: none;">
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <h3>Aucun quiz trouvé</h3>
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-section">
+        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <h3>Aucun quiz disponible</h3>
+        <p>Votre coach n'a pas encore créé de quiz pour vous</p>
+    </div>
+    {% endif %}
+
+    {# Your Achievements #}
+    {% if achievements.total_quiz > 0 %}
+    <div class="achievements-section">
+        <h2 class="achievements-title">Vos Réussites</h2>
+        
+        <div class="achievements-grid">
+            {# Achievement Badge - Expert Santé #}
+            <div class="achievement-badge {{ achievements.has_expert ? 'completed' : 'locked' }}">
+                <div class="achievement-icon zen">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
+                        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+                        <path d="M4 22h16"/>
+                        <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+                        <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+                        <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+                    </svg>
+                </div>
+                <div class="achievement-info">
+                    <h3 class="achievement-name">Expert Santé {{ achievements.has_expert ? '✓' : '' }}</h3>
+                    <p class="achievement-desc">Obtenir 80% ou plus à un quiz</p>
+                </div>
+            </div>
+
+            {# Achievement Badge - Connaisseur #}
+            <div class="achievement-badge {{ achievements.has_connaisseur ? 'completed' : 'locked' }}">
+                <div class="achievement-icon mindful">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <circle cx="12" cy="8" r="6"/>
+                        <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
+                    </svg>
+                </div>
+                <div class="achievement-info">
+                    <h3 class="achievement-name">Connaisseur {{ achievements.has_connaisseur ? '✓' : '' }}</h3>
+                    <p class="achievement-desc">Obtenir 60% ou plus à un quiz</p>
+                </div>
+            </div>
+
+            {# Achievement Badge - Apprenti #}
+            <div class="achievement-badge {{ achievements.has_apprenti ? 'completed' : 'locked' }}">
+                <div class="achievement-icon stress">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    </svg>
+                </div>
+                <div class="achievement-info">
+                    <h3 class="achievement-name">Apprenti {{ achievements.has_apprenti ? '✓' : '' }}</h3>
+                    <p class="achievement-desc">Obtenir 40% ou plus à un quiz</p>
+                </div>
+            </div>
+
+            {# Achievement Badge - Quiz Master #}
+            <div class="achievement-badge {{ achievements.total_quiz >= 5 ? 'completed' : 'locked' }}">
+                <div class="achievement-icon selfcare">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                </div>
+                <div class="achievement-info">
+                    <h3 class="achievement-name">Quiz Master {{ achievements.total_quiz >= 5 ? '✓' : '' }}</h3>
+                    <p class="achievement-desc">Compléter 5 quiz ({{ achievements.total_quiz }}/5)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {# Quiz History - Quiz passés uniquement #}
+    {% if quizzesPasses|length > 0 %}
+    <div class="quiz-history-section">
+        <h2 class="quiz-history-title">Historique de vos Quiz Passés</h2>
+        
+        {# Filtres et Recherche pour historique #}
+        <div class="quiz-filters-container">
+            <div class="filter-search">
+                <input 
+                    type="text" 
+                    id="searchQuizzesPasses" 
+                    class="search-input" 
+                    placeholder="Rechercher dans l'historique..."
+                    autocomplete="off"
+                >
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="m21 21-4.35-4.35"/>
+                </svg>
+            </div>
+            <div class="filter-sort">
+                <select id="sortQuizzesPasses" class="sort-select">
+                    <option value="date">Trier par date</option>
+                    <option value="name">Trier par nom</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="quiz-history-list" id="quizzesPassesContainer">
+            {% for quiz in quizzesPasses|slice(0, 5) %}
+            <div class="quiz-history-item">
+                <div class="quiz-history-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                </div>
+                <div class="quiz-history-content">
+                    <h4 class="quiz-history-name">{{ quiz.titre }}</h4>
+                    <p class="quiz-history-date">{{ quiz.dateQuiz|date('d/m/Y à H:i') }}</p>
+                </div>
+                <div class="quiz-history-score">
+                    <span class="score-value">{{ quiz.scoreResultat }} pts</span>
+                    {% if quiz.medailleQuiz %}
+                        <span class="quiz-medaille">🏆 {{ quiz.medailleQuiz }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div id="noResultsPasses" class="empty-section" style="display: none;">
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <h3>Aucun quiz trouvé</h3>
+        </div>
+
+        {% if quizzesPasses|length > 5 %}
+        <div class="quiz-history-footer">
+            <p class="text-gray">{{ quizzesPasses|length - 5 }} autre(s) quiz non affichés</p>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Récupérer les contrôles de filtrage pour les quiz disponibles
+    const searchDisponibles = document.getElementById('searchQuizzesDisponibles');
+    const sortDisponibles = document.getElementById('sortQuizzesDisponibles');
+    const containerDisponibles = document.getElementById('quizzesDisponiblesContainer');
+    const noResultsDisponibles = document.getElementById('noResultsDisponibles');
+    
+    // Récupérer les contrôles de filtrage pour les quiz passés
+    const searchPasses = document.getElementById('searchQuizzesPasses');
+    const sortPasses = document.getElementById('sortQuizzesPasses');
+    const containerPasses = document.getElementById('quizzesPassesContainer');
+    const noResultsPasses = document.getElementById('noResultsPasses');
+
+    // Fonction pour charger et afficher les quiz
+    function loadQuizzes(type) {
+        const search = type === 'disponibles' ? searchDisponibles.value : searchPasses.value;
+        const sort = type === 'disponibles' ? sortDisponibles.value : sortPasses.value;
+        const container = type === 'disponibles' ? containerDisponibles : containerPasses;
+        const noResults = type === 'disponibles' ? noResultsDisponibles : noResultsPasses;
+
+        // Effectuer la requête AJAX
+        fetch(`{{ path('app_mental_search') }}?search=${encodeURIComponent(search)}&sort=${sort}&type=${type}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (data.quizzes.length > 0) {
+                        container.innerHTML = '';
+                        noResults.style.display = 'none';
+
+                        data.quizzes.forEach(quiz => {
+                            if (type === 'disponibles') {
+                                // Affichage pour quiz disponibles
+                                const card = document.createElement('a');
+                                card.href = `{{ path('app_mental_quiz_start', {'quizId': 'ID'}) }}`.replace('ID', quiz.id);
+                                card.className = 'quiz-theme-card';
+                                card.innerHTML = `
+                                    <div class="quiz-theme-icon">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                            <polyline points="14 2 14 8 20 8"/>
+                                        </svg>
+                                    </div>
+                                    <h3 class="quiz-theme-title">${quiz.titre}</h3>
+                                    <p class="quiz-theme-desc">Niveau de stress cible : ${quiz.niveauStressCible}/10</p>
+                                    <div class="quiz-theme-meta">
+                                        <span class="quiz-duration">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                                <circle cx="12" cy="12" r="10"/>
+                                                <polyline points="12 6 12 12 16 14"/>
+                                            </svg>
+                                            ${quiz.questionsCount > 0 ? (quiz.questionsCount * 2) : 5} min
+                                        </span>
+                                        <span class="quiz-questions">${quiz.questionsCount > 0 ? quiz.questionsCount : '5'} questions</span>
+                                    </div>
+                                `;
+                                container.appendChild(card);
+                            } else {
+                                // Affichage pour quiz passés
+                                const item = document.createElement('div');
+                                item.className = 'quiz-history-item';
+                                item.innerHTML = `
+                                    <div class="quiz-history-icon">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                            <circle cx="12" cy="12" r="10"/>
+                                            <polyline points="12 6 12 12 16 14"/>
+                                        </svg>
+                                    </div>
+                                    <div class="quiz-history-content">
+                                        <h4 class="quiz-history-name">${quiz.titre}</h4>
+                                        <p class="quiz-history-date">${quiz.dateQuiz}</p>
+                                    </div>
+                                    <div class="quiz-history-score">
+                                        <span class="score-value">${quiz.scoreResultat} pts</span>
+                                        ${quiz.medailleQuiz ? `<span class="quiz-medaille">🏆 ${quiz.medailleQuiz}</span>` : ''}
+                                    </div>
+                                `;
+                                container.appendChild(item);
+                            }
+                        });
+                    } else {
+                        container.innerHTML = '';
+                        noResults.style.display = 'block';
+                    }
+                }
+            })
+            .catch(error => console.error('Erreur:', error));
+    }
+
+    // Écouteurs d'événements pour quiz disponibles
+    if (searchDisponibles) {
+        searchDisponibles.addEventListener('input', () => loadQuizzes('disponibles'));
+        sortDisponibles.addEventListener('change', () => loadQuizzes('disponibles'));
+    }
+
+    // Écouteurs d'événements pour quiz passés
+    if (searchPasses) {
+        searchPasses.addEventListener('input', () => loadQuizzes('passes'));
+        sortPasses.addEventListener('change', () => loadQuizzes('passes'));
+    }
+});
+</script>
+
+<style>
+.quiz-filters-container {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.filter-search {
+    flex: 1;
+    min-width: 250px;
+    position: relative;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.75rem 2.5rem 0.75rem 1rem;
+    border: 1px solid #E2E8F0;
+    border-radius: 0.5rem;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #8B5CF6;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.search-icon {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1.25rem;
+    height: 1.25rem;
+    color: #94A3B8;
+    pointer-events: none;
+}
+
+.filter-sort {
+    min-width: 150px;
+}
+
+.sort-select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #E2E8F0;
+    border-radius: 0.5rem;
+    font-size: 0.95rem;
+    cursor: pointer;
+    background-color: #FFFFFF;
+    transition: all 0.2s;
+}
+
+.sort-select:focus {
+    outline: none;
+    border-color: #8B5CF6;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+</style>
+
+<style>
+    .zen-moment-card .bg-gradient-light { 
+        background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+        border-radius: 1.5rem;
+    }
+    .zen-badge { 
+        background: rgba(139, 92, 246, 0.1); 
+        color: #8B5CF6; 
+        padding: 0.25rem 0.75rem; 
+        border-radius: 1rem; 
+        font-weight: bold; 
+        font-size: 0.8rem;
+        display: inline-block;
+    }
+    .btn-primary-soft {
+        background: #8B5CF6;
+        color: white;
+        border-radius: 0.75rem;
+        padding: 0.6rem 1.5rem;
+        transition: all 0.3s;
+    }
+    .btn-primary-soft:hover {
+        background: #7c3aed;
+        transform: translateY(-2px);
+        color: white;
+        text-decoration: none;
+    }
+    .zen-bg-icon {
+        position: absolute;
+        bottom: -10px;
+        right: 20px;
+        font-size: 5rem;
+        opacity: 0.1;
+    }
+    .italic { font-style: italic; }
+</style>
+{% endblock %}

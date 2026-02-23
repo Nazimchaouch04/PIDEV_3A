@@ -1,0 +1,108 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Mon Portrait Mental - BioSync{% endblock %}
+
+{% block body %}
+<div class="portrait-page p-4">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h1 class="h2 font-weight-bold">👤 Mon Portrait Mental</h1>
+            <p class="text-muted">Découvrez comment votre mode de vie influence votre bien-être cognitif.</p>
+        </div>
+        <a href="{{ path('app_mental_portrait_export') }}" class="btn btn-primary shadow-sm">
+            <i class="fas fa-download fa-sm text-white-50 mr-2"></i>Exporter mon Rapport PDF
+        </a>
+    </div>
+
+    <div class="row">
+        {# Resilience Card #}
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header bg-gradient-primary text-white py-3">
+                    <h6 class="m-0 font-weight-bold">🛡️ Facteur de Résilience</h6>
+                </div>
+                <div class="card-body text-center">
+                    <div class="resilience-score-display mb-4">
+                        <span class="display-1 font-weight-bold text-primary">{{ resilience }}</span>
+                        <p class="text-muted">Indice de corrélation Sport / Mental</p>
+                    </div>
+                    <div class="alert alert-info text-left">
+                        <strong>Le saviez-vous ?</strong> Cet indice combine votre assiduité au sport et vos résultats aux quiz mentaux. Un score élevé indique une forte capacité d'adaptation.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Engagement Card #}
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header bg-gradient-success text-white py-3">
+                    <h6 class="m-0 font-weight-bold">⚡ Niveau d'Engagement</h6>
+                </div>
+                <div class="card-body">
+                    <div class="engagement-progress mb-4">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Global Wellness Engagement</span>
+                            <span class="font-weight-bold">{{ engagement }}%</span>
+                        </div>
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ engagement }}%" aria-valuenow="{{ engagement }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Quiz passés (7 jours)</span>
+                            <i class="fas fa-brain text-success"></i>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Sessions sportives</span>
+                            <i class="fas fa-running text-success"></i>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Nutrition/Agility Correlation Table #}
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">🍏 Impact de ma Nutrition sur mon Agilité</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Date Quiz</th>
+                            <th>Agilité Cognitive</th>
+                            <th>Calories du jour</th>
+                            <th>Protéines (g)</th>
+                            <th>Temps Réponse</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in correlations %}
+                        <tr>
+                            <td>{{ item.date }}</td>
+                            <td>
+                                <span class="badge badge-info">{{ item.agilite }}</span>
+                            </td>
+                            <td>{{ item.calories }} kcal</td>
+                            <td>{{ item.proteines }}g</td>
+                            <td>{{ item.temps_reponse|number_format(1) }}s</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-gradient-primary { background: linear-gradient(180deg, #4e73df 10%, #224abe 100%); }
+    .bg-gradient-success { background: linear-gradient(180deg, #1cc88a 10%, #13855c 100%); }
+    .resilience-score-display .display-1 { font-size: 6rem; line-height: 1; }
+</style>
+{% endblock %}

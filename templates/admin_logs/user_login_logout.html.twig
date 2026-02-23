@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Historique Connexion/Déconnexion - {{ user.nomComplet }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2D3748;
+            border-bottom: 2px solid #4299E1;
+            padding-bottom: 10px;
+        }
+        .user-info {
+            background: #EBF4FF;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        .user-info strong {
+            color: #4299E1;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th {
+            background: #4299E1;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #E2E8F0;
+        }
+        tr:hover {
+            background: #F7FAFC;
+        }
+        .login {
+            color: #48BB78;
+            font-weight: bold;
+        }
+        .logout {
+            color: #F56565;
+            font-weight: bold;
+        }
+        .timestamp {
+            color: #718096;
+            font-size: 0.9em;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #4299E1;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .no-logs {
+            text-align: center;
+            color: #718096;
+            padding: 40px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 Historique des Connexions et Déconnexions</h1>
+        
+        <div class="user-info">
+            <strong>Utilisateur:</strong> {{ user.nomComplet }}<br>
+            <strong>Email:</strong> {{ user.email }}<br>
+            <strong>Rôle:</strong> {{ user.roles|first }}
+        </div>
+
+        {% if logs is empty %}
+            <div class="no-logs">
+                Aucun historique de connexion/déconnexion trouvé pour cet utilisateur.
+            </div>
+        {% else %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date et Heure</th>
+                        <th>Action</th>
+                        <th>Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                        <tr>
+                            <td class="timestamp">
+                                {{ log.createdAt|date('d/m/Y H:i:s') }}
+                            </td>
+                            <td>
+                                {% if 'Connexion' in log.action %}
+                                    <span class="login">🟢 {{ log.action }}</span>
+                                {% elseif 'Déconnexion' in log.action %}
+                                    <span class="logout">� {{ log.action }}</span>
+                                {% else %}
+                                    {{ log.action }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if 'Connexion' in log.action %}
+                                    <span style="color: #48BB78;">En ligne</span>
+                                {% else %}
+                                    <span style="color: #4299E1;">Hors ligne</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+
+        <a href="{{ path('app_admin_logs_index') }}" class="back-link">
+            ← Retour à tous les logs
+        </a>
+        |
+        <a href="{{ path('app_admin_logs_user', {id: user.id}) }}" class="back-link">
+            📄 Voir tous les logs de cet utilisateur
+        </a>
+    </div>
+</body>
+</html>

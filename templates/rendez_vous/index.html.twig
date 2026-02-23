@@ -1,0 +1,38 @@
+{% extends 'base_back.html.twig' %}
+{% block title %}RendezVous{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+
+<h2 class="mb-3">Liste des rendez-vous</h2>
+
+<table class="rdv-table">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Motif</th>
+            <th>Statut</th>
+            <th>Mode</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for rdv in rendez_vous %}
+        <tr>
+            <td>{{ rdv.dateHeure|date('d/m/Y H:i') }}</td>
+            <td>{{ rdv.motif }}</td>
+            <td>{{ rdv.statut }}</td>
+            <td>{{ rdv.mode }}</td>
+            <td>
+                <a class="btn btn-sm btn-primary"
+                   href="{{ path('app_rendez_vous_show',{id:rdv.id}) }}">
+                   Voir
+                </a>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+</div>
+{% endblock %}

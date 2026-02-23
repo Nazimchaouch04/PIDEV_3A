@@ -1,0 +1,251 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Certifications - BioSync{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .filters-container {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        margin-bottom: 25px;
+    }
+    
+    /* Table styling */
+    .table-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .data-table th {
+        background: #F7FAFC;
+        padding: 14px 18px;
+        text-align: left;
+        font-size: 12px;
+        font-weight: 700;
+        color: #4A5568;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #E2E8F0;
+    }
+    .data-table td {
+        padding: 16px 18px;
+        border-bottom: 1px solid #EDF2F7;
+        font-size: 14px;
+        color: #2D3748;
+        vertical-align: middle;
+    }
+    .data-table tr:hover {
+        background: #F7FAFC;
+    }
+    .data-table tr:last-child td {
+        border-bottom: none;
+    }
+    
+    /* User info */
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #6C5CE7, #A29BFE);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 14px;
+    }
+    .user-details {
+        display: flex;
+        flex-direction: column;
+    }
+    .user-name {
+        font-weight: 600;
+        color: #2D3748;
+    }
+    
+    /* Type badges */
+    .type-badge {
+        display: inline-block;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    .type-badge.coach {
+        background: #C6F6D5;
+        color: #22543D;
+    }
+    .type-badge.specialist {
+        background: #FEEBC8;
+        color: #744210;
+    }
+    
+    /* Motivation tooltip */
+    .motivation-container {
+        position: relative;
+    }
+    .motivation-trigger {
+        padding: 8px 14px;
+        background: rgba(99, 102, 241, 0.1);
+        color: #6366F1;
+        border: none;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .motivation-trigger:hover {
+        background: #6366F1;
+        color: white;
+    }
+    .motivation-popup {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        margin-top: 8px;
+        background: white;
+        border: 1px solid #E2E8F0;
+        border-radius: 12px;
+        padding: 16px;
+        width: 320px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        z-index: 100;
+        display: none;
+    }
+    .motivation-popup.show {
+        display: block;
+    }
+    .motivation-popup::before {
+        content: '';
+        position: absolute;
+        bottom: 100%;
+        left: 20px;
+        border: 8px solid transparent;
+        border-bottom-color: white;
+    }
+    .motivation-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: #4A5568;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+    }
+    .motivation-text {
+        font-size: 14px;
+        color: #2D3748;
+        line-height: 1.6;
+    }
+    
+    /* Action buttons */
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+    }
+    .action-btn.view {
+        background: rgba(59, 130, 246, 0.1);
+        color: #3B82F6;
+    }
+    .action-btn.view:hover {
+        background: #3B82F6;
+        color: white;
+    }
+    .action-btn.approve {
+        background: #10B981;
+        color: white;
+    }
+    .action-btn.approve:hover {
+        background: #059669;
+    }
+    
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+    }
+    .empty-state-icon {
+        width: 80px;
+        height: 80px;
+        background: #F7FAFC;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        color: #A0AEC0;
+    }
+    .empty-state-title {
+    .badge-success {
+        background: #28a745;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+    }
+    
+    .motivation-text {
+        position: absolute;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        padding: 10px;
+        border-radius: 4px;
+        max-width: 300px;
+        z-index: 1000;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    td {
+        position: relative;
+    }
+</style>
+
+<script>
+function showMotivation(id) {
+    const element = document.getElementById('motivation-' + id);
+    const allMotivations = document.querySelectorAll('.motivation-text');
+    
+    // Hide all other motivations
+    allMotivations.forEach(el => {
+        if (el.id !== 'motivation-' + id) {
+            el.style.display = 'none';
+        }
+    });
+    
+    // Afficher/cacher la motivation actuelle
+    element.style.display = element.style.display === 'none' ? 'block' : 'none';
+}
+
+// Cacher les motivations quand on clique ailleurs
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('button') && !e.target.closest('.motivation-text')) {
+        document.querySelectorAll('.motivation-text').forEach(el => {
+            el.style.display = 'none';
+        });
+    }
+});
+</script>
+{% endblock %}

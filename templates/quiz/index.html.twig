@@ -1,0 +1,117 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Quiz - BioSync{% endblock %}
+
+{% block body %}
+<div class="container my-5">
+    <h1 class="text-center mb-4">Quiz de culture générale</h1>
+    
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger">{{ message }}</div>
+    {% endfor %}
+
+    <div class="row">
+        <!-- Filtres -->
+        <div class="col-md-3">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Filtres</h5>
+                </div>
+                <div class="card-body">
+                    <form action="{{ path('app_quiz_filter') }}" method="get">
+                        <div class="mb-3">
+                            <label for="category" class="form-label">Catégorie</label>
+                            <select class="form-select" id="category" name="category">
+                                {% for category in categories %}
+                                    <option value="{{ category }}" 
+                                            {% if selectedCategory == category %}selected{% endif %}>
+                                        {{ category|capitalize }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="difficulty" class="form-label">Difficulté</label>
+                            <select class="form-select" id="difficulty" name="difficulty">
+                                <option value="easy" {% if selectedDifficulty == 'easy' %}selected{% endif %}>Facile</option>
+                                <option value="medium" {% if selectedDifficulty == 'medium' %}selected{% endif %}>Moyen</option>
+                                <option value="hard" {% if selectedDifficulty == 'hard' %}selected{% endif %}>Difficile</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Appliquer les filtres</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Liste des questions -->
+        <div class="col-md-9">
+            {% if questions is empty %}
+                <div class="alert alert-info">Aucune question trouvée pour les critères sélectionnés.</div>
+            {% else %}
+                <form action="{{ path('app_quiz_submit') }}" method="post">
+                    {% for question in questions %}
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">Question {{ loop.index }}</h5>
+                            </div>
+                            <div class="card-body">
+                                <h6 class="card-subtitle mb-3 text-muted">
+                                    Catégorie: {{ question.category|capitalize }} | 
+                                    Difficulté: {{ question.difficulty|capitalize }}
+                                </h6>
+                                <p class="card-text">{{ question.question|raw }}</p>
+                                
+                                {% for answerKey, answerValue in question.answers %}
+                                    {% if answerValue is not null %}
+                                        <div class="form-check mb-2">
+                                            {# HTML5 validation disabled - using Symfony validators instead #}
+                                            <input class="form-check-input" 
+                                                   type="radio" 
+                                                   name="answers[{{ question.id }}]" 
+                                                   id="q{{ question.id }}_{{ loop.index }}"
+                                                   value="{{ answerKey }}"
+                                                   {# required #}>
+                                            <label class="form-check-label" for="q{{ question.id }}_{{ loop.index }}">
+                                                {{ answerValue|raw }}
+                                            </label>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                <div class="mt-3">
+                                    <a href="{{ path('app_quiz_question', {'id': question.id}) }}" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        Voir les détails
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success btn-lg">Soumettre mes réponses</button>
+                    </div>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .card {
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+    }
+</style>
+{% endblock %}

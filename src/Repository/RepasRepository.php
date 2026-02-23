@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Repas;
+use App\Entity\Utilisateur;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,28 +17,36 @@ class RepasRepository extends ServiceEntityRepository
         parent::__construct($registry, Repas::class);
     }
 
-//    /**
-//     * @return Repas[] Returns an array of Repas objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('r')
-//            ->andWhere('r.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('r.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    /**
+     * @return Repas[]
+     */
+    public function findByUtilisateur(Utilisateur $utilisateur): array
+    {
+        return $this->createQueryBuilder('r')
+            ->andWhere('r.utilisateur = :user')
+            ->setParameter('user', $utilisateur)
+            ->orderBy('r.dateConsommation', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 
-//    public function findOneBySomeField($value): ?Repas
-//    {
-//        return $this->createQueryBuilder('r')
-//            ->andWhere('r.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    /**
+     * @return Repas[]
+     */
+    public function findTodayByUtilisateur(Utilisateur $utilisateur): array
+    {
+        $today = new \DateTime('today');
+        $tomorrow = new \DateTime('tomorrow');
+
+        return $this->createQueryBuilder('r')
+            ->andWhere('r.utilisateur = :user')
+            ->andWhere('r.dateConsommation >= :today')
+            ->andWhere('r.dateConsommation < :tomorrow')
+            ->setParameter('user', $utilisateur)
+            ->setParameter('today', $today)
+            ->setParameter('tomorrow', $tomorrow)
+            ->orderBy('r.dateConsommation', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }

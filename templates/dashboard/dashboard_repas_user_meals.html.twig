@@ -1,0 +1,51 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Admin - Repas de {{ user.email }}{% endblock %}
+
+{% block body %}
+<div class="page-header flex-between">
+  <div>
+    <h1 class="page-title">Repas de l'utilisateur</h1>
+    <p class="page-subtitle">{{ user.nomComplet|default('Utilisateur') }} — {{ user.email }}</p>
+  </div>
+  <div>
+    <a class="btn btn-outline" href="{{ path('admin_users_index') }}">Retour à la liste</a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-content">
+    <div style="overflow-x: auto;">
+      <table style="width:100%; border-collapse: collapse;">
+        <thead>
+          <tr style="text-align: left; border-bottom: 1px solid var(--border-color);">
+            <th style="padding: 12px;">Titre du repas</th>
+            <th style="padding: 12px;">Moment</th>
+            <th style="padding: 12px;">Date de consommation</th>
+            <th style="padding: 12px; text-align: right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for repa in repasList %}
+          <tr style="border-bottom: 1px solid var(--border-light);">
+            <td style="padding: 12px; font-weight: 600;">{{ repa.titreRepas }}</td>
+            <td style="padding: 12px;">{{ repa.typeMoment ? repa.typeMoment.label() : '' }}</td>
+            <td style="padding: 12px;">{{ repa.dateConsommation ? repa.dateConsommation|date('d/m/Y H:i') : '' }}</td>
+            <td style="padding: 12px; text-align: right; display:flex; gap:8px; justify-content:flex-end;">
+              <a class="btn btn-outline" href="{{ path('admin_meal_foods', {'id': repa.id}) }}">Voir les aliments</a>
+              <a class="btn btn-primary" href="{{ path('app_repas_edit', {'id': repa.id, 'redirect_to': 'admin_user_meals', 'user_id': user.id}) }}">Modifier</a>
+              <form method="post" action="{{ path('app_repas_delete', {'id': repa.id, 'redirect_to': 'admin_user_meals', 'user_id': user.id}) }}" onsubmit="return confirm('Confirmer la suppression de ce repas ?');" style="display:inline-block;">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ repa.id) }}">
+                <button class="btn" style="color:#EF4444; border:1px solid #FECACA; background:#FEF2F2;">Supprimer</button>
+              </form>
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="4" style="padding: 16px; color: var(--text-secondary);">Aucun repas trouvé.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -2,140 +2,282 @@
 
 namespace App\Controller;
 
+use App\Entity\Utilisateur;
+use App\Form\AdminUserType;
+use App\Repository\CertificationRepository;
+use App\Repository\UtilisateurRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Routing\Annotation\Route;
+use Dompdf\Dompdf;
+use Dompdf\Options;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
-#[Route('/admin')]
-final class AdminController extends AbstractController
+#[IsGranted('ROLE_ADMIN')]
+class AdminController extends AbstractController
 {
-    #[Route('', name: 'app_admin_dashboard')]
-    public function dashboard(): Response
+    #[Route('/admin-dashboard', name: 'app_admin_dashboard')]
+    public function index(UtilisateurRepository $userRepo, CertificationRepository $certRepo): Response
     {
-        return $this->render('back/dashboard.html.twig', [
-            'pending_pro_requests' => 0,
-            'unread_notifications' => 0,
+        return $this->render('admin_dashboard.html.twig', [
+            'totalUsers' => $userRepo->count([]),
+            'totalQuizzes' => 42,
+            'totalQuestions' => 150,
+            'pendingCertsCount' => $certRepo->count(['statut' => 'PENDING']),
+            'recentUsers' => $userRepo->findBy([], ['dateInscription' => 'DESC'], 5),
         ]);
     }
 
-    #[Route('/users', name: 'app_admin_users')]
-    public function users(): Response
+    #[Route('/admin-users', name: 'app_admin_users')]
+    public function listUsers(UtilisateurRepository $userRepo, Request $request): Response
     {
-        return $this->render('back/placeholder.html.twig', [
-            'title' => 'Gestion des utilisateurs',
+        // Récupération des paramètres de recherche et tri depuis la requête
+        $q = $request->query->get('q');           // Terme de recherche (nom ou email)
+        $sort = $request->query->get('sort', 'id');     // Champ de tri (défaut: id)
+        $direction = $request->query->get('direction', 'ASC'); // Direction de tri (défaut: ASC)
+
+        // Construction de la requête Doctrine pour filtrer et trier les utilisateurs
+        $queryBuilder = $userRepo->createQueryBuilder('u');
+
+        // Ajout du filtre de recherche si un terme est fourni
+        if ($q) {
+            $queryBuilder->where('u.nomComplet LIKE :q OR u.email LIKE :q')
+                ->setParameter('q', '%' . $q . '%');  // Recherche partielle (LIKE %terme%)
+        }
+
+        // Application du tri selon le champ et la direction spécifiés
+        $queryBuilder->orderBy('u.' . $sort, $direction);
+
+        // GESTION AJAX pour recherche et tri dynamique
+        if ($request->headers->get('X-Requested-With') === 'XMLHttpRequest') {
+            // Retour JSON avec le HTML du tableau pour mise à jour sans rechargement
+            return $this->json([
+                'usersHtml' => $this->renderView('admin/_user_list.html.twig', [
+                    'users' => $queryBuilder->getQuery()->getResult(),
+                    'current_q' => $q,
+                    'current_sort' => $sort,
+                    'current_direction' => $direction,
+                ])
+            ]);
+        }
+
+        // Retour normal avec rendu complet de la page
+        return $this->render('admin_users.html.twig', [
+            'users' => $queryBuilder->getQuery()->getResult(),
+            'current_q' => $q,
+            'current_sort' => $sort,
+            'current_direction' => $direction,
         ]);
     }
 
-    #[Route('/pro-requests', name: 'app_admin_pro_requests')]
-    public function proRequests(): Response
+    #[Route('/admin-user-view/{id}', name: 'app_admin_user_show')]
+    public function showUser(Utilisateur $user): Response
     {
-        return $this->render('back/placeholder.html.twig', [
-            'title' => 'Demandes pro',
-            'pending_pro_requests' => 0,
+        return $this->render('profile/index.html.twig', [
+            'user' => $user,
+            'isAdminView' => true,
         ]);
     }
 
-    #[Route('/nutrition', name: 'app_admin_nutrition')]
-    public function nutrition(): Response
+    #[Route('/admin-certifications', name: 'app_admin_certifications')]
+    public function listCertifications(CertificationRepository $certRepo): Response
     {
-        return $this->render('back/placeholder.html.twig', [
-            'title' => 'Nutrition',
+        return $this->render('admin_certifications.html.twig', [
+            'certifications' => $certRepo->findBy(['statut' => 'PENDING']),
         ]);
     }
 
-    #[Route('/sport', name: 'app_admin_sport')]
-    public function sport(): Response
+    #[Route('/admin-cert-approve/{id}', name: 'app_admin_cert_approve')]
+    public function approveCert($id, CertificationRepository $certRepo, EntityManagerInterface $em): Response
     {
-        return $this->render('back/placeholder.html.twig', [
-            'title' => 'Sport',
+        $cert = $certRepo->find($id);
+
+        if ($cert) {
+            // 1. Mettre à jour le statut de la certification
+            $cert->setStatut('APPROVED');
+
+            // 2. Récupérer l'utilisateur lié
+            $user = $cert->getUtilisateur();
+
+            // 3. Attribuer le rôle spécifique selon le choix de l'utilisateur
+            if ($cert->getType() === 'COACH') {
+                $user->setRoles(['ROLE_COACH']);
+            } elseif ($cert->getType() === 'SPECIALISTE') {
+                $user->setRoles(['ROLE_SPECIALISTE']);
+            } else {
+                // Fallback (sécurité si le type est vide, ce qui ne devrait pas arriver)
+                $user->setRoles(['ROLE_PRO']);
+            }
+
+            $em->flush();
+            $this->addFlash('success', 'Certification approuvée ! L\'utilisateur est maintenant ' . $cert->getType());
+        }
+
+        return $this->redirectToRoute('app_admin_certifications');
+    }
+
+    #[Route('/admin-user-delete/{id}', name: 'app_admin_user_delete')]
+    public function deleteUser(Utilisateur $user, EntityManagerInterface $em): Response
+    {
+        if ($user !== $this->getUser()) {
+            $em->remove($user);
+            $em->flush();
+            $this->addFlash('success', 'Utilisateur supprimé.');
+        }
+        return $this->redirectToRoute('app_admin_users');
+    }
+
+    #[Route('/admin-user-new', name: 'app_admin_user_new')]
+    public function newUser(Request $request, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $em): Response
+    {
+        // Création d'une nouvelle instance d'utilisateur
+        $user = new Utilisateur();
+        
+        // Création du formulaire avec champ mot de passe obligatoire
+        $form = $this->createForm(AdminUserType::class, $user, ['include_password' => true]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Hachage sécurisé du mot de passe avant sauvegarde
+            $plainPassword = $form->get('plainPassword')->getData();
+            $user->setMotDePasse(
+                $passwordHasher->hashPassword(
+                    $user,
+                    $plainPassword
+                )
+            );
+
+            // Persistance de l'utilisateur en base de données
+            $em->persist($user);
+            $em->flush();
+
+            // Message de succès et redirection vers la liste
+            $this->addFlash('success', 'Utilisateur créé avec succès.');
+            return $this->redirectToRoute('app_admin_users');
+        }
+
+        // Affichage du formulaire si non soumis ou invalide
+        return $this->render('admin/user_form.html.twig', [
+            'form' => $form->createView(),
+            'title' => 'Créer un utilisateur',
+            'user' => $user
         ]);
     }
 
-    #[Route('/mental', name: 'app_admin_mental')]
-    public function mental(): Response
+    #[Route('/admin-user-edit/{id}', name: 'app_admin_user_edit')]
+    public function editUser(Utilisateur $user, Request $request, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $em): Response
     {
-        return $this->render('back/placeholder.html.twig', [
-            'title' => 'Quiz & Mental',
+        // Création du formulaire pour l'utilisateur existant avec mot de passe optionnel
+        $form = $this->createForm(AdminUserType::class, $user, ['include_password' => true, 'password_required' => false]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Mise à jour du mot de passe uniquement si un nouveau est fourni
+            $plainPassword = $form->get('plainPassword')->getData();
+            if ($plainPassword) {
+                $user->setMotDePasse(
+                    $passwordHasher->hashPassword(
+                        $user,
+                        $plainPassword
+                    )
+                );
+            }
+
+            // Sauvegarde des modifications
+            $em->flush();
+            $this->addFlash('success', 'Utilisateur mis à jour avec succès.');
+            return $this->redirectToRoute('app_admin_users');
+        }
+
+        // Affichage du formulaire avec données existantes
+        return $this->render('admin/user_form.html.twig', [
+            'form' => $form->createView(),
+            'title' => 'Modifier un utilisateur',
+            'user' => $user
         ]);
     }
 
-    #[Route('/appointments', name: 'app_admin_appointments')]
-    public function appointments(): Response
+    #[Route('/admin-user-photo/{id}', name: 'app_admin_user_photo', methods: ['POST'])]
+    public function uploadUserPhoto(Utilisateur $user, Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
     {
-        return $this->render('back/placeholder.html.twig', [
-            'title' => 'Rendez-vous',
-        ]);
+        $photoFile = $request->files->get('photo');
+
+        if ($photoFile) {
+            $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            if (!in_array($photoFile->getMimeType(), $allowedMimeTypes)) {
+                $this->addFlash('error', 'Format de fichier non autorisé. Utilisez JPG, PNG, GIF ou WEBP.');
+                return $this->redirectToRoute('app_admin_user_edit', ['id' => $user->getId()]);
+            }
+
+            $originalFilename = pathinfo($photoFile->getClientOriginalName(), PATHINFO_FILENAME);
+            $safeFilename = $slugger->slug($originalFilename);
+            $newFilename = $safeFilename . '-' . uniqid() . '.' . $photoFile->guessExtension();
+
+            try {
+                $photoFile->move(
+                    $this->getParameter('photos_directory'),
+                    $newFilename
+                );
+
+                // Delete old photo if exists
+                if ($user->getPhoto()) {
+                    $oldPhotoPath = $this->getParameter('photos_directory') . '/' . $user->getPhoto();
+                    if (file_exists($oldPhotoPath)) {
+                        unlink($oldPhotoPath);
+                    }
+                }
+
+                $user->setPhoto($newFilename);
+                $entityManager->flush();
+
+                $this->addFlash('success', 'Photo de profil mise à jour !');
+            } catch (FileException $e) {
+                $this->addFlash('error', 'Erreur lors du téléchargement de la photo.');
+            }
+        } else {
+            $this->addFlash('error', 'Aucun fichier sélectionné.');
+        }
+
+        return $this->redirectToRoute('app_admin_user_edit', ['id' => $user->getId()]);
     }
 
-    #[Route('/community', name: 'app_admin_community')]
-    public function community(): Response
+    #[Route('/admin-users/pdf', name: 'app_admin_users_pdf', methods: ['GET'])]
+    public function exportUsersPdf(UtilisateurRepository $userRepo): Response
     {
-        return $this->render('back/placeholder.html.twig', [
-            'title' => 'Communauté',
+        // Configuration de Dompdf pour la génération PDF
+        $options = new Options();
+        $options->set('defaultFont', 'Arial');
+        $options->set('isRemoteEnabled', true);
+        $options->set('isHtml5ParserEnabled', true);
+        
+        $dompdf = new Dompdf($options);
+        
+        // Récupération de tous les utilisateurs pour l'export
+        $users = $userRepo->findAll();
+        
+        // Génération du HTML à partir du template
+        $html = $this->renderView('admin/users_pdf.html.twig', [
+            'users' => $users,
+            'date' => new \DateTime()
         ]);
-    }
-
-    #[Route('/settings', name: 'app_admin_settings')]
-    public function settings(): Response
-    {
-        return $this->render('back/placeholder.html.twig', [
-            'title' => 'Paramètres',
-        ]);
-    }
-
-    #[Route('/logs', name: 'app_admin_logs')]
-    public function logs(): Response
-    {
-        return $this->render('back/placeholder.html.twig', [
-            'title' => 'Logs',
-        ]);
-    }
-
-    #[Route('/analytics', name: 'app_admin_analytics')]
-    public function analytics(): Response
-    {
-        return $this->render('back/placeholder.html.twig', [
-            'title' => 'Analytics',
-        ]);
-    }
-
-    #[Route('/profile', name: 'app_admin_profile')]
-    public function profile(): Response
-    {
-        return $this->render('back/placeholder.html.twig', [
-            'title' => 'Mon profil (Admin)',
-        ]);
-    }
-
-    #[Route('/user/create', name: 'app_admin_user_create')]
-    public function userCreate(): Response
-    {
-        return $this->render('back/placeholder.html.twig', [
-            'title' => 'Ajouter un utilisateur',
-        ]);
-    }
-
-    #[Route('/nutrition/food/create', name: 'app_admin_nutrition_food_create')]
-    public function nutritionFoodCreate(): Response
-    {
-        return $this->render('back/placeholder.html.twig', [
-            'title' => 'Ajouter un aliment',
-        ]);
-    }
-
-    #[Route('/sport/exercise/create', name: 'app_admin_sport_exercise_create')]
-    public function sportExerciseCreate(): Response
-    {
-        return $this->render('back/placeholder.html.twig', [
-            'title' => 'Ajouter un exercice',
-        ]);
-    }
-
-    #[Route('/mental/quiz/create', name: 'app_admin_mental_quiz_create')]
-    public function mentalQuizCreate(): Response
-    {
-        return $this->render('back/placeholder.html.twig', [
-            'title' => 'Créer un quiz',
+        
+        // Conversion HTML vers PDF
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+        
+        // Génération du nom de fichier avec timestamp
+        $filename = 'utilisateurs_' . date('Y-m-d_H-i-s') . '.pdf';
+        
+        // Envoi du PDF en téléchargement
+        return new Response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"'
         ]);
     }
 }

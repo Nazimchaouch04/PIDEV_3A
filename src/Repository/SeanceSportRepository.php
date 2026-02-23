@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\SeanceSport;
+use App\Entity\Utilisateur;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,28 +17,36 @@ class SeanceSportRepository extends ServiceEntityRepository
         parent::__construct($registry, SeanceSport::class);
     }
 
-//    /**
-//     * @return SeanceSport[] Returns an array of SeanceSport objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('s')
-//            ->andWhere('s.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('s.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    /**
+     * @return SeanceSport[]
+     */
+    public function findByUtilisateur(Utilisateur $utilisateur): array
+    {
+        return $this->createQueryBuilder('s')
+            ->andWhere('s.utilisateur = :user')
+            ->setParameter('user', $utilisateur)
+            ->orderBy('s.dateSeance', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 
-//    public function findOneBySomeField($value): ?SeanceSport
-//    {
-//        return $this->createQueryBuilder('s')
-//            ->andWhere('s.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    /**
+     * @return SeanceSport[]
+     */
+    public function findThisWeekByUtilisateur(Utilisateur $utilisateur): array
+    {
+        $startOfWeek = new \DateTime('monday this week');
+        $endOfWeek = new \DateTime('sunday this week 23:59:59');
+
+        return $this->createQueryBuilder('s')
+            ->andWhere('s.utilisateur = :user')
+            ->andWhere('s.dateSeance >= :start')
+            ->andWhere('s.dateSeance <= :end')
+            ->setParameter('user', $utilisateur)
+            ->setParameter('start', $startOfWeek)
+            ->setParameter('end', $endOfWeek)
+            ->orderBy('s.dateSeance', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }

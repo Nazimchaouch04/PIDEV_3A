@@ -1,0 +1,65 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Question #{{ question.id }} - Quiz - BioSync{% endblock %}
+
+{% block body %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="h4 mb-0">Détails de la question</h2>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h5 class="card-title">{{ question.question|raw }}</h5>
+                        <p class="text-muted">
+                            Catégorie: {{ question.category|capitalize }} | 
+                            Difficulté: {{ question.difficulty|capitalize }}
+                        </p>
+                    </div>
+
+                    <h6 class="mb-3">Réponses possibles :</h6>
+                    <div class="list-group mb-4">
+                        {% for answerKey, answerValue in question.answers %}
+                            {% if answerValue is not null %}
+                                <div class="list-group-item">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" 
+                                               name="answer" id="answer{{ loop.index }}">
+                                        <label class="form-check-label" for="answer{{ loop.index }}">
+                                            {{ answerValue|raw }}
+                                        </label>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    <div class="card bg-light mb-4">
+                        <div class="card-body">
+                            <h6><i class="bi bi-info-circle"></i> Explication :</h6>
+                            <p class="mb-0">
+                                {% if question.explanation %}
+                                    {{ question.explanation|raw }}
+                                {% else %}
+                                    Aucune explication disponible pour cette question.
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ path('app_quiz') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Retour à la liste
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            Valider ma réponse
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

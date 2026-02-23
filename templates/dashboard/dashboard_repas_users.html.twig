@@ -1,0 +1,140 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Admin - Utilisateurs{% endblock %}
+
+{% block body %}
+<div class="page-header flex-between">
+  <div>
+    <h1 class="page-title">Utilisateurs</h1>
+    <p class="page-subtitle">Superviser les profils et accéder à leurs repas</p>
+  </div>
+  <div style="display: flex; gap: 8px;">
+    <a href="{{ path('admin_users_pdf') }}" class="btn btn-sm btn-outline-secondary" target="_blank">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/>
+        <polyline points="10 9 9 9 8 9"/>
+      </svg>
+      Export PDF
+    </a>
+  </div>
+</div>
+
+{# Barre de recherche et filtres #}
+<div style="padding: 16px 20px; border-bottom: 1px solid var(--border-light); background: var(--bg-secondary); margin-bottom: 20px;">
+  <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+    <div style="flex: 1; min-width: 200px; position: relative;">
+      <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 0.875rem;">🔍</span>
+      <input type="text" id="searchUsers" placeholder="Rechercher un utilisateur..." 
+             style="width: 100%; padding: 8px 12px 8px 35px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.875rem;">
+    </div>
+    <select id="sortUsers" style="padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.875rem;">
+      <option value="name">Trier par nom</option>
+      <option value="email">Trier par email</option>
+    </select>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-content">
+    <div style="overflow-x: auto;">
+      <table style="width:100%; border-collapse: collapse;">
+        <thead>
+          <tr style="text-align: left; border-bottom: 1px solid var(--border-color);">
+            <th style="padding: 12px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                Nom
+                <button onclick="sortTable('name')" style="background: none; border: none; cursor: pointer; padding: 4px;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="18 15 12 9 6 15"/>
+                  </svg>
+                </button>
+              </div>
+            </th>
+            <th style="padding: 12px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                Email
+                <button onclick="sortTable('email')" style="background: none; border: none; cursor: pointer; padding: 4px;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="18 15 12 9 6 15"/>
+                  </svg>
+                </button>
+              </div>
+            </th>
+            <th style="padding: 12px;">Rôle</th>
+            <th style="padding: 12px; text-align: right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="usersTableBody">
+        {% for user in users %}
+          <tr style="border-bottom: 1px solid var(--border-light);" data-name="{{ user.nomComplet|lower }}" data-email="{{ user.email|lower }}">
+            <td style="padding: 12px; font-weight: 600;">{{ user.nomComplet|default('N/A') }}</td>
+            <td style="padding: 12px;">{{ user.email }}</td>
+            <td style="padding: 12px;">
+              {% set roles = user.roles ?? [] %}
+              {% if 'ROLE_ADMIN' in roles %}
+                Admin
+              {% elseif 'ROLE_COACH' in roles %}
+                Coach
+              {% else %}
+                Utilisateur
+              {% endif %}
+            </td>
+            <td style="padding: 12px; text-align: right;">
+              <a class="btn btn-outline" href="{{ path('admin_user_meals', {'id': user.id}) }}">Voir ses repas</a>
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="4" style="padding: 16px; color: var(--text-secondary);">Aucun utilisateur trouvé.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+// Fonction de recherche
+document.getElementById('searchUsers').addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    const rows = document.querySelectorAll('#usersTableBody tr');
+    
+    rows.forEach(row => {
+        const name = row.getAttribute('data-name') || '';
+        const email = row.getAttribute('data-email') || '';
+        const isVisible = name.includes(searchTerm) || email.includes(searchTerm);
+        row.style.display = isVisible ? '' : 'none';
+    });
+});
+
+// Fonction de tri
+function sortTable(column) {
+    const tbody = document.getElementById('usersTableBody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    
+    rows.sort((a, b) => {
+        let aValue, bValue;
+        
+        if (column === 'name') {
+            aValue = a.getAttribute('data-name') || '';
+            bValue = b.getAttribute('data-name') || '';
+        } else if (column === 'email') {
+            aValue = a.getAttribute('data-email') || '';
+            bValue = b.getAttribute('data-email') || '';
+        }
+        
+        return aValue.localeCompare(bValue);
+    });
+    
+    // Réorganiser les lignes
+    rows.forEach(row => tbody.appendChild(row));
+}
+
+// Tri par select
+document.getElementById('sortUsers').addEventListener('change', function(e) {
+    sortTable(e.target.value);
+});
+</script>
+{% endblock %}

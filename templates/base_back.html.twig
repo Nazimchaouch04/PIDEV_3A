@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dashboard - BioSync{% endblock %}</title>
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+    {% block stylesheets %}{% endblock %}
+</head>
+<body>
+    <div class="app-layout">
+        {% include 'partials/_sidebar.html.twig' %}
+        <main class="main-content">
+            {% block body %}{% endblock %}
+        </main>
+    </div>
+    {% block javascripts %}{% endblock %}
+</body>
+</html>

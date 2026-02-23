@@ -1,0 +1,72 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ quiz.titre }} - BioSync{% endblock %}
+
+{% block body %}
+<div class="app-layout">
+    {% include 'partials/_sidebar.html.twig' with {'active': 'mental'} %}
+
+    <main class="main-content">
+        <div class="page-header flex-between">
+            <div>
+                <h1 class="page-title">{{ quiz.titre }}</h1>
+                <p class="page-subtitle">{{ quiz.dateQuiz|date('d/m/Y') }}</p>
+            </div>
+            <a href="{{ path('app_mental') }}" class="btn btn-primary">Retour</a>
+        </div>
+
+        <div class="grid grid-cols-2 gap-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Details du quiz</h4>
+                </div>
+                <div class="list-item">
+                    <div class="list-item-content">
+                        <div class="list-item-subtitle">Niveau de stress cible</div>
+                        <div class="list-item-title">{{ quiz.niveauStressCible }}/10</div>
+                    </div>
+                </div>
+                <div class="list-item">
+                    <div class="list-item-content">
+                        <div class="list-item-subtitle">Score obtenu</div>
+                        <div class="list-item-title">{{ quiz.scoreResultat }} points</div>
+                    </div>
+                </div>
+                {% if quiz.medailleQuiz %}
+                <div class="list-item">
+                    <div class="list-item-content">
+                        <div class="list-item-subtitle">Medaille</div>
+                        <div class="list-item-title">
+                            <span class="badge badge-warning">{{ quiz.medailleQuiz }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Questions ({{ quiz.questions|length }})</h4>
+                </div>
+                {% if quiz.questions|length > 0 %}
+                    {% for question in quiz.questions %}
+                        <div class="list-item">
+                            <div class="list-item-icon" style="background: rgba(110, 197, 166, 0.1); color: var(--primary);">
+                                {{ loop.index }}
+                            </div>
+                            <div class="list-item-content">
+                                <div class="list-item-title">{{ question.enonce|slice(0, 50) }}...</div>
+                                <div class="list-item-subtitle">{{ question.pointsValeur }} points</div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <p class="text-gray">Aucune question dans ce quiz</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

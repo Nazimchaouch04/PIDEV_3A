@@ -1,0 +1,369 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Gérer Les Repas - BioSync{% endblock %}
+
+{% block body %}
+        {# Page Header #}
+        <div class="page-header">
+            <h1 class="page-title">Gérer Les Repas</h1>
+            <p class="page-subtitle">Gérez vos repas et votre suivi nutritionnel</p>
+        </div>
+
+        {# Stats Grid #}
+        <div class="grid-4" style="margin-bottom: 32px;">
+            {# Calories Card with Daily Target #}
+            <div class="stats-card">
+                <div class="stat-icon calories">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/>
+                        <path d="M7 2v20"/>
+                        <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>
+                    </svg>
+                </div>
+                <div class="stat-value">{{ repas|reduce((sum, r) => sum + r.totalCalories, 0) }}</div>
+                <div class="stat-label">sur 2450 cal</div>
+                <div class="stat-progress">
+                    {% set caloriesPercent = (repas|reduce((sum, r) => sum + r.totalCalories, 0) / 2450 * 100)|round(0) %}
+                    <div class="stat-progress-bar progress-green" style="width: {{ caloriesPercent > 100 ? 100 : caloriesPercent }}%;"></div>
+                </div>
+            </div>
+
+            {# Protein Card with Target #}
+            <div class="stats-card">
+                <div class="stat-value">{{ repas|reduce((sum, r) => sum + r.totalProteines, 0) }}g</div>
+                <div class="stat-label">Objectif: 150g</div>
+                <div class="stat-progress">
+                    {% set proteinPercent = (repas|reduce((sum, r) => sum + r.totalProteines, 0) / 150 * 100)|round(0) %}
+                    <div class="stat-progress-bar progress-blue" style="width: {{ proteinPercent > 100 ? 100 : proteinPercent }}%;"></div>
+                </div>
+            </div>
+
+            {# Carbs Card with Target #}
+            <div class="stats-card">
+                <div class="stat-value">{{ repas|reduce((sum, r) => sum + r.totalGlucides, 0) }}g</div>
+                <div class="stat-label">Objectif: 250g</div>
+                <div class="stat-progress">
+                    {% set carbsPercent = (repas|reduce((sum, r) => sum + r.totalGlucides, 0) / 250 * 100)|round(0) %}
+                    <div class="stat-progress-bar progress-green" style="width: {{ carbsPercent > 100 ? 100 : carbsPercent }}%;"></div>
+                </div>
+            </div>
+
+            {# Fats Card with Target #}
+            <div class="stats-card">
+                <div class="stat-value">{{ repas|reduce((sum, r) => sum + r.totalLipides, 0) }}g</div>
+                <div class="stat-label">Objectif: 80g</div>
+                <div class="stat-progress">
+                    {% set fatsPercent = (repas|reduce((sum, r) => sum + r.totalLipides, 0) / 80 * 100)|round(0) %}
+                    <div class="stat-progress-bar progress-orange" style="width: {{ fatsPercent > 100 ? 100 : fatsPercent }}%;"></div>
+                </div>
+            </div>
+        </div>
+
+        {# Meals Section #}
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h2 style="font-size: 20px; font-weight: 700; color: var(--text-primary);">Tous les Repas</h2>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <a href="{{ path('app_repas_pdf') }}" class="btn btn-outline" style="display: flex; align-items: center; gap: 8px; padding: 10px 16px; border: 2px solid #e5e7eb; border-radius: 8px; text-decoration: none; color: #6b7280; transition: all 0.3s ease;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 18px; height: 18px;">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    Exporter PDF
+                </a>
+                <a href="{{ path('app_repas_new') }}" class="btn btn-success">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                    Ajouter un Repas
+                </a>
+            </div>
+        </div>
+
+        {# Search and Filters Bar #}
+        <div style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #e5e7eb; margin-bottom: 24px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);">
+            <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+                {# Search Input #}
+                <div style="flex: 1; min-width: 300px; position: relative;">
+                    <input type="text" id="searchInput" placeholder="Rechercher des repas..." style="width: 100%; padding: 12px 16px 12px 44px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 0.95rem; transition: all 0.3s ease;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#9ca3af" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px;">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="m21 21-4.35-4.35"/>
+                    </svg>
+                </div>
+
+                {# Sort Buttons #}
+                <div style="display: flex; gap: 8px;">
+                    <button id="sortAsc" class="btn btn-outline" style="display: flex; align-items: center; gap: 8px; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; background: white; color: #6b7280; cursor: pointer; transition: all 0.3s ease;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 18px; height: 18px;">
+                            <path d="M3 7h18M3 12h18M3 17h18"/>
+                            <path d="M7 3v18M17 3v18"/>
+                        </svg>
+                        Trier A-Z
+                    </button>
+                    <button id="sortDesc" class="btn btn-outline" style="display: flex; align-items: center; gap: 8px; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; background: white; color: #6b7280; cursor: pointer; transition: all 0.3s ease;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 18px; height: 18px;">
+                            <path d="M3 7h18M3 12h18M3 17h18"/>
+                            <path d="M7 3v18M17 3v18"/>
+                        </svg>
+                        Trier Z-A
+                    </button>
+                </div>
+
+                {# Date Sort #}
+                <button id="sortDate" class="btn btn-outline" style="display: flex; align-items: center; gap: 8px; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; background: white; color: #6b7280; cursor: pointer; transition: all 0.3s ease;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width: 18px; height: 18px;">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    Trier par Date
+                </button>
+            </div>
+        </div>
+
+        {# Meals List #}
+        <div class="meal-list">
+            {% if repas is defined and repas|length > 0 %}
+                {% for r in repas %}
+                    <div class="meal-card" data-id="{{ r.id }}">
+                        <div class="meal-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/>
+                                <path d="M7 2v20"/>
+                                <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>
+                            </svg>
+                        </div>
+                        <div class="meal-info">
+                            <div class="meal-name" title="Voir les détails du repas">{{ r.titreRepas }}</div>
+                            <div class="meal-macros">{{ r.totalCalories|default(0) }} cal  P: {{ r.totalProteines|default(0) }}g  C: {{ r.totalGlucides|default(0) }}g  F: {{ r.totalLipides|default(0) }}g</div>
+                        </div>
+                        <div class="meal-time" title="Voir les détails du repas">{{ r.dateConsommation|date('H:i') }}</div>
+                        <div class="meal-actions">
+                            <a href="{{ path('app_repas_show', {'id': r.id}) }}" class="icon-btn icon-btn-edit" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;" title="Voir les détails du repas">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </a>
+                            <a href="{{ path('app_repas_edit', {'id': r.id}) }}" class="icon-btn icon-btn-edit" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; margin-left: 8px;" title="Modifier le repas">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                </svg>
+                            </a>
+                            <form method="post" action="{{ path('app_repas_delete', {'id': r.id}) }}" style="display: inline-block; margin-left: 8px;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce repas ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ r.id) }}">
+                                <button type="submit" class="icon-btn icon-btn-delete" style="border: none; background: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;" title="Supprimer le repas">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                        <polyline points="3 6 5 6 21 6"/>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                    </svg>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="meal-card">
+                    <div class="meal-info">
+                        <div class="meal-name">Aucun repas trouvé</div>
+                        <div class="meal-macros">Commencez par ajouter votre premier repas</div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const sortAscBtn = document.getElementById('sortAsc');
+    const sortDescBtn = document.getElementById('sortDesc');
+    const sortDateBtn = document.getElementById('sortDate');
+    const mealList = document.querySelector('.meal-list');
+    let currentSort = 'none';
+    
+    // Données des repas (uniquement les repas valides)
+    let repasData = [
+        {% for r in repas %}
+        {
+            id: {{ r.id }},
+            titre: "{{ r.titreRepas|e('js') }}",
+            date: "{{ r.dateConsommation|date('Y-m-d H:i:s') }}",
+            calories: {{ r.totalCalories|default(0) }},
+            proteines: {{ r.totalProteines|default(0) }},
+            glucides: {{ r.totalGlucides|default(0) }},
+            lipides: {{ r.totalLipides|default(0) }},
+            typeMoment: "{{ r.typeMoment.label|default('')|e('js') }}"
+        },
+        {% endfor %}
+    ];
+
+    // Fonction pour afficher les repas (sans liens pour éviter les erreurs)
+    function displayRepas(repas) {
+        if (repas.length === 0) {
+            mealList.innerHTML = `
+                <div class="meal-card">
+                    <div class="meal-info">
+                        <div class="meal-name">Aucun repas trouvé</div>
+                        <div class="meal-macros">Essayez d'ajuster votre recherche ou vos filtres</div>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        mealList.innerHTML = repas.map(r => `
+            <div class="meal-card" data-id="${r.id}">
+                <div class="meal-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/>
+                        <path d="M7 2v20"/>
+                        <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>
+                    </svg>
+                </div>
+                <div class="meal-info">
+                    <div class="meal-name">${r.titre}</div>
+                    <div class="meal-macros">${r.calories} cal  P: ${r.proteines}g  C: ${r.glucides}g  F: ${r.lipides}g</div>
+                </div>
+                <div class="meal-time">${new Date(r.date).toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})}</div>
+                <div class="meal-actions">
+                    <a href="/repas/${r.id}/show" class="icon-btn icon-btn-edit" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center;" title="Voir les détails du repas">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                    </a>
+                    <a href="/repas/${r.id}/edit" class="icon-btn icon-btn-edit" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; margin-left: 8px;" title="Modifier le repas">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                    </a>
+                    <form method="post" action="/repas/${r.id}" style="display: inline-block; margin-left: 8px;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce repas ?');">
+                        <input type="hidden" name="_method" value="DELETE">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete') }}">
+                        <button type="submit" class="icon-btn icon-btn-delete" style="border: none; background: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;" title="Supprimer le repas">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <polyline points="3 6 5 6 21 6"/>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Fonction de recherche
+    function searchRepas(query) {
+        if (!query) {
+            return repasData;
+        }
+        
+        const lowerQuery = query.toLowerCase();
+        return repasData.filter(r => 
+            r.titre.toLowerCase().includes(lowerQuery) ||
+            r.typeMoment.toLowerCase().includes(lowerQuery) ||
+            r.calories.toString().includes(lowerQuery)
+        );
+    }
+
+    // Fonctions de tri
+    function sortRepas(repas, type) {
+        const sorted = [...repas];
+        
+        switch(type) {
+            case 'asc':
+                return sorted.sort((a, b) => a.titre.localeCompare(b.titre));
+            case 'desc':
+                return sorted.sort((a, b) => b.titre.localeCompare(a.titre));
+            case 'date':
+                return sorted.sort((a, b) => new Date(b.date) - new Date(a.date));
+            default:
+                return sorted;
+        }
+    }
+
+    // Gestionnaire de recherche
+    searchInput.addEventListener('input', function() {
+        const query = this.value;
+        const filtered = searchRepas(query);
+        const sorted = sortRepas(filtered, currentSort);
+        displayRepas(sorted);
+    });
+
+    // Gestionnaires de tri
+    sortAscBtn.addEventListener('click', function() {
+        currentSort = 'asc';
+        updateButtonStyles(this);
+        const filtered = searchRepas(searchInput.value);
+        const sorted = sortRepas(filtered, 'asc');
+        displayRepas(sorted);
+    });
+
+    sortDescBtn.addEventListener('click', function() {
+        currentSort = 'desc';
+        updateButtonStyles(this);
+        const filtered = searchRepas(searchInput.value);
+        const sorted = sortRepas(filtered, 'desc');
+        displayRepas(sorted);
+    });
+
+    sortDateBtn.addEventListener('click', function() {
+        currentSort = 'date';
+        updateButtonStyles(this);
+        const filtered = searchRepas(searchInput.value);
+        const sorted = sortRepas(filtered, 'date');
+        displayRepas(sorted);
+    });
+
+    // Mettre à jour les styles des boutons
+    function updateButtonStyles(activeBtn) {
+        [sortAscBtn, sortDescBtn, sortDateBtn].forEach(btn => {
+            if (btn === activeBtn) {
+                btn.style.background = '#3b82f6';
+                btn.style.color = 'white';
+                btn.style.borderColor = '#3b82f6';
+            } else {
+                btn.style.background = 'white';
+                btn.style.color = '#6b7280';
+                btn.style.borderColor = '#e5e7eb';
+            }
+        });
+    }
+
+    // Effets de survol pour les boutons
+    [sortAscBtn, sortDescBtn, sortDateBtn].forEach(btn => {
+        btn.addEventListener('mouseenter', function() {
+            if (this.style.background !== 'rgb(59, 130, 246)') {
+                this.style.borderColor = '#9ca3af';
+                this.style.transform = 'translateY(-1px)';
+            }
+        });
+        
+        btn.addEventListener('mouseleave', function() {
+            if (this.style.background !== 'rgb(59, 130, 246)') {
+                this.style.borderColor = '#e5e7eb';
+                this.style.transform = 'translateY(0)';
+            }
+        });
+    });
+
+    // Effet de survol pour le champ de recherche
+    searchInput.addEventListener('focus', function() {
+        this.style.borderColor = '#3b82f6';
+        this.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
+    });
+
+    searchInput.addEventListener('blur', function() {
+        this.style.borderColor = '#e5e7eb';
+        this.style.boxShadow = 'none';
+    });
+});
+</script>
+{% endblock %}

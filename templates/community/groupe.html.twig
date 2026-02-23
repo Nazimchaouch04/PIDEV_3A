@@ -1,0 +1,78 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ groupe.nomGroupe }} - BioSync{% endblock %}
+
+{% block body %}
+<div class="app-layout">
+    {% include 'partials/_sidebar.html.twig' with {'active': 'community'} %}
+
+    <main class="main-content">
+        <!-- Bannière Dynamique -->
+        <div class="card" style="padding: 0; overflow: hidden; margin-bottom: 30px;">
+            <img src="{{ groupe.image ?: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=1200' }}" 
+                 style="width: 100%; height: 300px; object-fit: cover;" alt="{{ groupe.nomGroupe }}">
+            
+            <div style="padding: 24px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1 class="page-title">{{ groupe.nomGroupe }}</h1>
+                    <span class="badge badge-mental-health">{{ groupe.thematique }}</span>
+                </div>
+                
+                <div style="display: flex; gap: 12px;">
+                    {% if isMember %}
+                        <form action="{{ path('app_community_leave', {id: groupe.id}) }}" method="post">
+                            <input type="hidden" name="_token" value="{{ csrf_token('leave' ~ groupe.id) }}">
+                            <button type="submit" class="btn btn-outline" style="color: #EF4444; border-color: #EF4444;">Quitter</button>
+                        </form>
+                    {% elseif groupe.hasPlaceDisponible %}
+                        <form action="{{ path('app_community_join', {id: groupe.id}) }}" method="post">
+                            <input type="hidden" name="_token" value="{{ csrf_token('join' ~ groupe.id) }}">
+                            <button type="submit" class="btn btn-primary">Rejoindre (+50 pts)</button>
+                        </form>
+                    {% else %}
+                        <span class="badge badge-secondary">Groupe Complet</span>
+                    {% endif %}
+                    <a href="{{ path('app_community') }}" class="btn btn-outline">Retour</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <!-- Informations -->
+            <div class="card">
+                <h3 style="margin-bottom: 16px; font-weight: 700;">À propos</h3>
+                <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px;">
+                    {{ groupe.description ?: 'Aucune description fournie.' }}
+                </p>
+                <div class="group-meta">
+                    <span class="group-meta-item">👥 Membres : {{ groupe.nombreMembres }} / {{ groupe.capaciteMax }}</span>
+                    {% if isMember %}
+                        <span class="group-meta-item">📅 Membre depuis le {{ membership.dateAdhesion|date('d/m/Y') }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Événements -->
+            <div class="card">
+                <h3 style="margin-bottom: 16px; font-weight: 700;">Événements à venir</h3>
+                {% for event in groupe.evenements %}
+                    <div class="appointment-card" style="margin-bottom: 12px; padding: 15px; border: 1px solid var(--border-light);">
+                        <div class="appointment-left">
+                            <div class="avatar-sm avatar-blue">📅</div>
+                            <div>
+                                <div class="doctor-name" style="font-size: 16px;">{{ event.titreEvent }}</div>
+                                <div class="appointment-meta">
+                                    <span>🕒 {{ event.dateEvent|date('d/m/Y H:i') }}</span>
+                                    <span style="color: var(--success-green); font-weight: 700;">+{{ event.pointsParticipation }} pts</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <p style="color: var(--text-light); text-align: center; padding: 20px;">Aucun événement prévu.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

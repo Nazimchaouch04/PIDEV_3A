@@ -1,0 +1,286 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Modifier mon profil - BioSync{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .form-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .form-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        padding: 35px;
+    }
+    
+    .form-header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 25px;
+        border-bottom: 2px solid #F1F5F9;
+    }
+    
+    .avatar-edit {
+        width: 90px;
+        height: 90px;
+        background: linear-gradient(135deg, #6C5CE7, #A29BFE);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        color: white;
+        font-size: 32px;
+        font-weight: 700;
+        position: relative;
+        cursor: pointer;
+        overflow: hidden;
+        transition: all 0.3s;
+    }
+    
+    .avatar-edit:hover {
+        transform: scale(1.05);
+    }
+    
+    .avatar-edit img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+    
+    .avatar-edit .avatar-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s;
+        border-radius: 50%;
+    }
+    
+    .avatar-edit:hover .avatar-overlay {
+        opacity: 1;
+    }
+    
+    .avatar-overlay svg {
+        color: white;
+    }
+    
+    .avatar-edit::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 28px;
+        height: 28px;
+        background: #10B981;
+        border-radius: 50%;
+        border: 3px solid white;
+        z-index: 2;
+    }
+    
+    .photo-upload-form {
+        display: none;
+    }
+    
+    .form-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #2D3748;
+        margin-bottom: 6px;
+    }
+    
+    .form-subtitle {
+        font-size: 14px;
+        color: #718096;
+    }
+    
+    .form-section {
+        margin-bottom: 25px;
+    }
+    
+    .section-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: #4A5568;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        color: #4A5568;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 14px 18px;
+        border: 2px solid #E2E8F0;
+        border-radius: 12px;
+        font-size: 15px;
+        background: white;
+        transition: all 0.2s;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #6C5CE7;
+        box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.1);
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 30px;
+        padding-top: 25px;
+        border-top: 2px solid #F1F5F9;
+        justify-content: flex-end;
+    }
+    
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+        flex: 0 0 auto;
+    }
+    
+    .btn-primary {
+        background: #6C5CE7;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background: #5A4FCF;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+    }
+    
+    .btn-secondary {
+        background: #EDF2F7;
+        color: #4A5568;
+    }
+    
+    .btn-secondary:hover {
+        background: #E2E8F0;
+    }
+    
+    .invalid-feedback {
+        color: #E53E3E;
+        font-size: 13px;
+        margin-top: 6px;
+    }
+    
+    @media (max-width: 640px) {
+        .form-card {
+            padding: 25px 20px;
+        }
+        .form-actions {
+            flex-direction: column;
+        }
+        .btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="bo-mental-dashboard">
+    <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+        <div>
+            <h1 class="page-title">Modifier mon profil</h1>
+            <p class="page-subtitle">Mettez à jour vos informations personnelles</p>
+        </div>
+        <a href="{{ path('app_profile') }}" class="btn btn-secondary" style="display: flex; align-items: center; gap: 8px; background: #EDF2F7; color: #4A5568; text-decoration: none;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            Retour
+        </a>
+    </div>
+
+    <div class="form-container">
+        <div class="form-card">
+            <div class="form-header">
+                <form action="{{ path('app_profile_photo') }}" method="POST" enctype="multipart/form-data" id="photoForm" class="photo-upload-form">
+                    <input type="file" name="photo" id="photoInput" accept="image/*" onchange="document.getElementById('photoForm').submit();">
+                </form>
+                <div class="avatar-edit" onclick="document.getElementById('photoInput').click();" title="Cliquez pour changer votre photo">
+                    {% if app.user.photo %}
+                        <img src="{{ asset('uploads/photos/' ~ app.user.photo) }}" alt="Photo de profil">
+                    {% else %}
+                        {{ app.user.nomComplet|slice(0, 2)|upper }}
+                    {% endif %}
+                    <div class="avatar-overlay">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                    </div>
+                </div>
+                <h2 class="form-title">{{ app.user.nomComplet }}</h2>
+                <p class="form-subtitle">Modifiez vos informations ci-dessous</p>
+            </div>
+
+            {{ form_start(form) }}
+                <div class="form-section">
+                    <div class="section-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6C5CE7" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        Informations personnelles
+                    </div>
+                    
+                    <div class="form-group">
+                        {{ form_label(form.nomComplet, 'Nom complet') }}
+                        {{ form_widget(form.nomComplet, {'attr': {'class': 'form-control', 'placeholder': 'Votre nom complet'}}) }}
+                        {{ form_errors(form.nomComplet) }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form_label(form.email, 'Adresse email') }}
+                        {{ form_widget(form.email, {'attr': {'class': 'form-control', 'placeholder': 'votre@email.com'}}) }}
+                        {{ form_errors(form.email) }}
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a href="{{ path('app_profile') }}" class="btn btn-secondary">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        Annuler
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        Enregistrer
+                    </button>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}
