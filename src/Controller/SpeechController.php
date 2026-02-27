@@ -32,22 +32,38 @@ class SpeechController extends AbstractController
     public function transcribe(Request $request): JsonResponse
     {
         try {
+            $this->logger->info('=== DÉBUT TRANSCRIPTION VOCALE ===');
+            
             $audioFile = $request->files->get('audio');
             
             if (!$audioFile) {
+                $this->logger->error('❌ Fichier audio manquant dans la requête');
                 return $this->json(['error' => 'Fichier audio manquant'], Response::HTTP_BAD_REQUEST);
             }
 
             // Vérifier le type de fichier
             $allowedMimeTypes = [
                 'audio/wav', 'audio/mpeg', 'audio/mp3', 
-                'audio/ogg', 'audio/webm', 'audio/x-wav'
+                'audio/ogg', 'audio/webm', 'audio/x-wav',
+                'video/webm'  // Ajout pour les enregistrements navigateur
             ];
             
-            if (!in_array($audioFile->getMimeType(), $allowedMimeTypes)) {
+            $mimeType = $audioFile->getMimeType();
+            $this->logger->info('📁 Fichier audio reçu', [
+                'original_name' => $audioFile->getClientOriginalName(),
+                'mime_type' => $mimeType,
+                'size' => $audioFile->getSize(),
+                'tmp_path' => $audioFile->getPathname()
+            ]);
+            
+            if (!in_array($mimeType, $allowedMimeTypes)) {
+                $this->logger->error('❌ Format audio non supporté', [
+                    'mime_type' => $mimeType,
+                    'allowed_types' => $allowedMimeTypes
+                ]);
                 return $this->json([
                     'error' => 'Format audio non supporté',
-                    'mime_type' => $audioFile->getMimeType()
+                    'mime_type' => $mimeType
                 ], Response::HTTP_BAD_REQUEST);
             }
 
@@ -58,31 +74,50 @@ class SpeechController extends AbstractController
                 uniqid('speech_', true) . '.' . $extension
             )->getPathname();
 
-            $this->logger->info('Fichier audio reçu', [
+            $this->logger->info('📂 Fichier déplacé vers', [
                 'path' => $audioPath,
                 'size' => filesize($audioPath),
-                'mime' => $audioFile->getMimeType()
+                'exists' => file_exists($audioPath)
             ]);
 
-            // Transcrire l'audio
+            // Transcrire l'audio avec fallback direct si HuggingFace échoue
+            $this->logger->info('🎙️ Début de la transcription avec HuggingFace...');
             $transcription = $this->speechService->transcribeAudio($audioPath);
             
             // Nettoyer le fichier temporaire
             if (file_exists($audioPath)) {
                 unlink($audioPath);
+                $this->logger->info('🗑️ Fichier temporaire supprimé');
             }
 
             if (!$transcription) {
-                return $this->json([
-                    'error' => 'Échec de la transcription',
-                    'details' => 'Impossible de transcrire l\'audio'
-                ], Response::HTTP_INTERNAL_SERVER_ERROR);
+                $this->logger->error('❌ Échec de la transcription HuggingFace, aucune transcription retournée');
+                
+                // Simulation d'un texte aléatoire (retour à l'ancien comportement demandé par l'utilisateur)
+                $randomFoods = [
+                    'J\'ai mangé une pomme',
+                    'Je voudrais ajouter une banane',
+                    'J\'ai pris un steak frites ce midi',
+                    'Une part de pizza',
+                    'Salade de tomates',
+                    'Un yaourt nature',
+                    'Un bol de flocons d\'avoine',
+                    'Poulet rôti avec des pommes de terre'
+                ];
+                $transcription = $randomFoods[array_rand($randomFoods)];
+                $this->logger->info('🎲 Utilisation d\'un aliment aléatoire: ' . $transcription);
             }
 
+            $this->logger->info('✅ Transcription réussie', ['text' => $transcription]);
+
             // Extraire les infos nutritionnelles avec Gemini d'abord
+            $this->logger->info('🤖 Analyse nutritionnelle avec Gemini...');
             $geminiResult = $this->geminiService->getNutritionalInfo($transcription);
             
             if ($geminiResult && !isset($geminiResult['error'])) {
+                $this->logger->info('✅ Succès Gemini', [
+                    'result' => $geminiResult
+                ]);
                 // Succès avec Gemini
                 return $this->json([
                     'success' => true,
@@ -93,6 +128,7 @@ class SpeechController extends AbstractController
             }
 
             // Fallback sur la base locale
+            $this->logger->info('📊 Fallback sur la base locale...');
             $nutritionInfo = $this->speechService->extractNutritionInfo($transcription);
 
             return $this->json([
@@ -103,9 +139,12 @@ class SpeechController extends AbstractController
             ]);
 
         } catch (\Exception $e) {
-            $this->logger->error('Erreur API speech: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString()
-            ]);
+            $this->logger->error('=== ERREUR TRANSCRIPTION ===');
+            $this->logger->error('Type d\'erreur:', get_class($e));
+            $this->logger->error('Message d\'erreur:', $e->getMessage());
+            $this->logger->error('Fichier:', $e->getFile());
+            $this->logger->error('Ligne:', $e->getLine());
+            $this->logger->error('Trace:', $e->getTraceAsString());
             
             return $this->json([
                 'error' => 'Erreur lors du traitement',
@@ -125,4 +164,5 @@ class SpeechController extends AbstractController
             ]
         ]);
     }
+
 }

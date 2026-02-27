@@ -29,6 +29,7 @@ security:
                 path: /
 
     access_control:
+        - { path: ^/api/speech, roles: PUBLIC_ACCESS }  # ← Ajoute ça en premier
         - { path: ^/$, roles: PUBLIC_ACCESS }
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/register, roles: PUBLIC_ACCESS }

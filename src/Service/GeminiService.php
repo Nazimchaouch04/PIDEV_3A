@@ -40,7 +40,7 @@ class GeminiService
                 ];
             }
             
-            $prompt = "Donne les valeurs nutritionnelles pour 100g de: {$query}. Réponds UNIQUEMENT avec un objet JSON valide comme ceci: {\"nomAliment\": \"nom de l'aliment\", \"calories\": 52, \"proteines\": 0.3, \"glucides\": 14, \"lipides\": 0.2}. Ne mets aucun texte avant ou après le JSON.";
+            $prompt = "Donne les valeurs nutritionnelles pour 100g de: {$query}. Réponds UNIQUEMENT avec un objet JSON valide comme ceci: {\"nomAliment\": \"nom de l'aliment\", \"calories\": 52, \"proteines\": 0.3, \"glucides\": 14, \"lipides\": 0.2, \"estExcitant\": false}. Mets \"estExcitant\" à true UNIQUEMENT si c'est du café, thé, boisson énergétique ou très riche en caféine (ex: chocolat noir pur). Ne mets aucun texte avant ou après le JSON.";
             
             error_log("Prompt: " . $prompt);
             
@@ -163,7 +163,12 @@ class GeminiService
             'viande', 'poulet', 'boeuf', 'bœuf', 'poisson', 'oeuf', 'œuf',
             'riz', 'pates', 'pâtes', 'pain', 'lait', 'fromage', 'yaourt',
             'salade', 'tomate', 'carotte', 'pomme de terre', 'steak',
-            'saumon', 'riz', 'poulet', 'salade', 'soupe', 'sandwich'
+            'saumon', 'soupe', 'sandwich', 'lentille', 'haricot',
+            'café', 'cafe', 'thé', 'the', 'boisson', 'coca', 'jus',
+            'eau', 'infusion', 'tisane', 'chocolat', 'cacao', 'energy', 'red bull',
+            'smoothie', 'matcha', 'compote', 'biscuit', 'gateau', 'gâteau',
+            'amande', 'noix', 'céréale', 'avoine', 'sucre', 'miel', 'confiture',
+            'beurre', 'huile', 'sauce', 'vinaigrette', 'ketchup', 'mayo'
         ];
         
         foreach ($foodKeywords as $food) {
@@ -185,22 +190,6 @@ class GeminiService
     {
         try {
             error_log("=== PARSING GEMINI RESPONSE ===");
-            error_log("Raw response: " . $response);
-            
-            // Essayer de décoder directement le JSON
-            $data = json_decode($response, true);
-            if (json_last_error() === JSON_ERROR_NONE) {
-                $result = [
-                    'nomAliment' => $data['nomAliment'] ?? '',
-                    'calories' => (int)($data['calories'] ?? 0),
-                    'proteines' => (float)($data['proteines'] ?? 0),
-                    'glucides' => (float)($data['glucides'] ?? 0),
-                    'lipides' => (float)($data['lipides'] ?? 0)
-                ];
-                error_log("Successfully parsed JSON directly: " . print_r($result, true));
-                return $result;
-            }
-            
             // Chercher un JSON dans la réponse
             if (preg_match('/\{[^}]+\}/', $response, $matches)) {
                 $jsonString = $matches[0];
@@ -213,7 +202,8 @@ class GeminiService
                         'calories' => (int)($data['calories'] ?? 0),
                         'proteines' => (float)($data['proteines'] ?? 0),
                         'glucides' => (float)($data['glucides'] ?? 0),
-                        'lipides' => (float)($data['lipides'] ?? 0)
+                        'lipides' => (float)($data['lipides'] ?? 0),
+                        'estExcitant' => isset($data['estExcitant']) ? (bool)$data['estExcitant'] : false
                     ];
                     error_log("Successfully parsed extracted JSON: " . print_r($result, true));
                     return $result;
@@ -242,7 +232,8 @@ class GeminiService
             'calories' => 0,
             'proteines' => 0.0,
             'glucides' => 0.0,
-            'lipides' => 0.0
+            'lipides' => 0.0,
+            'estExcitant' => false
         ];
 
         // Extraire les calories
@@ -283,9 +274,16 @@ class GeminiService
         
         // Base de données simple pour les aliments courants (pour 100g)
         $fallbackDatabase = [
+            // Fruits
             'pomme' => ['nomAliment' => 'Pomme', 'calories' => 52, 'proteines' => 0.3, 'glucides' => 14, 'lipides' => 0.2],
             'pomme de terre' => ['nomAliment' => 'Pomme de terre', 'calories' => 77, 'proteines' => 2.0, 'glucides' => 17, 'lipides' => 0.1],
+            'banane' => ['nomAliment' => 'Banane', 'calories' => 89, 'proteines' => 1.1, 'glucides' => 23, 'lipides' => 0.3],
+            'fruit' => ['nomAliment' => 'Fruit', 'calories' => 60, 'proteines' => 1, 'glucides' => 15, 'lipides' => 0.2],
+
+            // Céréales / féculents
             'riz' => ['nomAliment' => 'Riz', 'calories' => 130, 'proteines' => 2.7, 'glucides' => 28, 'lipides' => 0.3],
+            'couscous' => ['nomAliment' => 'Couscous (cuit)', 'calories' => 112, 'proteines' => 3.8, 'glucides' => 23.2, 'lipides' => 0.2],
+            'semoule' => ['nomAliment' => 'Semoule (cuite)', 'calories' => 112, 'proteines' => 3.8, 'glucides' => 23.2, 'lipides' => 0.2],
             'poulet' => ['nomAliment' => 'Poulet', 'calories' => 165, 'proteines' => 31, 'glucides' => 0, 'lipides' => 3.6],
             'boeuf' => ['nomAliment' => 'Bœuf', 'calories' => 250, 'proteines' => 26, 'glucides' => 0, 'lipides' => 15],
             'bœuf' => ['nomAliment' => 'Bœuf', 'calories' => 250, 'proteines' => 26, 'glucides' => 0, 'lipides' => 15],
@@ -295,24 +293,48 @@ class GeminiService
             'pates' => ['nomAliment' => 'Pâtes', 'calories' => 131, 'proteines' => 5, 'glucides' => 25, 'lipides' => 1.1],
             'pâtes' => ['nomAliment' => 'Pâtes', 'calories' => 131, 'proteines' => 5, 'glucides' => 25, 'lipides' => 1.1],
             'pain' => ['nomAliment' => 'Pain', 'calories' => 265, 'proteines' => 9, 'glucides' => 49, 'lipides' => 3.2],
+
+            // Produits laitiers
             'lait' => ['nomAliment' => 'Lait', 'calories' => 42, 'proteines' => 3.4, 'glucides' => 5, 'lipides' => 1],
             'fromage' => ['nomAliment' => 'Fromage', 'calories' => 113, 'proteines' => 7, 'glucides' => 1, 'lipides' => 9],
             'yaourt' => ['nomAliment' => 'Yaourt', 'calories' => 59, 'proteines' => 10, 'glucides' => 3.6, 'lipides' => 0.4],
+
+            // Légumes
             'salade' => ['nomAliment' => 'Salade', 'calories' => 15, 'proteines' => 1.4, 'glucides' => 2.9, 'lipides' => 0.2],
             'tomate' => ['nomAliment' => 'Tomate', 'calories' => 18, 'proteines' => 0.9, 'glucides' => 3.9, 'lipides' => 0.2],
             'carotte' => ['nomAliment' => 'Carotte', 'calories' => 41, 'proteines' => 0.9, 'glucides' => 10, 'lipides' => 0.2],
-            'banane' => ['nomAliment' => 'Banane', 'calories' => 89, 'proteines' => 1.1, 'glucides' => 23, 'lipides' => 0.3],
+            'legume' => ['nomAliment' => 'Légume', 'calories' => 30, 'proteines' => 2, 'glucides' => 5, 'lipides' => 0.3],
+            'légume' => ['nomAliment' => 'Légume', 'calories' => 30, 'proteines' => 2, 'glucides' => 5, 'lipides' => 0.3],
+
+            // Légumineuses
+            'lentilles' => ['nomAliment' => 'Lentilles (cuites)', 'calories' => 116, 'proteines' => 9.0, 'glucides' => 20.0, 'lipides' => 0.4],
+            'lentille' => ['nomAliment' => 'Lentilles (cuites)', 'calories' => 116, 'proteines' => 9.0, 'glucides' => 20.0, 'lipides' => 0.4],
+
+            // Viandes / poissons génériques
             'steak' => ['nomAliment' => 'Steak', 'calories' => 271, 'proteines' => 26, 'glucides' => 0, 'lipides' => 17],
             'poisson' => ['nomAliment' => 'Poisson', 'calories' => 150, 'proteines' => 20, 'glucides' => 0, 'lipides' => 8],
             'viande' => ['nomAliment' => 'Viande', 'calories' => 200, 'proteines' => 25, 'glucides' => 0, 'lipides' => 12],
-            'legume' => ['nomAliment' => 'Légume', 'calories' => 30, 'proteines' => 2, 'glucides' => 5, 'lipides' => 0.3],
-            'légume' => ['nomAliment' => 'Légume', 'calories' => 30, 'proteines' => 2, 'glucides' => 5, 'lipides' => 0.3],
-            'fruit' => ['nomAliment' => 'Fruit', 'calories' => 60, 'proteines' => 1, 'glucides' => 15, 'lipides' => 0.2],
+            // Boissons et Excitants
+            'café' => ['nomAliment' => 'Café', 'calories' => 2, 'proteines' => 0.1, 'glucides' => 0, 'lipides' => 0, 'estExcitant' => true],
+            'cafe' => ['nomAliment' => 'Café', 'calories' => 2, 'proteines' => 0.1, 'glucides' => 0, 'lipides' => 0, 'estExcitant' => true],
+            'thé' => ['nomAliment' => 'Thé', 'calories' => 1, 'proteines' => 0, 'glucides' => 0, 'lipides' => 0, 'estExcitant' => true],
+            'the' => ['nomAliment' => 'Thé', 'calories' => 1, 'proteines' => 0, 'glucides' => 0, 'lipides' => 0, 'estExcitant' => true],
+            'coca' => ['nomAliment' => 'Coca-Cola', 'calories' => 42, 'proteines' => 0, 'glucides' => 10.6, 'lipides' => 0, 'estExcitant' => true],
+            'énergie' => ['nomAliment' => 'Boisson énergisante', 'calories' => 45, 'proteines' => 0.3, 'glucides' => 11, 'lipides' => 0, 'estExcitant' => true],
+            'energy drink' => ['nomAliment' => 'Boisson énergisante', 'calories' => 45, 'proteines' => 0.3, 'glucides' => 11, 'lipides' => 0, 'estExcitant' => true],
+            'red bull' => ['nomAliment' => 'Red Bull', 'calories' => 45, 'proteines' => 0.3, 'glucides' => 11, 'lipides' => 0, 'estExcitant' => true],
+            'chocolat' => ['nomAliment' => 'Chocolat noir', 'calories' => 546, 'proteines' => 5, 'glucides' => 61, 'lipides' => 31, 'estExcitant' => true],
+            'eau' => ['nomAliment' => 'Eau', 'calories' => 0, 'proteines' => 0, 'glucides' => 0, 'lipides' => 0, 'estExcitant' => false],
+            'jus' => ['nomAliment' => 'Jus de fruits', 'calories' => 45, 'proteines' => 0.5, 'glucides' => 10, 'lipides' => 0.1, 'estExcitant' => false],
         ];
 
         // Chercher une correspondance dans la base de données
         foreach ($fallbackDatabase as $food => $values) {
             if (strpos($query, $food) !== false) {
+                // S'assurer que le fallback a la clé estExcitant
+                if (!isset($values['estExcitant'])) {
+                    $values['estExcitant'] = false;
+                }
                 error_log("Found fallback match for: " . $food . " -> " . print_r($values, true));
                 return $values;
             }
@@ -320,6 +342,14 @@ class GeminiService
 
         // Valeurs par défaut si rien trouvé
         error_log("No match found, using default values");
-        return ['nomAliment' => '', 'calories' => 50, 'proteines' => 1.0, 'glucides' => 10.0, 'lipides' => 0.5];
+        $cleanQuery = trim($query);
+        return [
+            'nomAliment' => $cleanQuery !== '' ? ucfirst($cleanQuery) : 'Aliment inconnu',
+            'calories' => 50,
+            'proteines' => 1.0,
+            'glucides' => 10.0,
+            'lipides' => 0.5,
+            'estExcitant' => false
+        ];
     }
 }

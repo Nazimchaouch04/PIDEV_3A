@@ -15,6 +15,7 @@ use Dompdf\Dompdf;
 use Dompdf\Options;
 use App\Service\RepasService;
 use App\Service\GeminiService;
+use App\Service\AlertService;
 
 #[Route('/aliment')]
 final class AlimentController extends AbstractController
@@ -28,7 +29,7 @@ final class AlimentController extends AbstractController
     }
 
     #[Route('/new', name: 'app_aliment_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, RepasService $repasService): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, RepasService $repasService, AlertService $alertService): Response
     {
         $aliment = new Aliment();
         
@@ -70,6 +71,9 @@ final class AlimentController extends AbstractController
                 $repasService->mettreAJourPoints($repas);
                 $entityManager->persist($repas);
                 $entityManager->flush();
+                
+                // Déclencher l'alerte du coach si le repas contient maintenant des excitants l'après-midi
+                $alertService->checkRepasAlerts($repas);
             } else {
                 $entityManager->flush();
             }

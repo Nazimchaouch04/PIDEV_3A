@@ -7,20 +7,18 @@ use App\Enum\TypeMoment;
 
 class RepasService
 {
+    public function __construct(
+        private readonly ChronoScoreService $chronoScoreService,
+    ) {
+    }
+
     /**
      * Calcule le score intelligent combinant timing et nutrition
      */
     public function calculerScoreIntelligent(Repas $repas): int
     {
-        $score = 0;
-        
-        // 1. Score Timing (cohérence horaire) - TOUJOURS calculé
-        $score += $this->calculerScoreTiming($repas);
-        
-        // 2. Score Nutrition (qualité des aliments)
-        $score += $this->calculerScoreNutrition($repas);
-        
-        return max($score, -20); // Score minimum de -20 pour éviter les abus
+        $result = $this->chronoScoreService->evaluateRepas($repas);
+        return $result['totalScore'] ?? 0;
     }
 
     /**
@@ -201,8 +199,8 @@ class RepasService
      */
     public function mettreAJourPoints(Repas $repas): Repas
     {
-        $score = $this->calculerScoreIntelligent($repas);
-        $repas->setPointsGagnes($score);
+        $result = $this->chronoScoreService->evaluateRepas($repas);
+        $repas->setPointsGagnes($result['totalScore'] ?? 0);
         return $repas;
     }
 
@@ -224,13 +222,20 @@ class RepasService
      */
     public function getDetailsScore(Repas $repas): array
     {
+        $result = $this->chronoScoreService->evaluateRepas($repas);
+
         return [
-            'timing' => $this->calculerScoreTiming($repas),
-            'nutrition' => $this->calculerScoreNutrition($repas),
-            'total' => $this->calculerScoreIntelligent($repas),
-            'heure' => $repas->getDateConsommation()->format('H:i'),
-            'calories' => $repas->getTotalCalories(),
-            'proteines' => $repas->getTotalProteines(),
+            'timing' => $result['timingScore'] ?? 0,
+            'nutrition' => $result['nutritionScore'] ?? 0,
+            'equilibreBonus' => $result['equilibreBonus'] ?? 0,
+            'interaction' => $result['interactionScore'] ?? 0,
+            'riskPenalty' => $result['riskPenalty'] ?? 0,
+            'statusCode' => $result['statusCode'] ?? null,
+            'statusLabel' => $result['statusLabel'] ?? null,
+            'total' => $result['totalScore'] ?? 0,
+            'heure' => $result['meta']['heure'] ?? $repas->getDateConsommation()->format('H:i'),
+            'calories' => $result['meta']['calories'] ?? $repas->getTotalCalories(),
+            'proteines' => $result['meta']['proteines'] ?? $repas->getTotalProteines(),
         ];
     }
 }

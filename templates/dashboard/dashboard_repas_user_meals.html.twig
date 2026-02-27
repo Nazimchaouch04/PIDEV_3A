@@ -8,7 +8,8 @@
     <h1 class="page-title">Repas de l'utilisateur</h1>
     <p class="page-subtitle">{{ user.nomComplet|default('Utilisateur') }} — {{ user.email }}</p>
   </div>
-  <div>
+  <div style="display: flex; gap: 8px;">
+    <a class="btn btn-primary" href="{{ path('app_coach_patient_dashboard', {'id': user.id}) }}">Voir Dashboard</a>
     <a class="btn btn-outline" href="{{ path('admin_users_index') }}">Retour à la liste</a>
   </div>
 </div>

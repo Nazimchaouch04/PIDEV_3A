@@ -8,6 +8,10 @@ parameters:
     app.api_key: '%env(QUIZ_API_KEY)%'
     app.gemini_api_key: '%env(GEMINI_API_KEY)%'
     app.huggingface_api_key: '%env(HUGGINGFACE_API_KEY)%'
+    twilio_sid: '%env(TWILIO_SID)%'
+    twilio_auth_token: '%env(TWILIO_AUTH_TOKEN)%'
+    twilio_phone_number: '%env(TWILIO_PHONE_NUMBER)%'
+    coach_phone_number: '%env(COACH_PHONE_NUMBER)%'
 
 services:
     _defaults:
@@ -34,6 +38,13 @@ services:
             $httpClient: '@http_client'
             $logger: '@logger'
 
+    App\Service\AlertService:
+        arguments:
+            $twilioSid: '%twilio_sid%'
+            $twilioAuthToken: '%twilio_auth_token%'
+            $twilioPhoneNumber: '%twilio_phone_number%'
+            $coachPhoneNumber: '%coach_phone_number%'
+
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
     App\:
@@ -46,3 +57,4 @@ services:
             - '../src/Service/RepasService.php'
             - '../src/Service/GeminiService.php'
             - '../src/Service/HuggingFaceSpeechService.php'
+            - '../src/Service/AlertService.php'

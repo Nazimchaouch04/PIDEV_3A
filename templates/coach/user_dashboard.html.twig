@@ -1,0 +1,480 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Dashboard Nutrition - {{ patient.nomComplet }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .dashboard-container {
+            padding: 24px;
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+            min-height: 100vh;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .dashboard-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1e293b;
+            margin: 0;
+            background: linear-gradient(90deg, #0ea5e9, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 12px;
+            background: white;
+            padding: 4px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            color: #64748b;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active {
+            background: #0ea5e9;
+            color: white;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+        }
+
+        .filter-btn:hover:not(.active) {
+            background: #f1f5f9;
+            color: #0f172a;
+        }
+
+        .grid-dashboard {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        .alert-box {
+            background: #fef2f2;
+            border: 1px solid #fee2e2;
+            border-left: 4px solid #ef4444;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .alert-icon {
+            color: #ef4444;
+            flex-shrink: 0;
+        }
+
+        .alert-content h4 {
+            margin: 0 0 4px 0;
+            color: #991b1b;
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .alert-content p {
+            margin: 0;
+            color: #b91c1c;
+            font-size: 14px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #94a3b8;
+        }
+        
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 16px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+        
+        /* Styles for coach alerts history */
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .history-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 16px;
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            border-left: 4px solid #f59e0b;
+            border-radius: 12px;
+        }
+
+        .history-item.critical {
+            background: #fef2f2;
+            border-color: #fecaca;
+            border-left-color: #ef4444;
+        }
+
+        .history-item-icon {
+            color: #f59e0b;
+            flex-shrink: 0;
+            padding-top: 2px;
+        }
+
+        .history-item.critical .history-item-icon {
+            color: #ef4444;
+        }
+
+        .history-item-content {
+            flex: 1;
+        }
+
+        .history-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .history-item-title {
+            font-weight: 600;
+            color: #92400e;
+            margin: 0;
+        }
+
+        .history-item.critical .history-item-title {
+            color: #991b1b;
+        }
+
+        .history-item-date {
+            font-size: 12px;
+            color: #9ca3af;
+        }
+
+        .history-item-text {
+            color: #b45309;
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .history-item.critical .history-item-text {
+            color: #b91c1c;
+        }
+
+        @media (max-width: 1024px) {
+            .grid-dashboard {
+                grid-template-columns: 1fr;
+            }
+            .full-width {
+                grid-column: span 1;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <a href="{{ path('admin_user_meals', {'id': patient.id}) }}" style="background: white; border: 1px solid #e2e8f0; color: #64748b; padding: 8px 16px; border-radius: 12px; font-weight: 600; text-decoration: none; font-size: 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 8px; transition: all 0.3s ease;" onmouseover="this.style.background='#f8fafc'; this.style.color='#0f172a'" onmouseout="this.style.background='white'; this.style.color='#64748b'">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                    Retour aux Repas
+                </a>
+                <h1 class="dashboard-title">Scores Nutritionnels : {{ patient.nomComplet }}</h1>
+            </div>
+            
+            <div class="filter-group">
+                <a href="{{ path('app_coach_patient_dashboard', {'id': patient.id, 'filter': 'week'}) }}" class="filter-btn {{ filter == 'week' ? 'active' : '' }}">7 Derniers Jours</a>
+                <a href="{{ path('app_coach_patient_dashboard', {'id': patient.id, 'filter': 'month'}) }}" class="filter-btn {{ filter == 'month' ? 'active' : '' }}">30 Derniers Jours</a>
+            </div>
+        </div>
+
+        <div class="grid-dashboard">
+            {# Courbe des moyennes journalières #}
+            <div class="card full-width">
+                <h2 class="card-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                    Evolution Hebdomadaire/Mensuelle (Score global sur 10)
+                </h2>
+                {% if dailyChartLabels|length > 0 %}
+                    <div class="chart-container">
+                        <canvas id="dailyTrendChart"></canvas>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24"><path d="M21 21H3V3m18 8l-5-5-4 4-4-4"/></svg>
+                        <p>Aucune donnée disponible pour ce patient sur cette période.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            {# Historique Détaillé des scores de repas #}
+            <div class="card full-width">
+                <h2 class="card-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                    Aperçu par Repas (Détails au survol)
+                </h2>
+                {% if chartData|length > 0 %}
+                    <div class="chart-container">
+                        <canvas id="mealBarChart"></canvas>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <p>Le patient n'a ajouté aucun repas pour le moment.</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            {# Historique des Alertes Coach #}
+            <div class="card full-width" style="overflow-y: auto; max-height: 500px;">
+                <h2 class="card-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                    Historique des Alertes Coach (SMS)
+                </h2>
+                
+                <div class="history-list">
+                    {% if coachAlerts|length > 0 %}
+                        {% for alerte in coachAlerts %}
+                            <div class="history-item {{ alerte.criticite == 'ROUGE' ? 'critical' : '' }}">
+                                <div class="history-item-icon">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <polyline points="12 6 12 12 16 14"></polyline>
+                                    </svg>
+                                </div>
+                                <div class="history-item-content">
+                                    <div class="history-item-header">
+                                        <h4 class="history-item-title">
+                                            Repas: {{ alerte.repas ? alerte.repas.titreRepas : 'Inconnu' }}
+                                        </h4>
+                                        <span class="history-item-date">{{ alerte.dateAlerte|date('d/m/Y H:i') }}</span>
+                                    </div>
+                                    <p class="history-item-text">{{ alerte.message }}</p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="history-item" style="background: #f0fdf4; border-color: #dcfce7; border-left-color: #22c55e;">
+                            <div class="history-item-icon" style="color: #22c55e;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                </svg>
+                            </div>
+                            <div class="history-item-content">
+                                <h4 class="history-item-title" style="color: #166534;">Aucune alerte récente</h4>
+                                <p class="history-item-text" style="color: #15803d;">Le patient n'a déclenché aucune alerte SMS récemment.</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <!-- Load Chart.js from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Data injected from Controller
+            const mealData = {{ chartData|json_encode|raw }};
+            const dailyLabels = {{ dailyChartLabels|json_encode|raw }};
+            const dailyData = {{ dailyChartData|json_encode|raw }};
+            const dailyColors = {{ dailyChartColors|json_encode|raw }};
+
+            // 1. Line Chart for Daily Trend
+            if (document.getElementById('dailyTrendChart')) {
+                const ctxDaily = document.getElementById('dailyTrendChart').getContext('2d');
+                
+                // Gradient for the line
+                let gradient = ctxDaily.createLinearGradient(0, 0, 0, 400);
+                gradient.addColorStop(0, 'rgba(14, 165, 233, 0.5)');
+                gradient.addColorStop(1, 'rgba(14, 165, 233, 0.05)');
+
+                new Chart(ctxDaily, {
+                    type: 'line',
+                    data: {
+                        labels: dailyLabels,
+                        datasets: [{
+                            label: 'Score Moyen Quotidien',
+                            data: dailyData,
+                            borderColor: '#0ea5e9',
+                            backgroundColor: gradient,
+                            borderWidth: 3,
+                            pointBackgroundColor: dailyColors,
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: dailyColors,
+                            pointRadius: 5,
+                            pointHoverRadius: 8,
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 10,
+                                grid: { color: '#f1f5f9' },
+                                ticks: { font: { family: 'Inter' } }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { font: { family: 'Inter' } }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                                titleFont: { family: 'Inter', size: 14 },
+                                bodyFont: { family: 'Inter', size: 14 },
+                                padding: 12,
+                                cornerRadius: 8,
+                                displayColors: false,
+                                callbacks: {
+                                    label: function(context) {
+                                        return `Score : ${context.parsed.y} / 10`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 2. Bar Chart for Individual Meals
+            if (document.getElementById('mealBarChart')) {
+                const ctxMeals = document.getElementById('mealBarChart').getContext('2d');
+                
+                const mealLabels = mealData.map(d => d.date + ' ' + d.heure);
+                const scores = mealData.map(d => d.globalScore);
+                const bgColors = mealData.map(d => {
+                    if (d.globalScore >= 7) return 'rgba(16, 185, 129, 0.8)'; // Green
+                    if (d.globalScore >= 4) return 'rgba(245, 158, 11, 0.8)'; // Yellow
+                    return 'rgba(239, 68, 68, 0.8)'; // Red
+                });
+                
+                new Chart(ctxMeals, {
+                    type: 'bar',
+                    data: {
+                        labels: mealLabels,
+                        datasets: [{
+                            label: 'Score Global',
+                            data: scores,
+                            backgroundColor: bgColors,
+                            borderRadius: 6,
+                            barPercentage: 0.6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 10,
+                                grid: { color: '#f1f5f9' }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { maxRotation: 45, minRotation: 45 }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                                titleFont: { family: 'Inter', size: 14, weight: 'bold' },
+                                bodyFont: { family: 'Inter', size: 13 },
+                                padding: 12,
+                                cornerRadius: 8,
+                                callbacks: {
+                                    title: function(context) {
+                                        const index = context[0].dataIndex;
+                                        return mealData[index].titre + ' (' + mealData[index].type + ')';
+                                    },
+                                    label: function(context) {
+                                        const index = context.dataIndex;
+                                        const data = mealData[index];
+                                        return [
+                                            `Score Global: ${data.globalScore} / 10`,
+                                            `🕒 Timing: ${data.timingScore}`,
+                                            `🥗 Nutrition: ${data.nutritionScore}`,
+                                            `⚖️ Équilibre: ${data.balanceScore}`,
+                                            `🔁 Interaction: ${data.interactionScore}`
+                                        ];
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+{% endblock %}

@@ -33,11 +33,12 @@ class HuggingFaceSpeechService
                 throw new \Exception("Impossible de lire le fichier audio");
             }
 
-            // Appel à l'API HuggingFace Whisper
+            // Appel à l'API HuggingFace Whisper avec l'URL d'inférence correcte
             $response = $this->httpClient->request('POST', 'https://api-inference.huggingface.co/models/openai/whisper-large-v3', [
                 'headers' => [
                     'Authorization' => 'Bearer ' . $this->apiKey,
-                    'Content-Type' => 'audio/mpeg',
+                    // On envoie un flux binaire générique pour laisser l'API détecter le format (webm/opus, etc.)
+                    'Content-Type' => 'application/octet-stream',
                 ],
                 'body' => $audioContent,
                 'timeout' => 30,
@@ -122,10 +123,19 @@ class HuggingFaceSpeechService
         $nutritionInfo = null;
         $foundFood = null;
         
+        // Nettoyer le texte pour la recherche
+        $cleanFood = trim($food);
+        
         foreach ($foodDatabase as $foodName => $values) {
-            if (stripos($food, $foodName) !== false) {
+            // Recherche insensible à la casse et avec correspondance partielle
+            if (stripos($cleanFood, $foodName) !== false || stripos($foodName, $cleanFood) !== false) {
                 $nutritionInfo = $values;
                 $foundFood = $foodName;
+                $this->logger->info('Aliment trouvé dans la base', [
+                    'search' => $cleanFood,
+                    'found' => $foodName,
+                    'values' => $values
+                ]);
                 break;
             }
         }

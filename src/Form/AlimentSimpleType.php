@@ -6,6 +6,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -53,6 +54,13 @@ class AlimentSimpleType extends AbstractType
                 'attr' => [
                     'placeholder' => 'Enter fats...',
                     'class' => 'form-input'
+                ]
+            ])
+            ->add('estExcitant', CheckboxType::class, [
+                'label'    => 'Excitant (ex: Café, Thé, RedBull)',
+                'required' => false,
+                'attr'     => [
+                    'class' => 'form-checkbox'
                 ]
             ])
         ;

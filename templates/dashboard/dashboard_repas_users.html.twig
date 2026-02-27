@@ -83,6 +83,7 @@
               {% endif %}
             </td>
             <td style="padding: 12px; text-align: right;">
+              <a class="btn btn-primary" href="{{ path('app_coach_patient_dashboard', {'id': user.id}) }}" style="margin-right: 8px;">Voir Dashboard</a>
               <a class="btn btn-outline" href="{{ path('admin_user_meals', {'id': user.id}) }}">Voir ses repas</a>
             </td>
           </tr>

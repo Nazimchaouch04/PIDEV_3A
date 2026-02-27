@@ -30,11 +30,10 @@ class Repas
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Assert\NotNull(message: 'La date de consommation est requise')]
-    #[Assert\LessThanOrEqual('today', message: 'La date ne peut pas être dans le futur')]
+    #[Assert\LessThanOrEqual('now', message: 'La date ne peut pas être dans le futur')]
     private ?\DateTimeInterface $dateConsommation = null;
 
     #[ORM\Column]
-    #[Assert\PositiveOrZero(message: 'Les points doivent être supérieurs ou égaux à 0')]
     private int $pointsGagnes = 0;
 
     #[ORM\ManyToOne(inversedBy: 'repas')]

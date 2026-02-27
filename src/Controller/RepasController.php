@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Repas;
 use App\Form\Repas1Type;
 use App\Repository\RepasRepository;
+use App\Service\ChronoScoreService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -37,7 +38,7 @@ final class RepasController extends AbstractController
     }
 
     #[Route('/new', name: 'app_repas_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, \App\Service\AlertService $alertService): Response
     {
         $repa = new Repas();
         $user = $this->getUser();
@@ -52,6 +53,9 @@ final class RepasController extends AbstractController
             $entityManager->persist($repa);
             $entityManager->flush();
 
+            // Notify Coach if necessary
+            $alertService->checkRepasAlerts($repa);
+
             return $this->redirectToRoute('app_repas_show', ['id' => $repa->getId()], Response::HTTP_SEE_OTHER);
         }
 
@@ -62,13 +66,29 @@ final class RepasController extends AbstractController
     }
 
     #[Route('/{id}/show', name: 'app_repas_show', methods: ['GET'])]
-    public function show(?Repas $repa): Response
+    public function show(
+        ?Repas $repa,
+        ChronoScoreService $chronoScoreService,
+        RepasRepository $repasRepository
+    ): Response
     {
         if (!$repa) {
             throw $this->createNotFoundException('Repas not found');
         }
+
+        $chronoScore = $chronoScoreService->evaluateRepas($repa);
+
+        $weeklyTrend = null;
+        $user = $repa->getUtilisateur();
+        if ($user) {
+            $repasSemaine = $repasRepository->findByUtilisateurAndWeek($user, $repa->getDateConsommation());
+            $weeklyTrend = $chronoScoreService->analyzeWeeklyTrend($repasSemaine, $repa);
+        }
+
         return $this->render('repas/show.html.twig', [
             'repa' => $repa,
+            'chronoScore' => $chronoScore,
+            'weeklyTrend' => $weeklyTrend,
         ]);
     }
 
