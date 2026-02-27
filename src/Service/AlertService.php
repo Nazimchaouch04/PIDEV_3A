@@ -53,23 +53,14 @@ class AlertService
 
         $user = $repas->getUtilisateur();
         
-        // Check if an alert was already logged today (anti-spam 1 per day rule limit)
-        $today = new \DateTime();
-        $today->setTime(0, 0, 0);
+        // Check if an alert was already logged for this specific meal (anti-spam)
+        $existingAlert = $this->alerteRepository->findOneBy(['repas' => $repas, 'type' => 'EXCITANT_TARDIF']);
         
-        $todaysAlertsCount = $this->alerteRepository->createQueryBuilder('a')
-            ->select('count(a.id)')
-            ->where('a.utilisateur = :user')
-            ->andWhere('a.dateAlerte >= :today')
-            ->setParameter('user', $user)
-            ->setParameter('today', $today)
-            ->getQuery()
-            ->getSingleScalarResult();
-
-        if ($todaysAlertsCount > 0) {
-            // Anti-spam: We already alerted today for this user.
-            // TEMPORARILY DISABLED FOR TESTING
-            // return;
+        if ($existingAlert) {
+            // Anti-spam: We already alerted for this meal.
+            // Update the existing alert strictly if new excitants were added?
+            // Actually, simply returning is fine to avoid multiple SMS.
+            return;
         }
 
         // Tendance Hebdomadaire (more than 2 times this week)
@@ -114,7 +105,7 @@ class AlertService
         // Send SMS
         if ($this->twilioClient && $this->coachPhoneNumber) {
             $smsBody = sprintf(
-                "🚨 Alerte ChronoNutrition\nPatient: %s\nAliments: %s\nHeure: %s%s\n💡 Conseil: Suggérer un repas léger ou tisane relaxante ce soir.",
+                "🚨 Alerte ChronoNutrition\nPatient: %s\nAliments: %s\nHeure: %s%s\n Conseil: Suggérer un repas léger ou tisane relaxante ce soir.",
                 $user->getNomComplet(),
                 $excitantsStr,
                 $timeStr,
