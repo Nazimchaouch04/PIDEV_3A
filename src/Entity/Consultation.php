@@ -12,15 +12,17 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: ConsultationRepository::class)]
 class Consultation
 {
+    /** @var int|null */
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column]
+    // ✅ CORRIGÉ : DateTime → DateTimeImmutable
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     #[Assert\NotBlank(message: "La date de consultation est obligatoire")]
     #[Assert\LessThanOrEqual("today", message: "La date de consultation ne peut pas être dans le futur")]
-    private ?\DateTime $dateConsultation = null;
+    private ?\DateTimeImmutable $dateConsultation = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Assert\Length(min: 10, max: 2000, minMessage: "Les symptômes doivent faire au moins 10 caractères", maxMessage: "Les symptômes ne doivent pas dépasser 2000 caractères")]
@@ -37,23 +39,27 @@ class Consultation
     #[Assert\Regex(pattern: "/^[a-zA-Z0-9\s\-.,;:àâäéèêëïîôöùûç]+$/", message: "Les recommandations contiennent des caractères non valides")]
     private ?string $recommandations = null;
 
-    // ✅ ONE consultation belongs to ONE rendez-vous
     #[ORM\OneToOne(inversedBy: 'consultation')]
     #[ORM\JoinColumn(nullable: false)]
     private ?RendezVous $rendezVous = null;
 
-    // ✅ ONE consultation can have MANY prescriptions
+    /**
+     * @var Collection<int, Prescription>
+     */
+    // ✅ CORRIGÉ : ajout orphanRemoval=true pour supprimer les orphelins
     #[ORM\OneToMany(
         targetEntity: Prescription::class,
         mappedBy: 'consultation',
-        cascade: ['persist', 'remove']
+        cascade: ['persist', 'remove'],
+        orphanRemoval: true
     )]
     private Collection $prescriptions;
 
     public function __construct()
     {
         $this->prescriptions = new ArrayCollection();
-        $this->dateConsultation = new \DateTime();
+        // ✅ CORRIGÉ : DateTimeImmutable
+        $this->dateConsultation = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -61,12 +67,13 @@ class Consultation
         return $this->id;
     }
 
-    public function getDateConsultation(): ?\DateTime
+    public function getDateConsultation(): ?\DateTimeImmutable
     {
         return $this->dateConsultation;
     }
 
-    public function setDateConsultation(\DateTime $dateConsultation): static
+    // ✅ CORRIGÉ : setter accepte DateTimeImmutable
+    public function setDateConsultation(\DateTimeImmutable $dateConsultation): static
     {
         $this->dateConsultation = $dateConsultation;
         return $this;

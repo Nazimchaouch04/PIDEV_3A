@@ -17,6 +17,7 @@ class Specialiste
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    /** @var int|null */
     private ?int $id = null;
 
     #[ORM\Column(length: 100)]
@@ -35,22 +36,18 @@ class Specialiste
     #[Assert\NotBlank(message: 'La disponibilite est requise')]
     private ?string $disponibilite = null;
 
-    /**
-     * LOGIN ACCOUNT LINK
-     */
-    #[ORM\OneToOne(inversedBy: 'specialiste')]
-    #[ORM\JoinColumn(nullable: false)]
+    // ✅ CORRIGÉ : inversedBy: 'specialiste' pointe vers $specialiste ajouté dans Utilisateur
+    // ✅ CORRIGÉ : ajout onDelete CASCADE pour cohérence ORM/DB
+    #[ORM\OneToOne(inversedBy: 'specialiste', targetEntity: Utilisateur::class)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Utilisateur $utilisateur = null;
 
-    /**
-     * @var Collection<int, RendezVous>
-     */
-    #[ORM\OneToMany(targetEntity: RendezVous::class, mappedBy: 'specialiste')]
-    private Collection $rendezVous;
+    // ✅ SUPPRIMÉ : la relation OneToMany vers RendezVous est incohérente car
+    // RendezVous::$specialiste est un Utilisateur, pas un Specialiste.
+    // Les rendez-vous du spécialiste sont accessibles via $utilisateur->getRendezVousSpecialiste()
 
     public function __construct()
     {
-        $this->rendezVous = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -102,9 +99,6 @@ class Specialiste
         return $this;
     }
 
-    /*
-     * UTILISATEUR RELATION
-     */
     public function getUtilisateur(): ?Utilisateur
     {
         return $this->utilisateur;
@@ -116,30 +110,9 @@ class Specialiste
         return $this;
     }
 
-    /**
-     * @return Collection<int, RendezVous>
-     */
+    // ✅ Raccourci pratique pour accéder aux rendez-vous via l'utilisateur lié
     public function getRendezVous(): Collection
     {
-        return $this->rendezVous;
-    }
-
-    public function addRendezVous(RendezVous $rendezVous): static
-    {
-        if (!$this->rendezVous->contains($rendezVous)) {
-            $this->rendezVous->add($rendezVous);
-            $rendezVous->setSpecialiste($this->utilisateur);
-        }
-        return $this;
-    }
-
-    public function removeRendezVous(RendezVous $rendezVous): static
-    {
-        if ($this->rendezVous->removeElement($rendezVous)) {
-            if ($rendezVous->getSpecialiste() === $this->utilisateur) {
-                $rendezVous->setSpecialiste(null);
-            }
-        }
-        return $this;
+        return $this->utilisateur?->getRendezVousSpecialiste() ?? new ArrayCollection();
     }
 }

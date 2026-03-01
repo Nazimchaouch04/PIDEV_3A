@@ -20,6 +20,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    /** @var int|null */
     private ?int $id = null;
 
     #[ORM\Column(length: 100)]
@@ -55,6 +56,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     private ?\DateTimeInterface $dateInscription = null;
 
     #[ORM\Column(type: Types::JSON)]
+    /** @var array<string> */
     private array $roles = [];
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -69,9 +71,15 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToOne(mappedBy: 'utilisateur', targetEntity: Certification::class, cascade: ['persist', 'remove'])]
     private ?Certification $certification = null;
 
+    // ✅ CORRIGÉ : ajout du champ $specialiste manquant (inversedBy: 'utilisateur' dans Specialiste)
+    #[ORM\OneToOne(mappedBy: 'utilisateur', targetEntity: Specialiste::class, cascade: ['persist', 'remove'])]
+    private ?Specialiste $specialiste = null;
+
     /**
      * Vecteur d'encodage facial moyen (128 valeurs float) issu de face_recognition.
      * Null si l'utilisateur n'a pas encore configuré le Face ID.
+     *
+     * @var array<int, float>|null
      */
     #[ORM\Column(type: Types::JSON, nullable: true)]
     private ?array $faceEncoding = null;
@@ -79,66 +87,51 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var Collection<int, Repas>
      */
-    #[ORM\OneToMany(targetEntity: Repas::class, mappedBy: 'utilisateur', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Repas::class, mappedBy: 'utilisateur', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $repas;
 
     /**
      * @var Collection<int, SeanceSport>
      */
-    #[ORM\OneToMany(targetEntity: SeanceSport::class, mappedBy: 'utilisateur', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: SeanceSport::class, mappedBy: 'utilisateur', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $seancesSport;
 
     /**
      * @var Collection<int, QuizMental>
-     * Collection des quiz mentaux passés par l'utilisateur
-     * Relation OneToMany : un utilisateur peut passer plusieurs quiz mentaux
      */
-    #[ORM\OneToMany(targetEntity: QuizMental::class, mappedBy: 'utilisateur', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: QuizMental::class, mappedBy: 'utilisateur', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $quizMentaux;
 
     /**
      * @var Collection<int, RendezVous>
-     * Collection des rendez-vous médicaux de l'utilisateur (comme patient)
-     * Relation OneToMany : un utilisateur peut avoir plusieurs rendez-vous
      */
-    #[ORM\OneToMany(targetEntity: RendezVous::class, mappedBy: 'patient', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: RendezVous::class, mappedBy: 'patient', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $rendezVousPatient;
 
     /**
      * @var Collection<int, RendezVous>
-     * Collection des rendez-vous médicaux de l'utilisateur (comme spécialiste)
-     * Relation OneToMany : un spécialiste peut avoir plusieurs rendez-vous
      */
-    #[ORM\OneToMany(targetEntity: RendezVous::class, mappedBy: 'specialiste', orphanRemoval: true)]
+    // ✅ CORRIGÉ : mappedBy: 'specialiste' pointe vers RendezVous::$specialiste (Utilisateur)
+    #[ORM\OneToMany(targetEntity: RendezVous::class, mappedBy: 'specialiste', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $rendezVousSpecialiste;
 
     /**
      * @var Collection<int, MembreGroupe>
-     * Collection des groupes de soutien auxquels l'utilisateur est inscrit
-     * Relation OneToMany : un utilisateur peut rejoindre plusieurs groupes
      */
-    #[ORM\OneToMany(targetEntity: MembreGroupe::class, mappedBy: 'utilisateur', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: MembreGroupe::class, mappedBy: 'utilisateur', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $membresGroupes;
 
-    /**
-     * Constructeur de l'entité Utilisateur
-     * Initialise les valeurs par défaut et les collections vides
-     */
     public function __construct()
     {
-        $this->dateInscription = new \DateTime();  // Date d'inscription automatique
-        $this->roles = ['ROLE_USER'];              // Rôle par défaut
-        $this->repas = new ArrayCollection();           // Initialisation collection repas
-        $this->seancesSport = new ArrayCollection();     // Initialisation collection séances sport
-        $this->quizMentaux = new ArrayCollection();   // Initialisation collection quiz mentaux
-        $this->rendezVousPatient = new ArrayCollection();     // Initialisation collection rendez-vous patient
-        $this->rendezVousSpecialiste = new ArrayCollection();  // Initialisation collection rendez-vous spécialiste
-        $this->membresGroupes = new ArrayCollection();  // Initialisation collection groupes
+        $this->dateInscription = new \DateTime();
+        $this->roles = ['ROLE_USER'];
+        $this->repas = new ArrayCollection();
+        $this->seancesSport = new ArrayCollection();
+        $this->quizMentaux = new ArrayCollection();
+        $this->rendezVousPatient = new ArrayCollection();
+        $this->rendezVousSpecialiste = new ArrayCollection();
+        $this->membresGroupes = new ArrayCollection();
     }
-
-    // =========================================================================
-    // SECTION : GETTERS ET SETTERS
-    // =========================================================================
 
     public function getId(): ?int
     {
@@ -211,6 +204,9 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    /**
+     * @return array<string>
+     */
     public function getRoles(): array
     {
         $roles = $this->roles;
@@ -218,6 +214,9 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return array_unique($roles);
     }
 
+    /**
+     * @param array<string> $roles
+     */
     public function setRoles(array $roles): static
     {
         $this->roles = $roles;
@@ -241,11 +240,9 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         if ($profilSante === null && $this->profilSante !== null) {
             $this->profilSante->setUtilisateur(null);
         }
-
         if ($profilSante !== null && $profilSante->getUtilisateur() !== $this) {
             $profilSante->setUtilisateur($this);
         }
-
         $this->profilSante = $profilSante;
         return $this;
     }
@@ -260,21 +257,39 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         if ($certification === null && $this->certification !== null) {
             $this->certification->setUtilisateur(null);
         }
-
         if ($certification !== null && $certification->getUtilisateur() !== $this) {
             $certification->setUtilisateur($this);
         }
-
         $this->certification = $certification;
         return $this;
     }
 
-    // --- COLLECTIONS ---
+    // ✅ CORRIGÉ : getter/setter pour $specialiste ajoutés
+    public function getSpecialiste(): ?Specialiste
+    {
+        return $this->specialiste;
+    }
 
+    public function setSpecialiste(?Specialiste $specialiste): static
+    {
+        if ($specialiste === null && $this->specialiste !== null) {
+            $this->specialiste->setUtilisateur(null);
+        }
+        if ($specialiste !== null && $specialiste->getUtilisateur() !== $this) {
+            $specialiste->setUtilisateur($this);
+        }
+        $this->specialiste = $specialiste;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Repas>
+     */
     public function getRepas(): Collection
     {
         return $this->repas;
     }
+
     public function addRepas(Repas $repas): static
     {
         if (!$this->repas->contains($repas)) {
@@ -283,6 +298,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         }
         return $this;
     }
+
     public function removeRepas(Repas $repas): static
     {
         if ($this->repas->removeElement($repas)) {
@@ -293,10 +309,14 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    /**
+     * @return Collection<int, SeanceSport>
+     */
     public function getSeancesSport(): Collection
     {
         return $this->seancesSport;
     }
+
     public function addSeanceSport(SeanceSport $seanceSport): static
     {
         if (!$this->seancesSport->contains($seanceSport)) {
@@ -306,15 +326,22 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    /**
+     * @return Collection<int, QuizMental>
+     */
     public function getQuizMentaux(): Collection
     {
         return $this->quizMentaux;
     }
+
+    /**
+     * @return Collection<int, RendezVous>
+     */
     public function getRendezVousPatient(): Collection
     {
         return $this->rendezVousPatient;
     }
-    
+
     public function addRendezVousPatient(RendezVous $rendezVous): static
     {
         if (!$this->rendezVousPatient->contains($rendezVous)) {
@@ -323,7 +350,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         }
         return $this;
     }
-    
+
     public function removeRendezVousPatient(RendezVous $rendezVous): static
     {
         if ($this->rendezVousPatient->removeElement($rendezVous)) {
@@ -334,11 +361,14 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    /**
+     * @return Collection<int, RendezVous>
+     */
     public function getRendezVousSpecialiste(): Collection
     {
         return $this->rendezVousSpecialiste;
     }
-    
+
     public function addRendezVousSpecialiste(RendezVous $rendezVous): static
     {
         if (!$this->rendezVousSpecialiste->contains($rendezVous)) {
@@ -347,7 +377,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         }
         return $this;
     }
-    
+
     public function removeRendezVousSpecialiste(RendezVous $rendezVous): static
     {
         if ($this->rendezVousSpecialiste->removeElement($rendezVous)) {
@@ -358,6 +388,9 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    /**
+     * @return Collection<int, MembreGroupe>
+     */
     public function getMembresGroupes(): Collection
     {
         return $this->membresGroupes;
@@ -387,23 +420,27 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getInitials(): string
     {
-        $names = explode(' ', $this->nomComplet);
+        $names = explode(' ', $this->nomComplet ?? '');
         $initials = '';
-        
         foreach ($names as $name) {
             if (!empty($name)) {
                 $initials .= strtoupper(substr($name, 0, 1));
             }
         }
-        
         return $initials;
     }
 
+    /**
+     * @return array<int, float>|null
+     */
     public function getFaceEncoding(): ?array
     {
         return $this->faceEncoding;
     }
 
+    /**
+     * @param array<int, float>|null $faceEncoding
+     */
     public function setFaceEncoding(?array $faceEncoding): static
     {
         $this->faceEncoding = $faceEncoding;

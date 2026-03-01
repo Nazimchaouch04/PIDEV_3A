@@ -9,6 +9,7 @@ class RecaptchaService
 {
     private ReCaptcha $recaptcha;
     private LoggerInterface $logger;
+    /** @phpstan-ignore property.onlyWritten */
     private string $secretKey;
 
     public function __construct(LoggerInterface $logger, string $recaptchaSecretKey)
@@ -18,9 +19,6 @@ class RecaptchaService
         $this->recaptcha = new ReCaptcha($recaptchaSecretKey);
     }
 
-    /**
-     * Vérifie la réponse reCAPTCHA
-     */
     public function verify(string $token, ?string $remoteIp = null): bool
     {
         try {
@@ -47,9 +45,6 @@ class RecaptchaService
         }
     }
 
-    /**
-     * Vérifie la réponse reCAPTCHA avec un score minimum
-     */
     public function verifyWithScore(string $token, float $minScore = 0.5, ?string $remoteIp = null): bool
     {
         try {
@@ -79,27 +74,20 @@ class RecaptchaService
         }
     }
 
-    /**
-     * Retourne la clé de site reCAPTCHA
-     */
     public function getSiteKey(): string
     {
         return $_ENV['RECAPTCHA_SITE_KEY'] ?? '';
     }
 
-    /**
-     * Génère le script JavaScript pour reCAPTCHA
-     */
     public function renderScript(string $action = 'homepage'): string
     {
         $siteKey = $this->getSiteKey();
-        
+
         return "
         <script src=\"https://www.google.com/recaptcha/api.js?render={$siteKey}\"></script>
         <script>
         function executeRecaptcha(action) {
             return grecaptcha.execute('{$siteKey}', {action: action}).then(function(token) {
-                // Mettre le token dans un champ caché
                 var recaptchaResponse = document.getElementById('recaptcha-response');
                 if (recaptchaResponse) {
                     recaptchaResponse.value = token;
@@ -107,17 +95,12 @@ class RecaptchaService
                 return token;
             });
         }
-        
-        // Exécuter reCAPTCHA au chargement de la page
         document.addEventListener('DOMContentLoaded', function() {
             executeRecaptcha('{$action}');
         });
         </script>";
     }
 
-    /**
-     * Génère le champ caché pour la réponse reCAPTCHA
-     */
     public function renderHiddenField(): string
     {
         return '<input type="hidden" id="recaptcha-response" name="recaptcha_response">';

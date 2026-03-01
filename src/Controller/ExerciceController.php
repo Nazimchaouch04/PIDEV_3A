@@ -8,10 +8,12 @@ use App\Form\ExerciceType;
 use App\Repository\ExerciceRepository;
 use App\Repository\SeanceSportRepository;
 use App\Service\CalorieNinjasService;
+use App\Service\CaloriePredictionService;
 use App\Service\ExerciseDBService;
 use App\Service\ProgrammeIAService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -102,8 +104,8 @@ final class ExerciceController extends AbstractController
         $debutSemaine = (clone $now)->modify('monday this week 00:00:00');
         $finSemaine   = (clone $now)->modify('sunday this week 23:59:59');
 
-        $tousExercices = $exerciceRepository->findAll();
-        $exercicesSemaine = array_filter($tousExercices, function($e) use ($debutSemaine, $finSemaine) {
+        $tousExercices    = $exerciceRepository->findAll();
+        $exercicesSemaine = array_filter($tousExercices, function ($e) use ($debutSemaine, $finSemaine) {
             $date = $e->getSeance()->getDateSeance();
             return $date >= $debutSemaine && $date <= $finSemaine;
         });
@@ -121,7 +123,7 @@ final class ExerciceController extends AbstractController
         }
 
         $nbIntensiteElevee = count(array_filter($exercicesSemaine,
-            fn($e) => $e->getIntensite()->value === 'eleve'
+            fn($e) => $e->getIntensite()->value === 'elevee'
         ));
 
         $toutesSeances  = $seanceSportRepository->findAll();
@@ -138,11 +140,11 @@ final class ExerciceController extends AbstractController
         foreach (self::DEFIS_EXERCICE as $defi) {
             $valeurActuelle = 0;
             switch ($defi['condition']) {
-                case 'exercices_semaine':    $valeurActuelle = $nbExercicesSemaine;  break;
-                case 'exercices_differents': $valeurActuelle = $nbDifferents;        break;
+                case 'exercices_semaine':    $valeurActuelle = $nbExercicesSemaine;          break;
+                case 'exercices_differents': $valeurActuelle = $nbDifferents;                break;
                 case 'calories_minute':      $valeurActuelle = round($maxCaloriesMinute, 1); break;
-                case 'intensite_elevee':     $valeurActuelle = $nbIntensiteElevee;   break;
-                case 'duree_seance':         $valeurActuelle = $maxDureeSeance;      break;
+                case 'intensite_elevee':     $valeurActuelle = $nbIntensiteElevee;           break;
+                case 'duree_seance':         $valeurActuelle = $maxDureeSeance;              break;
             }
             $progression = min(100, round(($valeurActuelle / $defi['valeur']) * 100));
             $atteint     = $progression >= 100;
@@ -184,9 +186,12 @@ final class ExerciceController extends AbstractController
     }
 
     // =========================================================================
-    // ════════════  GROQ — Message félicitations Exercice  ════════════════════
+    // ════════════════  GROQ — Message félicitations Exercice  ════════════════
     // =========================================================================
 
+    /**
+     * @param array<string, mixed> $data
+     */
     private function getMessageFelicitationsGroq(HttpClientInterface $httpClient, array $data): ?string
     {
         $groqApiKey = $_SERVER['GROQ_API_KEY'] ?? $_ENV['GROQ_API_KEY'] ?? null;
@@ -242,7 +247,7 @@ Utilise des emojis sportifs. Termine par un encouragement pour la semaine procha
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $exercice = new Exercice();
-        $form = $this->createForm(ExerciceType::class, $exercice);
+        $form     = $this->createForm(ExerciceType::class, $exercice);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -340,9 +345,9 @@ Utilise des emojis sportifs. Termine par un encouragement pour la semaine procha
 
     #[Route('/programme', name: 'app_exercice_programme', methods: ['GET', 'POST'])]
     public function programme(
-        Request $request,
+        Request              $request,
         CalorieNinjasService $calorieService,
-        ProgrammeIAService $programmeService
+        ProgrammeIAService   $programmeService
     ): Response {
         $programme = null;
         $exercices = [];
@@ -577,7 +582,7 @@ Utilise des emojis sportifs. Termine par un encouragement pour la semaine procha
 
     #[Route('/motivation/analyser', name: 'app_exercice_motivation_analyser', methods: ['POST'])]
     public function motivationAnalyser(
-        Request $request,
+        Request             $request,
         HttpClientInterface $httpClient
     ): Response {
         $humeur  = $request->request->get('humeur');
@@ -599,6 +604,48 @@ Utilise des emojis sportifs. Termine par un encouragement pour la semaine procha
             'sommeil'  => $sommeil,
             'stress'   => $stress,
         ]);
+    }
+
+    // =========================================================================
+    // ════════════  ML — Prédiction Calories Personnalisée  ════════════════════
+    // =========================================================================
+
+    #[Route('/prediction/calories/{id}', name: 'app_exercice_calories_prediction', methods: ['GET'])]
+    public function caloriesPrediction(
+        int $id,
+        CaloriePredictionService $predictionService,
+        Security $security,
+        ExerciceRepository $exerciceRepository
+    ): JsonResponse {
+        /** @var \App\Entity\Utilisateur $user */
+        $user   = $security->getUser();
+        $profil = $user?->getProfilSante();
+
+        if (!$profil || !$profil->getAge() || !$profil->getPoids()) {
+            return $this->json([
+                'status'  => 'error',
+                'message' => 'Complète ton Profil Santé pour voir la prédiction'
+            ]);
+        }
+
+        $exercice = $exerciceRepository->find($id);
+        if (!$exercice) {
+            return $this->json(['status' => 'error', 'message' => 'Exercice introuvable'], 404);
+        }
+
+        $result = $predictionService->predict(
+            [
+                'age'   => $profil->getAge(),
+                'poids' => $profil->getPoids(),
+            ],
+            [
+                'intensite'          => $exercice->getIntensite()->value,
+                'calorie_par_minute' => $exercice->getCaloriesParMinute(),
+                'duree'              => $exercice->getSeance()->getDureeMinutes() ?? 30,
+            ]
+        );
+
+        return $this->json($result);
     }
 
     // =========================================================================
@@ -646,6 +693,9 @@ Utilise des emojis sportifs. Termine par un encouragement pour la semaine procha
     // ════════════════════  GROQ — Prédiction Objectif User  ═══════════════════
     // =========================================================================
 
+    /**
+     * @param array<string, mixed> $data
+     */
     private function getPredictionGroqUser(HttpClientInterface $httpClient, array $data): string
     {
         $groqApiKey = $_SERVER['GROQ_API_KEY'] ?? $_ENV['GROQ_API_KEY'] ?? null;
@@ -688,6 +738,9 @@ Génère un plan motivant en français avec :
     // ════════════════════  GROQ IA — Conseils User  ═══════════════════════════
     // =========================================================================
 
+    /**
+     * @param array<string, mixed> $stats
+     */
     private function getConseilGroqUser(HttpClientInterface $httpClient, array $stats): string
     {
         $groqApiKey = $_SERVER['GROQ_API_KEY'] ?? $_ENV['GROQ_API_KEY'] ?? null;
@@ -723,6 +776,9 @@ Donne 3 conseils courts et motivants en français. Emoji sportif par conseil. Ma
     // ════════════════  GROQ — Motivation & Suivi Psychologique  ══════════════
     // =========================================================================
 
+    /**
+     * @param array<string, mixed> $data
+     */
     private function getMotivationGroq(HttpClientInterface $httpClient, array $data): string
     {
         $groqApiKey = $_SERVER['GROQ_API_KEY'] ?? $_ENV['GROQ_API_KEY'] ?? null;

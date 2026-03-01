@@ -16,6 +16,7 @@ class GroupeSoutien
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    /** @var int|null */
     private ?int $id = null;
 
     #[ORM\Column(length: 100)]
@@ -38,10 +39,18 @@ class GroupeSoutien
     #[Assert\NotBlank(message: 'L\'image est requise')]
     private ?string $image = null;
 
-    #[ORM\OneToMany(targetEntity: EvenementSante::class, mappedBy: 'groupe', orphanRemoval: true)]
+    /**
+     * @var Collection<int, EvenementSante>
+     */
+    // ✅ CORRIGÉ : ajout cascade=['persist', 'remove'] + onDelete géré via JoinColumn dans EvenementSante
+    #[ORM\OneToMany(targetEntity: EvenementSante::class, mappedBy: 'groupe', orphanRemoval: true, cascade: ['persist', 'remove'])]
     private Collection $evenements;
 
-    #[ORM\OneToMany(targetEntity: MembreGroupe::class, mappedBy: 'groupe', orphanRemoval: true)]
+    /**
+     * @var Collection<int, MembreGroupe>
+     */
+    // ✅ CORRIGÉ : ajout cascade=['persist', 'remove'] + onDelete géré via JoinColumn dans MembreGroupe
+    #[ORM\OneToMany(targetEntity: MembreGroupe::class, mappedBy: 'groupe', orphanRemoval: true, cascade: ['persist', 'remove'])]
     private Collection $membres;
 
     public function __construct()
@@ -110,13 +119,17 @@ class GroupeSoutien
         return $this;
     }
 
-    /** @return Collection<int, EvenementSante> */
+    /**
+     * @return Collection<int, EvenementSante>
+     */
     public function getEvenements(): Collection
     {
         return $this->evenements;
     }
 
-    /** @return Collection<int, MembreGroupe> */
+    /**
+     * @return Collection<int, MembreGroupe>
+     */
     public function getMembres(): Collection
     {
         return $this->membres;

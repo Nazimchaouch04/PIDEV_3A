@@ -27,6 +27,8 @@ class QuizService
 
     /**
      * Récupère des questions de quiz selon les critères
+     *
+     * @return array<int, mixed>
      */
     public function getQuestions(
         string $category = null,
@@ -36,7 +38,7 @@ class QuizService
         try {
             $queryParams = [
                 'apiKey' => $this->apiKey,
-                'limit' => $limit,
+                'limit'  => $limit,
             ];
 
             if ($category) {
@@ -50,7 +52,7 @@ class QuizService
                 'GET',
                 $this->quizApiUrl . '/questions',
                 [
-                    'query' => $queryParams,
+                    'query'   => $queryParams,
                     'headers' => [
                         'Accept' => 'application/json',
                     ],
@@ -62,6 +64,7 @@ class QuizService
             }
 
             return $response->toArray();
+
         } catch (\Exception $e) {
             $this->logger->error('Erreur QuizService: ' . $e->getMessage());
             throw new \RuntimeException('Impossible de récupérer les questions. Veuillez réessayer plus tard.');
@@ -70,6 +73,8 @@ class QuizService
 
     /**
      * Récupère les catégories disponibles
+     *
+     * @return array<int, mixed>
      */
     public function getCategories(): array
     {
@@ -78,7 +83,7 @@ class QuizService
                 'GET',
                 $this->quizApiUrl . '/categories',
                 [
-                    'query' => ['apiKey' => $this->apiKey],
+                    'query'   => ['apiKey' => $this->apiKey],
                     'headers' => [
                         'Accept' => 'application/json',
                     ],
@@ -90,6 +95,7 @@ class QuizService
             }
 
             return $response->toArray();
+
         } catch (\Exception $e) {
             $this->logger->error('Erreur QuizService (getCategories): ' . $e->getMessage());
             throw new \RuntimeException('Impossible de récupérer les catégories.');

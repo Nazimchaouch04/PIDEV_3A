@@ -14,12 +14,14 @@ class RendezVous
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    /** @var int|null */
     private ?int $id = null;
 
-    #[ORM\Column]
+    // ✅ CORRIGÉ : DateTime → DateTimeImmutable
+    #[ORM\Column(type: 'datetime_immutable')]
     #[Assert\NotBlank(message: "La date et l'heure sont obligatoires")]
     #[Assert\GreaterThan("today", message: "La date du rendez-vous doit être dans le futur")]
-    private ?\DateTime $dateHeure = null;
+    private ?\DateTimeImmutable $dateHeure = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: "Le motif est obligatoire")]
@@ -36,17 +38,16 @@ class RendezVous
     #[Assert\Choice(choices: ['PRESENTIEL', 'TELECONSULTATION'], message: "Le mode doit être 'Présentiel' ou 'Téléconsultation'")]
     private string $mode;
 
-    // PATIENT
     #[ORM\ManyToOne(inversedBy: 'rendezVousPatient')]
-    #[ORM\JoinColumn(nullable: false)]
+    // ✅ CORRIGÉ : ajout onDelete CASCADE
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Utilisateur $patient = null;
 
-    // DOCTOR ACCOUNT (Utilisateur ROLE_MEDECIN)
     #[ORM\ManyToOne(inversedBy: 'rendezVousSpecialiste')]
-    #[ORM\JoinColumn(nullable: false)]
+    // ✅ CORRIGÉ : ajout onDelete CASCADE
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Utilisateur $specialiste = null;
 
-    // CONSULTATION
     #[ORM\OneToOne(mappedBy: 'rendezVous', cascade: ['persist', 'remove'])]
     private ?Consultation $consultation = null;
 
@@ -60,12 +61,13 @@ class RendezVous
         return $this->id;
     }
 
-    public function getDateHeure(): ?\DateTime
+    public function getDateHeure(): ?\DateTimeImmutable
     {
         return $this->dateHeure;
     }
 
-    public function setDateHeure(\DateTime $dateHeure): static
+    // ✅ CORRIGÉ : setter accepte DateTimeImmutable
+    public function setDateHeure(\DateTimeImmutable $dateHeure): static
     {
         $this->dateHeure = $dateHeure;
         return $this;
@@ -136,16 +138,14 @@ class RendezVous
         if ($consultation && $consultation->getRendezVous() !== $this) {
             $consultation->setRendezVous($this);
         }
-
         $this->consultation = $consultation;
         return $this;
     }
 
-    /* LOGIC */
-
+    // ✅ CORRIGÉ : comparaison avec DateTimeImmutable
     public function isPassed(): bool
     {
-        return $this->dateHeure < new \DateTime();
+        return $this->dateHeure < new \DateTimeImmutable();
     }
 
     public function isDemande(): bool

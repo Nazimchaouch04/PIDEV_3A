@@ -10,6 +10,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: CertificationRepository::class)]
 class Certification
 {
+    /** @var int|null */
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -17,7 +18,7 @@ class Certification
 
     #[ORM\Column(length: 20)]
     #[Assert\NotBlank(message: "Le type de certification est requis")]
-    private ?string $type = null; // Stockera 'COACH' ou 'SPECIALISTE'
+    private ?string $type = null;
 
     #[ORM\Column(length: 100)]
     #[Assert\NotBlank(message: "La spécialité est requise")]
@@ -35,13 +36,11 @@ class Certification
     private ?string $motivation = null;
 
     #[ORM\Column(length: 20)]
-    private string $statut = 'PENDING'; // PENDING, APPROVED, REJECTED
+    private string $statut = 'PENDING';
 
     #[ORM\OneToOne(inversedBy: 'certification', targetEntity: Utilisateur::class)]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Utilisateur $utilisateur = null;
-
-    // --- GETTERS ET SETTERS ---
 
     public function getId(): ?int
     {

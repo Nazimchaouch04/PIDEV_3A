@@ -7,13 +7,13 @@ use Symfony\Component\Validator\Constraints as Assert;
 class CertificationRequest
 {
     #[Assert\NotBlank(message: "La spécialité est requise")]
-    public $specialite;
+    public ?string $specialite = null;
 
     #[Assert\NotBlank(message: "Le numéro d'enregistrement est requis")]
-    public $numeroEnregistrement;
+    public ?string $numeroEnregistrement = null;
 
     #[Assert\NotBlank(message: "Veuillez choisir un type de certification")]
-    public $type;
+    public ?string $type = null;
 
     #[Assert\NotBlank(message: "Veuillez télécharger votre diplôme")]
     #[Assert\File(
@@ -21,7 +21,7 @@ class CertificationRequest
         mimeTypes: ["application/pdf", "image/jpeg", "image/png"],
         mimeTypesMessage: "Veuillez télécharger un document valide (PDF, JPG, PNG)"
     )]
-    public $diplome;
+    public mixed $diplome = null;
 
-    public $motivation;
+    public ?string $motivation = null;
 }

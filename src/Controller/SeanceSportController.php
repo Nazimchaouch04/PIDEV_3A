@@ -3,11 +3,14 @@
 namespace App\Controller;
 
 use App\Entity\SeanceSport;
+use App\Entity\Utilisateur;
 use App\Form\SeanceSportType;
 use App\Repository\SeanceSportRepository;
 use App\Repository\ExerciceRepository;
+use App\Service\RisqueAlerteService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -19,15 +22,6 @@ final class SeanceSportController extends AbstractController
     // =========================================================================
     // ════════════════════  CONSTANTES MÉDAILLES  ══════════════════════════════
     // =========================================================================
-
-    private const MEDAILLES = [
-        'or'       => '🥇 Or',
-        'argent'   => '🥈 Argent',
-        'bronze'   => '🥉 Bronze',
-        'feu'      => '🔥 Feu',
-        'marathon' => '⏱️ Marathon',
-        'force'    => '💪 Force',
-    ];
 
     private const DEFIS = [
         [
@@ -116,7 +110,11 @@ final class SeanceSportController extends AbstractController
         HttpClientInterface $httpClient
     ): Response {
         $seanceSport = new SeanceSport();
-        $seanceSport->setUtilisateur($this->getUser());
+
+        /** @var Utilisateur $user */
+        $user = $this->getUser();
+        $seanceSport->setUtilisateur($user);
+
         $form = $this->createForm(SeanceSportType::class, $seanceSport);
         $form->handleRequest($request);
 
@@ -124,7 +122,6 @@ final class SeanceSportController extends AbstractController
             $entityManager->persist($seanceSport);
             $entityManager->flush();
 
-            // ── Attribution médaille automatique ──────────────────────────────
             $medaille = $this->evaluerEtAttribuerMedaille(
                 $seanceSport, $seanceSportRepository, $entityManager, $httpClient
             );
@@ -163,9 +160,7 @@ final class SeanceSportController extends AbstractController
             fn($s) => $s->getDateSeance() >= $debutSemaine && $s->getDateSeance() <= $finSemaine
         );
 
-        $nbSeancesSemaine = count($seancesSemaine);
-
-        // Calories max d'une séance cette semaine
+        $nbSeancesSemaine  = count($seancesSemaine);
         $maxCaloriesSeance = 0;
         $maxDureeSeance    = 0;
         $nbIntensiteElevee = 0;
@@ -174,22 +169,15 @@ final class SeanceSportController extends AbstractController
             $cal = $s->getTotalCaloriesBrulees();
             if ($cal > $maxCaloriesSeance) $maxCaloriesSeance = $cal;
             if ($s->getDureeMinutes() > $maxDureeSeance) $maxDureeSeance = $s->getDureeMinutes();
-
-            // Vérifier intensité élevée via exercices
             foreach ($s->getExercices() as $e) {
-                if ($e->getIntensite()->value === 'eleve') {
-                    $nbIntensiteElevee++;
-                    break; // 1 par séance
-                }
+                if ($e->getIntensite()->value === 'elevee') { $nbIntensiteElevee++; break; }
             }
         }
 
-        // ── Calcul progression de chaque défi ────────────────────────────────
         $defisAvecProgression = [];
         foreach (self::DEFIS as $defi) {
-            $progression = 0;
+            $progression    = 0;
             $valeurActuelle = 0;
-
             switch ($defi['condition']) {
                 case 'seances_semaine':
                     $valeurActuelle = $nbSeancesSemaine;
@@ -208,27 +196,20 @@ final class SeanceSportController extends AbstractController
                     $progression    = min(100, round(($nbIntensiteElevee / $defi['valeur']) * 100));
                     break;
             }
-
-            $atteint = $progression >= 100;
-
             $defisAvecProgression[] = array_merge($defi, [
                 'progression'    => $progression,
                 'valeurActuelle' => $valeurActuelle,
-                'atteint'        => $atteint,
+                'atteint'        => $progression >= 100,
             ]);
         }
 
-        // ── Médailles obtenues cette semaine ──────────────────────────────────
         $medaillesObtenues = [];
         foreach ($seancesSemaine as $s) {
-            if ($s->getMedailleObtenue()) {
-                $medaillesObtenues[] = $s->getMedailleObtenue();
-            }
+            if ($s->getMedailleObtenue()) $medaillesObtenues[] = $s->getMedailleObtenue();
         }
         $medaillesObtenues = array_unique($medaillesObtenues);
 
-        // ── Message Groq si au moins un défi atteint ─────────────────────────
-        $messageGroq = null;
+        $messageGroq   = null;
         $defisAtteints = array_filter($defisAvecProgression, fn($d) => $d['atteint']);
         if (!empty($defisAtteints)) {
             $messageGroq = $this->getMessageFelicitationsGroq($httpClient, [
@@ -239,12 +220,12 @@ final class SeanceSportController extends AbstractController
         }
 
         return $this->render('seance_sport/defis.html.twig', [
-            'defis'            => $defisAvecProgression,
-            'nbSeancesSemaine' => $nbSeancesSemaine,
-            'medaillesObtenues'=> $medaillesObtenues,
-            'messageGroq'      => $messageGroq,
-            'debutSemaine'     => $debutSemaine,
-            'finSemaine'       => $finSemaine,
+            'defis'             => $defisAvecProgression,
+            'nbSeancesSemaine'  => $nbSeancesSemaine,
+            'medaillesObtenues' => $medaillesObtenues,
+            'messageGroq'       => $messageGroq,
+            'debutSemaine'      => $debutSemaine,
+            'finSemaine'        => $finSemaine,
         ]);
     }
 
@@ -252,11 +233,14 @@ final class SeanceSportController extends AbstractController
     // ════════════════  LOGIQUE MÉDAILLE — Attribution auto  ═══════════════════
     // =========================================================================
 
+    /**
+     * @return array<string, string>|null
+     */
     private function evaluerEtAttribuerMedaille(
-        SeanceSport           $seanceSport,
-        SeanceSportRepository $repo,
+        SeanceSport            $seanceSport,
+        SeanceSportRepository  $repo,
         EntityManagerInterface $em,
-        HttpClientInterface   $httpClient
+        HttpClientInterface    $httpClient
     ): ?array {
         $now          = new \DateTime();
         $debutSemaine = (clone $now)->modify('monday this week 00:00:00');
@@ -269,8 +253,6 @@ final class SeanceSportController extends AbstractController
         $nbSemaine = count($seancesSemaine);
 
         $medailleChoisie = null;
-
-        // Priorité : la meilleure médaille gagne
         if ($nbSemaine >= 7) {
             $medailleChoisie = ['medaille' => '🥇 Or',       'defi' => 'Champion de la semaine'];
         } elseif ($nbSemaine >= 5) {
@@ -282,11 +264,10 @@ final class SeanceSportController extends AbstractController
         } elseif ($seanceSport->getTotalCaloriesBrulees() >= 500) {
             $medailleChoisie = ['medaille' => '🔥 Feu',      'defi' => 'Brûleur de calories'];
         } else {
-            // Vérifier intensité élevée
             $nbIntensiteElevee = 0;
             foreach ($seancesSemaine as $s) {
                 foreach ($s->getExercices() as $e) {
-                    if ($e->getIntensite()->value === 'eleve') { $nbIntensiteElevee++; break; }
+                    if ($e->getIntensite()->value === 'elevee') { $nbIntensiteElevee++; break; }
                 }
             }
             if ($nbIntensiteElevee >= 3) {
@@ -306,12 +287,15 @@ final class SeanceSportController extends AbstractController
     // ════════════  GROQ — Message félicitations personnalisé  ════════════════
     // =========================================================================
 
+    /**
+     * @param array<string, mixed> $data
+     */
     private function getMessageFelicitationsGroq(HttpClientInterface $httpClient, array $data): string
     {
         $groqApiKey = $_SERVER['GROQ_API_KEY'] ?? $_ENV['GROQ_API_KEY'] ?? null;
-        if (!$groqApiKey) return null;
+        if (!$groqApiKey) return '🏅 Bravo ! Vous avez relevé vos défis cette semaine, continuez sur cette lancée !';
 
-        $defisNoms   = implode(', ', array_column($data['defisAtteints'], 'titre'));
+        $defisNoms     = implode(', ', array_column($data['defisAtteints'], 'titre'));
         $medaillesNoms = implode(', ', $data['medailles']);
 
         $prompt = sprintf(
@@ -319,28 +303,20 @@ final class SeanceSportController extends AbstractController
 - Défis réussis : %s
 - Médailles obtenues : %s
 - Nombre de séances cette semaine : %d
-
 Génère un message de félicitations court (3-4 phrases max), très motivant et personnalisé en français.
 Utilise des emojis sportifs. Termine par un encouragement pour la semaine prochaine.",
-            $defisNoms,
-            $medaillesNoms ?: 'aucune encore',
-            $data['nbSeancesSemaine']
+            $defisNoms, $medaillesNoms ?: 'aucune encore', $data['nbSeancesSemaine']
         );
 
         try {
             $response = $httpClient->request('POST', 'https://api.groq.com/openai/v1/chat/completions', [
                 'headers' => ['Authorization' => 'Bearer '.$groqApiKey, 'Content-Type' => 'application/json'],
-                'json'    => [
-                    'model'       => 'llama-3.3-70b-versatile',
-                    'messages'    => [['role' => 'user', 'content' => $prompt]],
-                    'max_tokens'  => 200,
-                    'temperature' => 0.8,
-                ],
+                'json'    => ['model' => 'llama-3.3-70b-versatile', 'messages' => [['role' => 'user', 'content' => $prompt]], 'max_tokens' => 200, 'temperature' => 0.8],
             ]);
             $d = $response->toArray();
-            return $d['choices'][0]['message']['content'] ?? null;
+            return $d['choices'][0]['message']['content'] ?? '🏅 Félicitations pour tes défis cette semaine !';
         } catch (\Exception $e) {
-            return null;
+            return '💪 Excellent travail cette semaine ! Continue sur cette dynamique !';
         }
     }
 
@@ -371,16 +347,13 @@ Utilise des emojis sportifs. Termine par un encouragement pour la semaine procha
         SeanceSportRepository $seanceSportRepository,
         HttpClientInterface   $httpClient
     ): Response {
-        $prediction    = null;
-        $toutesSeances = $seanceSportRepository->findAll();
-        $totalSeances  = count($toutesSeances);
-        $dureeTotal    = array_sum(array_map(fn($s) => $s->getDureeMinutes(), $toutesSeances));
-        $dureeMoyenne  = $totalSeances > 0 ? round($dureeTotal / $totalSeances) : 0;
-
+        $prediction      = null;
+        $toutesSeances   = $seanceSportRepository->findAll();
+        $totalSeances    = count($toutesSeances);
+        $dureeTotal      = array_sum(array_map(fn($s) => $s->getDureeMinutes(), $toutesSeances));
+        $dureeMoyenne    = $totalSeances > 0 ? round($dureeTotal / $totalSeances) : 0;
         $caloriesTotales = 0.0;
-        foreach ($toutesSeances as $seance) {
-            $caloriesTotales += $seance->getTotalCaloriesBrulees();
-        }
+        foreach ($toutesSeances as $seance) { $caloriesTotales += $seance->getTotalCaloriesBrulees(); }
         $caloriesTotales = round($caloriesTotales, 2);
 
         $now          = new \DateTime();
@@ -414,6 +387,36 @@ Utilise des emojis sportifs. Termine par un encouragement pour la semaine procha
     }
 
     // =========================================================================
+    // ═══════════  🚨 ALERTE INTELLIGENTE — Vérification temps réel  ══════════
+    // =========================================================================
+
+    #[Route('/alertes/check', name: 'app_seance_alertes_check', methods: ['GET'])]
+    public function checkAlertes(RisqueAlerteService $alerteService): JsonResponse
+    {
+        $alertes = $alerteService->verifierAlertes();
+        return $this->json([
+            'alertes' => $alertes,
+            'count'   => count($alertes),
+        ]);
+    }
+
+    // =========================================================================
+    // ═══════════  ▶ DÉMARRER une séance — enregistre heure réelle  ═══════════
+    // =========================================================================
+
+    #[Route('/{id}/demarrer', name: 'app_seance_sport_demarrer', methods: ['POST'])]
+    public function demarrer(
+        SeanceSport         $seanceSport,
+        RisqueAlerteService $alerteService
+    ): JsonResponse {
+        $alerteService->demarrerSeance($seanceSport);
+        return $this->json([
+            'status'  => 'success',
+            'message' => 'Séance démarrée à ' . (new \DateTime())->format('H:i'),
+        ]);
+    }
+
+    // =========================================================================
     // ════════════════════  SHOW / EDIT / DELETE  ══════════════════════════════
     // =========================================================================
 
@@ -427,21 +430,18 @@ Utilise des emojis sportifs. Termine par un encouragement pour la semaine procha
 
     #[Route('/{id}/edit', name: 'app_seance_sport_edit', methods: ['GET', 'POST'])]
     public function edit(
-        Request $request,
-        SeanceSport $seanceSport,
+        Request                $request,
+        SeanceSport            $seanceSport,
         EntityManagerInterface $entityManager,
-        SeanceSportRepository $seanceSportRepository,
-        HttpClientInterface $httpClient
+        SeanceSportRepository  $seanceSportRepository,
+        HttpClientInterface    $httpClient
     ): Response {
         $form = $this->createForm(SeanceSportType::class, $seanceSport);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
-
-            // Réévaluer médaille après modification
             $this->evaluerEtAttribuerMedaille($seanceSport, $seanceSportRepository, $entityManager, $httpClient);
-
             $this->addFlash('success', 'Séance modifiée avec succès !');
             return $this->redirectToRoute('app_seance_sport_index', [], Response::HTTP_SEE_OTHER);
         }
@@ -482,11 +482,11 @@ Utilise des emojis sportifs. Termine par un encouragement pour la semaine procha
         $seancePlusCourte = !empty($durees) ? min($durees) : 0;
         $totalMedailles   = count(array_filter($toutesSeances, fn($s) => $s->getMedailleObtenue() !== null));
 
-        $now          = new \DateTime();
-        $debutSemaine = (clone $now)->modify('monday this week');
-        $finSemaine   = (clone $now)->modify('sunday this week');
-        $debutMois    = (clone $now)->modify('first day of this month');
-        $finMois      = (clone $now)->modify('last day of this month');
+        $now                = new \DateTime();
+        $debutSemaine       = (clone $now)->modify('monday this week 00:00:00');
+        $finSemaine         = (clone $now)->modify('sunday this week 23:59:59');
+        $debutMois          = (clone $now)->modify('first day of this month 00:00:00');
+        $finMois            = (clone $now)->modify('last day of this month 23:59:59');
 
         $seanceCetteSemaine = count(array_filter($toutesSeances,
             fn($s) => $s->getDateSeance() >= $debutSemaine && $s->getDateSeance() <= $finSemaine
@@ -513,16 +513,82 @@ Utilise des emojis sportifs. Termine par un encouragement pour la semaine procha
         }
 
         $caloriesTotales = 0.0;
-        foreach ($toutesSeances as $seance) {
-            $caloriesTotales += $seance->getTotalCaloriesBrulees();
-        }
+        foreach ($toutesSeances as $seance) { $caloriesTotales += $seance->getTotalCaloriesBrulees(); }
         $caloriesTotales = round($caloriesTotales, 2);
 
+        // =====================================================================
+        // 📈 ANALYSE DE PROGRESSION — Semaine courante vs semaine précédente
+        // =====================================================================
+
+        $debutSemPrecedente = (clone $debutSemaine)->modify('-7 days');
+        $finSemPrecedente   = (clone $finSemaine)->modify('-7 days');
+
+        $seancesSemCourante   = array_filter($toutesSeances,
+            fn($s) => $s->getDateSeance() >= $debutSemaine && $s->getDateSeance() <= $finSemaine
+        );
+        $seancesSemPrecedente = array_filter($toutesSeances,
+            fn($s) => $s->getDateSeance() >= $debutSemPrecedente && $s->getDateSeance() <= $finSemPrecedente
+        );
+
+        $dureeSemCourante   = array_sum(array_map(fn($s) => $s->getDureeMinutes(), $seancesSemCourante));
+        $dureeSemPrecedente = array_sum(array_map(fn($s) => $s->getDureeMinutes(), $seancesSemPrecedente));
+
+        $calSemCourante = 0.0;
+        foreach ($seancesSemCourante as $s) { $calSemCourante += $s->getTotalCaloriesBrulees(); }
+        $calSemCourante = round($calSemCourante, 1);
+
+        $calSemPrecedente = 0.0;
+        foreach ($seancesSemPrecedente as $s) { $calSemPrecedente += $s->getTotalCaloriesBrulees(); }
+        $calSemPrecedente = round($calSemPrecedente, 1);
+
+        $diffSeances  = count($seancesSemCourante) - count($seancesSemPrecedente);
+        $diffDuree    = $dureeSemCourante - $dureeSemPrecedente;
+        $diffCalories = round($calSemCourante - $calSemPrecedente, 1);
+
+        // Score de progression 0-100
+        $scoreSeances     = $diffSeances > 0  ? 40 : ($diffSeances == 0  ? 20 : 0);
+        $scoreDuree       = $diffDuree > 0    ? 30 : ($diffDuree == 0    ? 15 : 0);
+        $scoreCalories    = $diffCalories > 0 ? 30 : ($diffCalories == 0 ? 15 : 0);
+        $scoreProgression = min(100, $scoreSeances + $scoreDuree + $scoreCalories);
+
+        $progressionData = [
+            'score'                => $scoreProgression,
+            'diffSeances'          => $diffSeances,
+            'diffDuree'            => $diffDuree,
+            'diffCalories'         => $diffCalories,
+            'dureeSemaineCourante' => $dureeSemCourante,
+            'calSemaineCourante'   => $calSemCourante,
+        ];
+
+        // Graphique : 8 dernières semaines
+        $progressionLabels     = [];
+        $progressionCalories   = [];
+        $progressionSeancesX10 = [];
+        for ($i = 7; $i >= 0; $i--) {
+            $debut = (clone $debutSemaine)->modify("-{$i} weeks");
+            $fin   = (clone $finSemaine)->modify("-{$i} weeks");
+            $progressionLabels[] = 'Sem ' . $debut->format('d/m');
+
+            $seancesSem = array_filter($toutesSeances,
+                fn($s) => $s->getDateSeance() >= $debut && $s->getDateSeance() <= $fin
+            );
+            $calSem = 0.0;
+            foreach ($seancesSem as $s) { $calSem += $s->getTotalCaloriesBrulees(); }
+            $progressionCalories[]   = round($calSem, 1);
+            $progressionSeancesX10[] = count($seancesSem) * 10;
+        }
+
+        // =====================================================================
+        // Graphiques existants
+        // =====================================================================
         $seancesParSemaine    = $seanceSportRepository->getSeancesParSemaine();
         $dureeParMois         = $seanceSportRepository->getDureeParMois();
         $repartitionIntensite = $exerciceRepository->getRepartitionParIntensiteGlobal();
         $top5Exercices        = $exerciceRepository->getTop5ExercicesGlobal();
 
+        // =====================================================================
+        // 🤖 Groq — Conseils + Analyse Progression
+        // =====================================================================
         $conseilIA = $this->getConseilGroqCoach($httpClient, [
             'totalSeances'       => $totalSeances,
             'seanceCetteSemaine' => $seanceCetteSemaine,
@@ -531,6 +597,16 @@ Utilise des emojis sportifs. Termine par un encouragement pour la semaine procha
             'dureeMoyenne'       => $dureeMoyenne,
             'caloriesTotales'    => $caloriesTotales,
             'totalMedailles'     => $totalMedailles,
+        ]);
+
+        $analyseProgression = $this->getAnalyseProgressionGroq($httpClient, [
+            'scoreProgression'   => $scoreProgression,
+            'diffSeances'        => $diffSeances,
+            'diffDuree'          => $diffDuree,
+            'diffCalories'       => $diffCalories,
+            'seanceCetteSemaine' => $seanceCetteSemaine,
+            'dureeSemCourante'   => $dureeSemCourante,
+            'calSemCourante'     => $calSemCourante,
         ]);
 
         return $this->render('seance_sport/statistiques.html.twig', [
@@ -544,6 +620,13 @@ Utilise des emojis sportifs. Termine par un encouragement pour la semaine procha
             'seanceCeMois'            => $seanceCeMois,
             'caloriesTotales'         => $caloriesTotales,
             'userLePlusActif'         => $userLePlusActif,
+            // ── Progression ──
+            'progressionData'         => $progressionData,
+            'progressionLabels'       => json_encode($progressionLabels),
+            'progressionCalories'     => json_encode($progressionCalories),
+            'progressionSeancesX10'   => json_encode($progressionSeancesX10),
+            'analyseProgression'      => $analyseProgression,
+            // ── Graphiques existants ──
             'seancesParSemaineLabels' => json_encode($seancesParSemaine['labels']),
             'seancesParSemaineData'   => json_encode($seancesParSemaine['data']),
             'dureeParMoisLabels'      => json_encode($dureeParMois['labels']),
@@ -560,6 +643,9 @@ Utilise des emojis sportifs. Termine par un encouragement pour la semaine procha
     // ══════════════════  GROQ — Prédiction Objectif  ══════════════════════════
     // =========================================================================
 
+    /**
+     * @param array<string, mixed> $data
+     */
     private function getPredictionGroq(HttpClientInterface $httpClient, array $data): string
     {
         $groqApiKey = $_SERVER['GROQ_API_KEY'] ?? $_ENV['GROQ_API_KEY'] ?? null;
@@ -567,20 +653,12 @@ Utilise des emojis sportifs. Termine par un encouragement pour la semaine procha
 
         $prompt = sprintf(
             "Tu es un coach sportif expert et analyste de données. Voici la situation RÉELLE du groupe :
-
 📊 DONNÉES ACTUELLES :
-- Total séances effectuées : %d
-- Séances ce mois-ci : %d
-- Durée moyenne par séance : %d minutes
-- Calories totales brûlées : %.1f kcal
-
+- Total séances effectuées : %d | Séances ce mois-ci : %d
+- Durée moyenne par séance : %d minutes | Calories totales brûlées : %.1f kcal
 🎯 OBJECTIF SOUHAITÉ :
-- Objectif principal : %s
-- Séances souhaitées par semaine : %d
-- Durée souhaitée par séance : %d minutes
-- Calories à brûler par séance : %d kcal
-- Délai : %s
-
+- Objectif principal : %s | Séances souhaitées par semaine : %d
+- Durée souhaitée par séance : %d minutes | Calories à brûler par séance : %d kcal | Délai : %s
 Génère un plan professionnel structuré en français avec :
 1. 📈 Analyse de l'écart actuel vs objectif
 2. 🗓️ Plan semaine par semaine
@@ -608,6 +686,9 @@ Génère un plan professionnel structuré en français avec :
     // ════════════════════  GROQ IA — Conseils Coach  ══════════════════════════
     // =========================================================================
 
+    /**
+     * @param array<string, mixed> $stats
+     */
     private function getConseilGroqCoach(HttpClientInterface $httpClient, array $stats): string
     {
         $groqApiKey = $_SERVER['GROQ_API_KEY'] ?? $_ENV['GROQ_API_KEY'] ?? null;
@@ -618,7 +699,6 @@ Génère un plan professionnel structuré en français avec :
 - Total séances : %d | Cette semaine : %d | Ce mois : %d
 - Durée totale : %d min | Moyenne : %d min/séance
 - Calories totales : %.1f kcal | Médailles attribuées : %d
-
 Donne 3 conseils professionnels en français. Commence chaque conseil par un emoji. Max 2 phrases par conseil.",
             $stats['totalSeances'], $stats['seanceCetteSemaine'], $stats['seanceCeMois'],
             $stats['dureeTotal'], $stats['dureeMoyenne'], $stats['caloriesTotales'], $stats['totalMedailles']
@@ -633,6 +713,56 @@ Donne 3 conseils professionnels en français. Commence chaque conseil par un emo
             return $d['choices'][0]['message']['content'] ?? "Continuez le bon travail ! 💪";
         } catch (\Exception $e) {
             return "💪 Erreur Groq : ".$e->getMessage();
+        }
+    }
+
+    // =========================================================================
+    // ════════════  🤖 GROQ — Analyse de Progression IA  ══════════════════════
+    // =========================================================================
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    private function getAnalyseProgressionGroq(HttpClientInterface $httpClient, array $data): string
+    {
+        $groqApiKey = $_SERVER['GROQ_API_KEY'] ?? $_ENV['GROQ_API_KEY'] ?? null;
+        if (!$groqApiKey) return '';
+
+        $tendance = $data['scoreProgression'] >= 60 ? 'en progression'
+                  : ($data['scoreProgression'] >= 30 ? 'stable' : 'en régression');
+
+        $prompt = sprintf(
+            "Tu es un coach sportif expert. Voici l'analyse de progression hebdomadaire :
+- Score de progression : %d/100 — le groupe est %s
+- Évolution séances : %+d cette semaine vs semaine précédente (%d séances au total)
+- Évolution durée : %+d minutes (%d min cette semaine)
+- Évolution calories : %+.1f kcal (%.1f kcal brûlées cette semaine)
+
+Donne une analyse courte (3-4 phrases) en français :
+1. Évalue si c'est une bonne ou mauvaise semaine
+2. Identifie le point fort et le point faible
+3. Donne 1 conseil concret pour la semaine prochaine
+Utilise des emojis. Sois direct et motivant.",
+            $data['scoreProgression'], $tendance,
+            $data['diffSeances'], $data['seanceCetteSemaine'],
+            $data['diffDuree'], $data['dureeSemCourante'],
+            $data['diffCalories'], $data['calSemCourante']
+        );
+
+        try {
+            $response = $httpClient->request('POST', 'https://api.groq.com/openai/v1/chat/completions', [
+                'headers' => ['Authorization' => 'Bearer '.$groqApiKey, 'Content-Type' => 'application/json'],
+                'json'    => [
+                    'model'       => 'llama-3.3-70b-versatile',
+                    'messages'    => [['role' => 'user', 'content' => $prompt]],
+                    'max_tokens'  => 250,
+                    'temperature' => 0.7,
+                ],
+            ]);
+            $d = $response->toArray();
+            return $d['choices'][0]['message']['content'] ?? '';
+        } catch (\Exception $e) {
+            return '💪 Continuez sur cette dynamique et visez la progression chaque semaine !';
         }
     }
 }

@@ -10,6 +10,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Table(name: 'aliment')]
 class Aliment
 {
+    /** @var int|null */
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -32,8 +33,9 @@ class Aliment
     #[ORM\Column]
     private bool $estExcitant = false;
 
+    // ✅ CORRIGÉ : nullable=false + onDelete=CASCADE pour cohérence avec orphanRemoval=true dans Repas
     #[ORM\ManyToOne(inversedBy: 'aliments')]
-    #[ORM\JoinColumn(nullable: true)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Repas $repas = null;
 
     #[ORM\Column(length: 50, nullable: true)]
@@ -125,7 +127,6 @@ class Aliment
     public function setTypeAliment(string $typeAliment): static
     {
         $this->typeAliment = $typeAliment;
-
         return $this;
     }
 
@@ -137,7 +138,6 @@ class Aliment
     public function setMultiScore(float $multiScore): static
     {
         $this->multiScore = $multiScore;
-
         return $this;
     }
 
@@ -149,7 +149,6 @@ class Aliment
     public function setNutriScore(?string $nutriScore): static
     {
         $this->nutriScore = $nutriScore;
-
         return $this;
     }
 
@@ -161,7 +160,6 @@ class Aliment
     public function setProteines(?float $proteines): static
     {
         $this->proteines = $proteines;
-
         return $this;
     }
 
@@ -173,7 +171,6 @@ class Aliment
     public function setGlucides(?float $glucides): static
     {
         $this->glucides = $glucides;
-
         return $this;
     }
 
@@ -185,7 +182,6 @@ class Aliment
     public function setLipides(?float $lipides): static
     {
         $this->lipides = $lipides;
-
         return $this;
     }
 }

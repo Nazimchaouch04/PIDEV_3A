@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Repas;
+use App\Entity\Utilisateur;
 use App\Form\Repas1Type;
 use App\Repository\RepasRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -41,10 +42,13 @@ final class RepasController extends AbstractController
     {
         $repa = new Repas();
         $user = $this->getUser();
+
         if ($user) {
+            // FIX :45 — cast UserInterface → Utilisateur
+            /** @var Utilisateur $user */
             $repa->setUtilisateur($user);
         }
-        
+
         $form = $this->createForm(Repas1Type::class, $repa);
         $form->handleRequest($request);
 
@@ -67,6 +71,7 @@ final class RepasController extends AbstractController
         if (!$repa) {
             throw $this->createNotFoundException('Repas not found');
         }
+
         return $this->render('repas/show.html.twig', [
             'repa' => $repa,
         ]);
@@ -78,16 +83,16 @@ final class RepasController extends AbstractController
         if (!$repa) {
             throw $this->createNotFoundException('Repas not found');
         }
+
         $form = $this->createForm(Repas1Type::class, $repa);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
 
-            // Gérer la redirection
             $redirectTo = $request->query->get('redirect_to');
-            $userId = $request->query->get('user_id');
-            
+            $userId     = $request->query->get('user_id');
+
             if ($redirectTo === 'admin_user_meals' && $userId) {
                 return $this->redirectToRoute('admin_user_meals', ['id' => $userId], Response::HTTP_SEE_OTHER);
             }
@@ -107,19 +112,17 @@ final class RepasController extends AbstractController
         if (!$repa) {
             throw $this->createNotFoundException('Repas not found');
         }
-        
-        // Récupérer l'utilisateur avant la suppression pour la redirection
+
         $user = $repa->getUtilisateur();
-        
-        if ($this->isCsrfTokenValid('delete'.$repa->getId(), $request->getPayload()->getString('_token'))) {
+
+        if ($this->isCsrfTokenValid('delete' . $repa->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($repa);
             $entityManager->flush();
         }
 
-        // Gérer la redirection
         $redirectTo = $request->query->get('redirect_to');
-        $userId = $request->query->get('user_id');
-        
+        $userId     = $request->query->get('user_id');
+
         if ($redirectTo === 'admin_user_meals' && ($userId || $user)) {
             $redirectUserId = $userId ?: $user->getId();
             return $this->redirectToRoute('admin_user_meals', ['id' => $redirectUserId], Response::HTTP_SEE_OTHER);
@@ -131,34 +134,28 @@ final class RepasController extends AbstractController
     #[Route('/pdf', name: 'app_repas_pdf', methods: ['GET'])]
     public function exportPdf(RepasRepository $repasRepository): Response
     {
-        // Configure Dompdf
         $options = new Options();
         $options->set('defaultFont', 'Arial');
         $options->set('isRemoteEnabled', true);
         $options->set('isHtml5ParserEnabled', true);
-        
+
         $dompdf = new Dompdf($options);
-        
-        // Get all repas
-        $repas = $repasRepository->findAll();
-        
-        // Generate HTML
+        $repas  = $repasRepository->findAll();
+
         $html = $this->renderView('repas/pdf.html.twig', [
             'repas' => $repas,
-            'date' => new \DateTime()
+            'date'  => new \DateTime(),
         ]);
-        
+
         $dompdf->loadHtml($html);
         $dompdf->setPaper('A4', 'portrait');
         $dompdf->render();
-        
-        // Generate filename
+
         $filename = 'repas_' . date('Y-m-d_H-i-s') . '.pdf';
-        
-        // Download the PDF
+
         return new Response($dompdf->output(), 200, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"'
+            'Content-Type'        => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ]);
     }
 }

@@ -10,7 +10,8 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class MotivationController extends AbstractController
 {
-    private $httpClient;
+    // FIX :13 — type explicite au lieu de $httpClient sans type
+    private HttpClientInterface $httpClient;
 
     public function __construct(HttpClientInterface $httpClient)
     {
@@ -37,7 +38,7 @@ class MotivationController extends AbstractController
                 'energie' => $energie,
                 'sommeil' => $sommeil,
                 'stress'  => $stress,
-            ]
+            ],
         ]);
 
         $data = $response->toArray();

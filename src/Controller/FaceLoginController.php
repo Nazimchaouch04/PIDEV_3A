@@ -24,15 +24,14 @@ class FaceLoginController extends AbstractController
         private HttpClientInterface $httpClient,
         private EntityManagerInterface $em,
         private UtilisateurRepository $userRepo,
+        /** @phpstan-ignore property.onlyWritten */
         private EventDispatcherInterface $dispatcher
     ) {}
-
-    // ─── Check if user has Face ID configured ─────────────────────────────────
 
     #[Route('/status', name: 'api_face_status', methods: ['POST'])]
     public function status(Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
+        $data  = json_decode($request->getContent(), true);
         $email = $data['email'] ?? null;
 
         if (!$email) {
@@ -48,8 +47,6 @@ class FaceLoginController extends AbstractController
             'configured' => !empty($user->getFaceEncoding()),
         ]);
     }
-
-    // ─── Step 1 of setup: Extract encoding from one image ─────────────────────
 
     #[Route('/generate-embedding', name: 'api_face_generate_embedding', methods: ['POST'])]
     public function generateEmbedding(Request $request): JsonResponse
@@ -79,13 +76,11 @@ class FaceLoginController extends AbstractController
         }
     }
 
-    // ─── Step 2 of setup: Save averaged encoding to DB ────────────────────────
-
     #[Route('/register-face', name: 'api_face_register', methods: ['POST'])]
     public function registerFace(Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-        $email = $data['email'] ?? null;
+        $data      = json_decode($request->getContent(), true);
+        $email     = $data['email'] ?? null;
         $encodings = $data['encodings'] ?? [];
 
         if (!$email) {
@@ -101,7 +96,6 @@ class FaceLoginController extends AbstractController
             return $this->json(['error' => 'At least 3 face images are required for setup.'], 400);
         }
 
-        // Ask Python to compute the averaged embedding
         try {
             $response = $this->httpClient->request('POST', self::PYTHON_API_URL . '/average-encodings', [
                 'body' => [
@@ -124,12 +118,10 @@ class FaceLoginController extends AbstractController
         return $this->json(['success' => true, 'message' => 'Face ID configured successfully!']);
     }
 
-    // ─── Login via Face ID ────────────────────────────────────────────────────
-
     #[Route('/login', name: 'api_face_login', methods: ['POST'])]
     public function faceLogin(Request $request): JsonResponse
     {
-        $email = $request->request->get('email');
+        $email     = $request->request->get('email');
         $imageFile = $request->files->get('image');
 
         if (!$email || !$imageFile) {
@@ -142,12 +134,11 @@ class FaceLoginController extends AbstractController
             return $this->json(['error' => 'Face ID not configured for this account.'], 404);
         }
 
-        // Send image + stored encoding to Python for comparison
         try {
             $response = $this->httpClient->request('POST', self::PYTHON_API_URL . '/compare-face', [
                 'body' => [
-                    'file' => fopen($imageFile->getPathname(), 'r'),
-                    'stored_encoding' => json_encode($user->getFaceEncoding()),
+                    'file'             => fopen($imageFile->getPathname(), 'r'),
+                    'stored_encoding'  => json_encode($user->getFaceEncoding()),
                 ],
             ]);
 
@@ -158,24 +149,22 @@ class FaceLoginController extends AbstractController
 
         if (!($result['match'] ?? false)) {
             return $this->json([
-                'success' => false,
-                'error' => $result['error'] ?? 'Face not recognized.',
+                'success'  => false,
+                'error'    => $result['error'] ?? 'Face not recognized.',
                 'distance' => $result['distance'] ?? null,
             ], 401);
         }
 
-        // ✅ Face matched — authenticate the user in the Symfony session
         $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
         $this->container->get('security.token_storage')->setToken($token);
         $request->getSession()->set('_security_main', serialize($token));
 
-        // Determine redirect URL by role
         $redirectUrl = in_array('ROLE_ADMIN', $user->getRoles(), true)
             ? $this->generateUrl('app_admin_dashboard')
             : $this->generateUrl('app_dashboard');
 
         return $this->json([
-            'success' => true,
+            'success'  => true,
             'redirect' => $redirectUrl,
         ]);
     }

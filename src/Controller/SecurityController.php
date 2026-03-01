@@ -19,51 +19,35 @@ use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
-
-
 use App\Service\ActivityLogger;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class SecurityController extends AbstractController
 {
-    private $passwordHasher;
+    // FIX :29 — type explicite au lieu de $passwordHasher sans type
+    private UserPasswordHasherInterface $passwordHasher;
     private ActivityLogger $activityLogger;
     private TokenStorageInterface $tokenStorage;
 
     public function __construct(
         UserPasswordHasherInterface $passwordHasher,
-        ActivityLogger $activityLogger,
-        TokenStorageInterface $tokenStorage
+        ActivityLogger              $activityLogger,
+        TokenStorageInterface       $tokenStorage
     ) {
         $this->passwordHasher = $passwordHasher;
         $this->activityLogger = $activityLogger;
-        $this->tokenStorage = $tokenStorage;
+        $this->tokenStorage   = $tokenStorage;
     }
 
     #[Route('/login', name: 'app_login')]
     public function login(AuthenticationUtils $authenticationUtils, Request $request, RecaptchaService $recaptchaService = null): Response
     {
-        // Pour le développement, on désactive la validation reCAPTCHA
-        // Le token est généré côté client mais pas validé côté serveur
-        
-        /*
-        // Si le formulaire est soumis, vérifier reCAPTCHA
-        if ($request->isMethod('POST')) {
-            $recaptchaToken = $request->request->get('recaptcha_response');
-            
-            if (!$recaptchaToken || !$recaptchaService->verifyWithScore($recaptchaToken, 0.5)) {
-                $this->addFlash('error', 'La vérification de sécurité a échoué. Veuillez réessayer.');
-                return $this->redirectToRoute('app_login');
-            }
-        }
-        */
-
-        $error = $authenticationUtils->getLastAuthenticationError();
+        $error        = $authenticationUtils->getLastAuthenticationError();
         $lastUsername = $authenticationUtils->getLastUsername();
 
         return $this->render('security/login.html.twig', [
-            'last_username' => $lastUsername,
-            'error' => $error,
+            'last_username'      => $lastUsername,
+            'error'              => $error,
             'recaptcha_site_key' => $recaptchaService ? $recaptchaService->getSiteKey() : '',
         ]);
     }
@@ -71,12 +55,11 @@ class SecurityController extends AbstractController
     #[Route('/logout', name: 'app_logout')]
     public function logout(): void
     {
-        // Log the logout event before the user is logged out
         $token = $this->tokenStorage->getToken();
         if ($token && $token->getUser() instanceof Utilisateur) {
             $this->activityLogger->log('Déconnexion', $token->getUser());
         }
-        
+
         throw new \LogicException('This method will be intercepted by the logout key on your firewall.');
     }
 
@@ -113,16 +96,11 @@ class SecurityController extends AbstractController
         $form = $this->createFormBuilder()
             ->add('email', EmailType::class, [
                 'label' => 'Adresse email',
-                'attr' => [
-                    'placeholder' => 'Entrez votre adresse email',
-                    'class' => 'form-control'
-                ]
+                'attr'  => ['placeholder' => 'Entrez votre adresse email', 'class' => 'form-control'],
             ])
             ->add('submit', SubmitType::class, [
                 'label' => 'Envoyer le lien de réinitialisation',
-                'attr' => [
-                    'class' => 'btn btn-primary'
-                ]
+                'attr'  => ['class' => 'btn btn-primary'],
             ])
             ->getForm();
 
@@ -130,9 +108,8 @@ class SecurityController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $email = $form->get('email')->getData();
-            
-            $user = $entityManager->getRepository(Utilisateur::class)->findOneBy(['email' => $email]);
-            
+            $user  = $entityManager->getRepository(Utilisateur::class)->findOneBy(['email' => $email]);
+
             if ($user) {
                 $resetToken = bin2hex(random_bytes(32));
                 $user->setResetToken($resetToken);
@@ -140,12 +117,10 @@ class SecurityController extends AbstractController
                 $entityManager->flush();
 
                 $resetUrl = $this->generateUrl('app_reset_password', ['token' => $resetToken], UrlGeneratorInterface::ABSOLUTE_URL);
-                
                 $mailjetService->sendPasswordResetEmail($email, $resetUrl, $user->getNomComplet());
             }
 
             $this->addFlash('success', 'Si votre email existe dans notre base de données, vous recevrez un lien de réinitialisation.');
-            
             return $this->redirectToRoute('app_login');
         }
 
@@ -158,7 +133,7 @@ class SecurityController extends AbstractController
     public function resetPassword(string $token, Request $request, EntityManagerInterface $entityManager): Response
     {
         $user = $entityManager->getRepository(Utilisateur::class)->findOneBy(['resetToken' => $token]);
-        
+
         if (!$user || $user->getResetTokenExpiresAt() < new \DateTime()) {
             $this->addFlash('error', 'Ce lien de réinitialisation est invalide ou a expiré.');
             return $this->redirectToRoute('app_forgot_password');
@@ -166,39 +141,26 @@ class SecurityController extends AbstractController
 
         $form = $this->createFormBuilder()
             ->add('password', RepeatedType::class, [
-                'type' => PasswordType::class,
-                'first_options' => [
-                    'label' => 'Nouveau mot de passe',
-                    'attr' => [
-                        'class' => 'form-control'
-                    ]
-                ],
-                'second_options' => [
-                    'label' => 'Confirmer le mot de passe',
-                    'attr' => [
-                        'class' => 'form-control'
-                    ]
-                ],
-                'invalid_message' => 'Les mots de passe doivent correspondre.',
+                'type'             => PasswordType::class,
+                'first_options'    => ['label' => 'Nouveau mot de passe',       'attr' => ['class' => 'form-control']],
+                'second_options'   => ['label' => 'Confirmer le mot de passe',  'attr' => ['class' => 'form-control']],
+                'invalid_message'  => 'Les mots de passe doivent correspondre.',
             ])
             ->add('submit', SubmitType::class, [
                 'label' => 'Réinitialiser le mot de passe',
-                'attr' => [
-                    'class' => 'btn btn-success'
-                ]
+                'attr'  => ['class' => 'btn btn-success'],
             ])
             ->getForm();
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $password = $form->get('password')->getData();
+            $password       = $form->get('password')->getData();
             $hashedPassword = $this->passwordHasher->hashPassword($user, $password);
-            
+
             $user->setMotDePasse($hashedPassword);
             $user->setResetToken(null);
             $user->setResetTokenExpiresAt(null);
-            
             $entityManager->flush();
 
             $this->addFlash('success', 'Votre mot de passe a été réinitialisé avec succès.');
@@ -209,6 +171,4 @@ class SecurityController extends AbstractController
             'form' => $form->createView(),
         ]);
     }
-
-
 }

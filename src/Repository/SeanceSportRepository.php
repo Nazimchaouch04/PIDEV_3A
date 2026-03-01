@@ -58,18 +58,12 @@ class SeanceSportRepository extends ServiceEntityRepository
     // ═══════════════════  MÉTHODES STATISTIQUES  ═════════════════════════════
     // =========================================================================
 
-    /**
-     * Durée totale en minutes pour un utilisateur
-     */
     public function getDureeTotal(Utilisateur $user): int
     {
         $seances = $this->findByUtilisateur($user);
         return array_sum(array_map(fn($s) => $s->getDureeMinutes(), $seances));
     }
 
-    /**
-     * Nombre de séances cette semaine pour un utilisateur
-     */
     public function countSeancesThisWeek(Utilisateur $user): int
     {
         $debut = new \DateTime('monday this week 00:00:00');
@@ -86,9 +80,6 @@ class SeanceSportRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
-    /**
-     * Nombre de séances ce mois pour un utilisateur
-     */
     public function countSeancesThisMonth(Utilisateur $user): int
     {
         $debut = new \DateTime('first day of this month 00:00:00');
@@ -106,9 +97,7 @@ class SeanceSportRepository extends ServiceEntityRepository
     }
 
     /**
-     * Séances par semaine — graphique Line (PHP natif, sans YEAR/WEEK DQL)
-     * $user = null → toutes les séances (coach)
-     * $user = Utilisateur → ses séances (user)
+     * @return array{labels: array<string>, data: array<int>}
      */
     public function getSeancesParSemaine(?Utilisateur $user = null): array
     {
@@ -123,19 +112,16 @@ class SeanceSportRepository extends ServiceEntityRepository
             $qb->andWhere('s.utilisateur = :user')->setParameter('user', $user);
         }
 
-        $seances = $qb->getQuery()->getResult();
-
-        // Grouper par semaine en PHP
-        $grouped = [];
+        $seances  = $qb->getQuery()->getResult();
+        $grouped  = [];
         foreach ($seances as $s) {
-            $cle = $s->getDateSeance()->format('Y-W'); // ex: "2026-08"
+            $cle = $s->getDateSeance()->format('Y-W');
             $grouped[$cle] = ($grouped[$cle] ?? 0) + 1;
         }
 
         $labels = [];
         $data   = [];
         foreach ($grouped as $semaine => $total) {
-            // Afficher "Sem 08" à partir de "2026-08"
             $labels[] = 'Sem ' . explode('-', $semaine)[1];
             $data[]   = $total;
         }
@@ -144,9 +130,7 @@ class SeanceSportRepository extends ServiceEntityRepository
     }
 
     /**
-     * Durée par mois — graphique Bar (PHP natif, sans MONTH DQL)
-     * $user = null → toutes les séances (coach)
-     * $user = Utilisateur → ses séances (user)
+     * @return array{labels: array<string>, data: array<int>}
      */
     public function getDureeParMois(?Utilisateur $user = null): array
     {
@@ -161,13 +145,11 @@ class SeanceSportRepository extends ServiceEntityRepository
             $qb->andWhere('s.utilisateur = :user')->setParameter('user', $user);
         }
 
-        $seances = $qb->getQuery()->getResult();
-
-        // Grouper par mois en PHP
+        $seances  = $qb->getQuery()->getResult();
         $moisNoms = ['', 'Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
         $grouped  = [];
         foreach ($seances as $s) {
-            $cle = $s->getDateSeance()->format('Y-m'); // ex: "2026-02"
+            $cle = $s->getDateSeance()->format('Y-m');
             $grouped[$cle] = ($grouped[$cle] ?? 0) + $s->getDureeMinutes();
         }
 
@@ -180,5 +162,28 @@ class SeanceSportRepository extends ServiceEntityRepository
         }
 
         return ['labels' => $labels, 'data' => $data];
+    }
+
+    // =========================================================================
+    // ════════════  NOUVELLE MÉTHODE — Alerte Intelligente  ═══════════════════
+    // =========================================================================
+
+    /**
+     * Séances démarrées aujourd'hui et pas encore alertées
+     * @return SeanceSport[]
+     */
+    public function findSeancesActivesAujourdhui(): array
+    {
+        $debut = new \DateTime('today 00:00:00');
+        $fin   = new \DateTime('today 23:59:59');
+
+        return $this->createQueryBuilder('s')
+            ->where('s.dateSeance BETWEEN :debut AND :fin')
+            ->andWhere('s.heureDebutReelle IS NOT NULL')
+            ->andWhere('s.alerteEnvoyee = false')
+            ->setParameter('debut', $debut)
+            ->setParameter('fin',   $fin)
+            ->getQuery()
+            ->getResult();
     }
 }

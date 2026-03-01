@@ -12,6 +12,7 @@ class MailjetService
     private string $fromEmail;
     private string $fromName;
 
+    /** @phpstan-ignore constructor.unusedParameter */
     public function __construct(ParameterBagInterface $parameterBag)
     {
         $this->client = new Client(
@@ -22,7 +23,7 @@ class MailjetService
         );
 
         $this->fromEmail = $_ENV['MAILJET_FROM_EMAIL'];
-        $this->fromName = $_ENV['MAILJET_FROM_NAME'];
+        $this->fromName  = $_ENV['MAILJET_FROM_NAME'];
     }
 
     /**
@@ -35,14 +36,14 @@ class MailjetService
                 [
                     'From' => [
                         'Email' => $this->fromEmail,
-                        'Name' => $this->fromName
+                        'Name'  => $this->fromName
                     ],
                     'To' => [
                         [
                             'Email' => $to
                         ]
                     ],
-                    'Subject' => $subject,
+                    'Subject'  => $subject,
                     'HTMLPart' => $htmlContent,
                     'TextPart' => $textContent
                 ]
@@ -51,10 +52,8 @@ class MailjetService
 
         try {
             $response = $this->client->post(Resources::$Email, ['body' => $body]);
-            
             return $response->success();
         } catch (\Exception $e) {
-            // En développement, vous pouvez logger l'erreur
             error_log('Mailjet Error: ' . $e->getMessage());
             return false;
         }
@@ -65,8 +64,7 @@ class MailjetService
      */
     public function sendPasswordResetEmail(string $to, string $resetUrl, string $userName): bool
     {
-        $subject = 'Réinitialisation de votre mot de passe - BioSync';
-        
+        $subject     = 'Réinitialisation de votre mot de passe - BioSync';
         $htmlContent = $this->getPasswordResetHtmlTemplate($resetUrl, $userName);
         $textContent = $this->getPasswordResetTextTemplate($resetUrl, $userName);
 

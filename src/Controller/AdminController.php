@@ -91,7 +91,7 @@ class AdminController extends AbstractController
     }
 
     #[Route('/admin-cert-approve/{id}', name: 'app_admin_cert_approve')]
-    public function approveCert($id, CertificationRepository $certRepo, EntityManagerInterface $em): Response
+    public function approveCert(int $id, CertificationRepository $certRepo, EntityManagerInterface $em): Response
     {
         $cert = $certRepo->find($id);
 

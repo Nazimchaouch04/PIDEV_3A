@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Service;
 
 use App\Repository\ExerciceRepository;
@@ -50,7 +51,7 @@ class ChatbotService
 
     private function demanderGroq(string $message): string
     {
-        $apiKey = $_SERVER['GROQ_API_KEY'] ?? $_ENV['GROQ_API_KEY'] ?? getenv('GROQ_API_KEY') ?? '';
+        $apiKey = $_SERVER['GROQ_API_KEY'] ?? $_ENV['GROQ_API_KEY'] ?? getenv('GROQ_API_KEY');
 
         if (empty($apiKey)) {
             return "Cle Groq manquante dans .env";

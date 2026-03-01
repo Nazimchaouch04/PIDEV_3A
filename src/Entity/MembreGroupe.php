@@ -13,25 +13,30 @@ class MembreGroupe
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    /** @var int|null */
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $dateAdhesion = null;
+    // ✅ CORRIGÉ : DateTime → DateTimeImmutable
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+    private ?\DateTimeImmutable $dateAdhesion = null;
 
     #[ORM\Column(length: 50)]
-    private ?string $roleMembre = 'membre';
+    private string $roleMembre = 'membre';
 
     #[ORM\ManyToOne(inversedBy: 'membresGroupes')]
-    #[ORM\JoinColumn(nullable: false)]
+    // ✅ CORRIGÉ : ajout onDelete CASCADE pour cohérence ORM/DB
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Utilisateur $utilisateur = null;
 
     #[ORM\ManyToOne(inversedBy: 'membres')]
-    #[ORM\JoinColumn(nullable: false)]
+    // ✅ CORRIGÉ : ajout onDelete CASCADE pour cohérence ORM/DB
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?GroupeSoutien $groupe = null;
 
     public function __construct()
     {
-        $this->dateAdhesion = new \DateTime();
+        // ✅ CORRIGÉ : DateTimeImmutable
+        $this->dateAdhesion = new \DateTimeImmutable();
         $this->roleMembre = 'membre';
     }
 
@@ -40,18 +45,19 @@ class MembreGroupe
         return $this->id;
     }
 
-    public function getDateAdhesion(): ?\DateTimeInterface
+    public function getDateAdhesion(): ?\DateTimeImmutable
     {
         return $this->dateAdhesion;
     }
 
-    public function setDateAdhesion(\DateTimeInterface $dateAdhesion): static
+    // ✅ CORRIGÉ : setter accepte DateTimeImmutable
+    public function setDateAdhesion(\DateTimeImmutable $dateAdhesion): static
     {
         $this->dateAdhesion = $dateAdhesion;
         return $this;
     }
 
-    public function getRoleMembre(): ?string
+    public function getRoleMembre(): string
     {
         return $this->roleMembre;
     }

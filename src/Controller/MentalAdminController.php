@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Question;
 use App\Entity\QuizMental;
+use App\Entity\Utilisateur;
 use App\Repository\QuestionRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,17 +19,16 @@ class MentalAdminController extends AbstractController
 {
     #[Route('', name: 'app_mental_admin_dashboard')]
     public function dashboard(
-        QuestionRepository $questionRepository,
+        QuestionRepository     $questionRepository,
         EntityManagerInterface $em
     ): Response {
-        // Vérification manuelle pour autoriser les spécialistes ET les admins
         if (!$this->isGranted('ROLE_ADMIN') && !$this->isGranted('ROLE_SPECIALISTE')) {
             throw $this->createAccessDeniedException('Accès réservé aux administrateurs et spécialistes.');
         }
-        
+
         $totalQuestions = $questionRepository->count([]);
-        $totalQuizzes = $em->getRepository(QuizMental::class)->count([]);
-        $totalUsers = $em->getRepository(\App\Entity\Utilisateur::class)->count([]);
+        $totalQuizzes   = $em->getRepository(QuizMental::class)->count([]);
+        $totalUsers     = $em->getRepository(Utilisateur::class)->count([]);
         $totalMedailles = $em->getRepository(QuizMental::class)
             ->createQueryBuilder('q')
             ->select('COUNT(q.id)')
@@ -39,10 +39,10 @@ class MentalAdminController extends AbstractController
         $recentQuestions = $questionRepository->findBy([], ['id' => 'DESC'], 5);
 
         return $this->render('bo/mental/dashboard.html.twig', [
-            'totalQuestions' => $totalQuestions,
-            'totalQuizzes' => $totalQuizzes,
-            'totalUsers' => $totalUsers,
-            'totalMedailles' => $totalMedailles,
+            'totalQuestions'  => $totalQuestions,
+            'totalQuizzes'    => $totalQuizzes,
+            'totalUsers'      => $totalUsers,
+            'totalMedailles'  => $totalMedailles,
             'recentQuestions' => $recentQuestions,
         ]);
     }
@@ -50,10 +50,8 @@ class MentalAdminController extends AbstractController
     #[Route('/questions', name: 'app_mental_admin_questions')]
     public function listQuestions(QuestionRepository $questionRepository): Response
     {
-        $questions = $questionRepository->findAll();
-
         return $this->render('bo/mental/questions/list.html.twig', [
-            'questions' => $questions,
+            'questions' => $questionRepository->findAll(),
         ]);
     }
 
@@ -77,24 +75,26 @@ class MentalAdminController extends AbstractController
     public function newQuiz(Request $request, EntityManagerInterface $em): Response
     {
         $quiz = new QuizMental();
-        
+
         if ($request->isMethod('POST')) {
             $quiz->setTitre($request->request->get('titre'));
             $quiz->setNiveauStressCible((int) $request->request->get('niveau_stress'));
             $quiz->setScoreResultat((int) $request->request->get('score', 0));
             $quiz->setMedailleQuiz($request->request->get('medaille'));
             $quiz->setDateQuiz(new \DateTime($request->request->get('date_quiz') ?: 'now'));
-            $quiz->setStatut('disponible'); // Quiz disponible par défaut
-            
-            // Utilisateur
-            $userId = $request->request->get('utilisateur_id');
-            $utilisateur = $em->getRepository(\App\Entity\Utilisateur::class)->find($userId);
+            $quiz->setStatut('disponible');
+
+            $userId      = $request->request->get('utilisateur_id');
+            $utilisateur = $em->getRepository(Utilisateur::class)->find($userId);
             if ($utilisateur) {
                 $quiz->setUtilisateur($utilisateur);
             } else {
-                $quiz->setUtilisateur($this->getUser());
+                // FIX :95 — cast UserInterface → Utilisateur
+                /** @var Utilisateur $currentUser */
+                $currentUser = $this->getUser();
+                $quiz->setUtilisateur($currentUser);
             }
-            
+
             $em->persist($quiz);
             $em->flush();
 
@@ -102,12 +102,12 @@ class MentalAdminController extends AbstractController
             return $this->redirectToRoute('app_mental_admin_quiz_list');
         }
 
-        $utilisateurs = $em->getRepository(\App\Entity\Utilisateur::class)->findAll();
+        $utilisateurs = $em->getRepository(Utilisateur::class)->findAll();
 
         return $this->render('bo/mental/quiz/form.html.twig', [
-            'quiz' => $quiz,
+            'quiz'         => $quiz,
             'utilisateurs' => $utilisateurs,
-            'isEdit' => false,
+            'isEdit'       => false,
         ]);
     }
 
@@ -120,11 +120,11 @@ class MentalAdminController extends AbstractController
             $quiz->setScoreResultat((int) $request->request->get('score'));
             $quiz->setMedailleQuiz($request->request->get('medaille') ?: null);
             $quiz->setDateQuiz(new \DateTime($request->request->get('date_quiz')));
-            
-            // Utilisateur
-            $userId = $request->request->get('utilisateur_id');
-            $utilisateur = $em->getRepository(\App\Entity\Utilisateur::class)->find($userId);
+
+            $userId      = $request->request->get('utilisateur_id');
+            $utilisateur = $em->getRepository(Utilisateur::class)->find($userId);
             if ($utilisateur) {
+                // FIX :181 — $utilisateur est déjà Utilisateur (trouvé par le repo), pas besoin de cast
                 $quiz->setUtilisateur($utilisateur);
             }
 
@@ -134,12 +134,12 @@ class MentalAdminController extends AbstractController
             return $this->redirectToRoute('app_mental_admin_quiz_list');
         }
 
-        $utilisateurs = $em->getRepository(\App\Entity\Utilisateur::class)->findAll();
+        $utilisateurs = $em->getRepository(Utilisateur::class)->findAll();
 
         return $this->render('bo/mental/quiz/form.html.twig', [
-            'quiz' => $quiz,
+            'quiz'         => $quiz,
             'utilisateurs' => $utilisateurs,
-            'isEdit' => true,
+            'isEdit'       => true,
         ]);
     }
 
@@ -161,25 +161,27 @@ class MentalAdminController extends AbstractController
         if ($request->isMethod('POST')) {
             $question->setEnonce($request->request->get('enonce'));
             $question->setReponseCorrecte($request->request->get('reponse_correcte'));
-            
-            // Options fausses séparées par |
+
             $optionsFausses = [
                 $request->request->get('option_1'),
                 $request->request->get('option_2'),
                 $request->request->get('option_3'),
             ];
             $question->setOptionsFaussesFromArray(array_filter($optionsFausses));
-            
             $question->setPointsValeur((int) $request->request->get('points_valeur'));
 
-            // Créer un quiz par défaut ou lier à un quiz existant
-            // Pour l'instant, on crée un quiz "Question Bank"
-            $quiz = $em->getRepository(QuizMental::class)->findOneBy(['titre' => 'Question Bank']) 
-                    ?? (new QuizMental())
-                        ->setTitre('Question Bank')
-                        ->setNiveauStressCible(5)
-                        ->setUtilisateur($this->getUser());
-            
+            $quiz = $em->getRepository(QuizMental::class)->findOneBy(['titre' => 'Question Bank']);
+            if (!$quiz) {
+                $quiz = new QuizMental();
+                $quiz->setTitre('Question Bank');
+                $quiz->setNiveauStressCible(5);
+
+                // FIX — cast UserInterface → Utilisateur pour setUtilisateur
+                /** @var Utilisateur $currentUser */
+                $currentUser = $this->getUser();
+                $quiz->setUtilisateur($currentUser);
+            }
+
             $question->setQuiz($quiz);
             $em->persist($quiz);
             $em->persist($question);
@@ -191,7 +193,7 @@ class MentalAdminController extends AbstractController
 
         return $this->render('bo/mental/questions/form.html.twig', [
             'question' => $question,
-            'isEdit' => false,
+            'isEdit'   => false,
         ]);
     }
 
@@ -201,14 +203,13 @@ class MentalAdminController extends AbstractController
         if ($request->isMethod('POST')) {
             $question->setEnonce($request->request->get('enonce'));
             $question->setReponseCorrecte($request->request->get('reponse_correcte'));
-            
+
             $optionsFausses = [
                 $request->request->get('option_1'),
                 $request->request->get('option_2'),
                 $request->request->get('option_3'),
             ];
             $question->setOptionsFaussesFromArray(array_filter($optionsFausses));
-            
             $question->setPointsValeur((int) $request->request->get('points_valeur'));
 
             $em->flush();
@@ -219,7 +220,7 @@ class MentalAdminController extends AbstractController
 
         return $this->render('bo/mental/questions/form.html.twig', [
             'question' => $question,
-            'isEdit' => true,
+            'isEdit'   => true,
         ]);
     }
 
@@ -236,7 +237,6 @@ class MentalAdminController extends AbstractController
     #[Route('/quiz/export-pdf', name: 'app_mental_admin_quiz_export_pdf')]
     public function exportQuizPdf(EntityManagerInterface $em): Response
     {
-        // Récupérer tous les quiz avec leurs utilisateurs et questions
         $quizzes = $em->getRepository(QuizMental::class)
             ->createQueryBuilder('q')
             ->leftJoin('q.utilisateur', 'u')
@@ -246,49 +246,43 @@ class MentalAdminController extends AbstractController
             ->orderBy('q.dateQuiz', 'DESC')
             ->getQuery()
             ->getResult();
-        
-        // Transformer le résultat pour avoir accès à nbQuestions comme propriété
+
         $formattedQuizzes = [];
         foreach ($quizzes as $quizData) {
-            $quiz = $quizData[0] ?? null;
+            $quiz        = $quizData[0] ?? null;
             $utilisateur = $quizData[1] ?? null;
-            
+
             if ($quiz && $utilisateur) {
                 $formattedQuizzes[] = (object) [
-                    'id' => $quiz->getId(),
-                    'titre' => $quiz->getTitre(),
-                    'dateQuiz' => $quiz->getDateQuiz(),
+                    'id'                => $quiz->getId(),
+                    'titre'             => $quiz->getTitre(),
+                    'dateQuiz'          => $quiz->getDateQuiz(),
                     'niveauStressCible' => $quiz->getNiveauStressCible(),
-                    'scoreResultat' => $quiz->getScoreResultat(),
-                    'medailleQuiz' => $quiz->getMedailleQuiz(),
-                    'statut' => $quiz->getStatut(),
-                    'utilisateur' => $utilisateur,
-                    'nbQuestions' => $quizData['nbQuestions'] ?? 0,
+                    'scoreResultat'     => $quiz->getScoreResultat(),
+                    'medailleQuiz'      => $quiz->getMedailleQuiz(),
+                    'statut'            => $quiz->getStatut(),
+                    'utilisateur'       => $utilisateur,
+                    'nbQuestions'       => $quizData['nbQuestions'] ?? 0,
                 ];
             }
         }
 
-        // Configuration DomPDF
         $options = new Options();
         $options->set('defaultFont', 'Arial');
         $options->set('isRemoteEnabled', true);
         $options->set('isJavascriptEnabled', true);
 
-        // Créer le HTML
         $html = $this->renderView('bo/mental/quiz/export_pdf.html.twig', [
-            'quizzes' => $formattedQuizzes,
+            'quizzes'    => $formattedQuizzes,
             'dateExport' => new \DateTime(),
         ]);
 
-        // Générer le PDF
         $dompdf = new Dompdf($options);
         $dompdf->loadHtml($html);
         $dompdf->render();
 
-        // Nom du fichier
         $filename = 'quiz_mental_export_' . date('Y-m-d_H-i-s') . '.pdf';
 
-        // Response PDF
         $response = new Response($dompdf->output());
         $response->headers->set('Content-Type', 'application/pdf');
         $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');

@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Utilisateur;
 use App\Repository\RepasRepository;
 use App\Repository\RendezVousRepository;
 use App\Repository\SeanceSportRepository;
@@ -13,18 +14,16 @@ class DashboardController extends AbstractController
 {
     #[Route('/dashboard', name: 'app_dashboard')]
     public function index(
-        RepasRepository $repasRepository,
+        RepasRepository       $repasRepository,
         SeanceSportRepository $seanceSportRepository,
-        RendezVousRepository $rendezVousRepository
+        RendezVousRepository  $rendezVousRepository
     ): Response {
-        /** @var \App\Entity\Utilisateur $user */
         $user = $this->getUser();
 
-        if (!$user) {
+        if (!$user instanceof Utilisateur) {
             return $this->redirectToRoute('app_login');
         }
 
-        // ✅ Redirection selon le rôle
         if ($this->isGranted('ROLE_ADMIN')) {
             return $this->redirectToRoute('app_sports');
         }
@@ -37,11 +36,10 @@ class DashboardController extends AbstractController
             return $this->redirectToRoute('app_exercice_index');
         }
 
-        // Chargement des données du dashboard
-        $todayRepas = $repasRepository->findTodayByUtilisateur($user);
+        $todayRepas  = $repasRepository->findTodayByUtilisateur($user);
         $weekSeances = $seanceSportRepository->findThisWeekByUtilisateur($user);
         $upcomingRdv = $rendezVousRepository->findBy(
-            ['patient' => $user],
+            ['patient'   => $user],
             ['dateHeure' => 'ASC'],
             5
         );
@@ -57,12 +55,12 @@ class DashboardController extends AbstractController
         }
 
         return $this->render('dashboard/index.html.twig', [
-            'user' => $user,
-            'todayRepas' => $todayRepas,
-            'weekSeances' => $weekSeances,
-            'upcomingRdv' => array_slice($upcomingRdv, 0, 3),
+            'user'               => $user,
+            'todayRepas'         => $todayRepas,
+            'weekSeances'        => $weekSeances,
+            'upcomingRdv'        => array_slice($upcomingRdv, 0, 3),
             'totalCaloriesToday' => $totalCaloriesToday,
-            'totalMinutesSport' => $totalMinutesSport,
+            'totalMinutesSport'  => $totalMinutesSport,
         ]);
     }
 }

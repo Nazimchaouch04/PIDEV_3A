@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\RendezVous;
+use App\Entity\Utilisateur;
 use App\Form\RendezVousType;
 use App\Repository\RendezVousRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -15,35 +16,31 @@ use App\Repository\ConsultationRepository;
 #[Route('/medical')]
 class MedicalController extends AbstractController
 {
+    #[Route('/dossier', name: 'app_medical_dossier')]
+    public function dossier(
+        RendezVousRepository   $rdvRepo,
+        ConsultationRepository $consultRepo
+    ): Response {
+        $user = $this->getUser();
 
-#[Route('/dossier', name: 'app_medical_dossier')]
-public function dossier(
-    RendezVousRepository $rdvRepo,
-    ConsultationRepository $consultRepo
-): Response {
+        return $this->render('medical/dossier.html.twig', [
+            'rdvs'          => $rdvRepo->findBy(['patient' => $user]),
+            'consultations' => $consultRepo->createQueryBuilder('c')
+                ->join('c.rendezVous', 'r')
+                ->where('r.patient = :patient')
+                ->setParameter('patient', $user)
+                ->getQuery()
+                ->getResult(),
+        ]);
+    }
 
-    $user = $this->getUser();
-
-    return $this->render('medical/dossier.html.twig', [
-        'rdvs' => $rdvRepo->findBy(['patient'=>$user]),
-        'consultations' => $consultRepo->createQueryBuilder('c')
-    ->join('c.rendezVous','r')
-    ->where('r.patient = :patient')
-    ->setParameter('patient',$user)
-    ->getQuery()
-    ->getResult()
-
-    ]);
-}
-
-    // LIST MY RENDEZ-VOUS
     #[Route('', name: 'app_medical')]
     public function index(RendezVousRepository $rendezVousRepository): Response
     {
         $user = $this->getUser();
 
         $rendezVous = $rendezVousRepository->findBy(
-            ['patient' => $user],
+            ['patient'  => $user],
             ['dateHeure' => 'DESC']
         );
 
@@ -52,33 +49,33 @@ public function dossier(
         ]);
     }
 
-    // CREATE RENDEZ-VOUS
-   #[Route('/new', name: 'app_medical_new')]
-public function new(Request $request, EntityManagerInterface $entityManager): Response
-{
-    $rdv = new RendezVous();
-    $rdv->setPatient($this->getUser());
-    $rdv->setStatut('DEMANDE');
+    #[Route('/new', name: 'app_medical_new')]
+    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $rdv = new RendezVous();
 
-    $form = $this->createForm(RendezVousType::class, $rdv);
-    $form->handleRequest($request);
+        // FIX :60 — cast UserInterface → Utilisateur
+        /** @var Utilisateur $user */
+        $user = $this->getUser();
+        $rdv->setPatient($user);
+        $rdv->setStatut('DEMANDE');
 
-    if ($form->isSubmitted() && $form->isValid()) {
+        $form = $this->createForm(RendezVousType::class, $rdv);
+        $form->handleRequest($request);
 
-        $rdv->setSpecialiste($form->get('specialiste')->getData());
+        if ($form->isSubmitted() && $form->isValid()) {
+            $rdv->setSpecialiste($form->get('specialiste')->getData());
+            $entityManager->persist($rdv);
+            $entityManager->flush();
 
-        $entityManager->persist($rdv);
-        $entityManager->flush();
+            return $this->redirectToRoute('app_medical');
+        }
 
-        return $this->redirectToRoute('app_medical');
+        return $this->render('medical/new.html.twig', [
+            'form' => $form->createView(),
+        ]);
     }
 
-    return $this->render('medical/new.html.twig', [
-        'form' => $form->createView(),
-    ]);
-}
-
-    // SHOW RENDEZ-VOUS
     #[Route('/{id<\d+>}', name: 'app_medical_show', methods: ['GET'])]
     public function show(RendezVous $rdv): Response
     {
@@ -91,7 +88,6 @@ public function new(Request $request, EntityManagerInterface $entityManager): Re
         ]);
     }
 
-    // MARK AS REALISED
     #[Route('/{id}/realise', name: 'app_medical_realise', methods: ['POST'])]
     public function markAsRealised(RendezVous $rdv, EntityManagerInterface $entityManager): Response
     {
@@ -107,7 +103,6 @@ public function new(Request $request, EntityManagerInterface $entityManager): Re
         return $this->redirectToRoute('app_medical');
     }
 
-    // CANCEL RENDEZ-VOUS
     #[Route('/{id}/annule', name: 'app_medical_annule', methods: ['POST'])]
     public function cancel(RendezVous $rdv, EntityManagerInterface $entityManager): Response
     {
@@ -122,53 +117,52 @@ public function new(Request $request, EntityManagerInterface $entityManager): Re
 
         return $this->redirectToRoute('app_medical');
     }
+
     #[Route('/{id}/delete', name: 'app_medical_delete', methods: ['POST'])]
-public function delete(Request $request, RendezVous $rdv, EntityManagerInterface $entityManager): Response
-{
-    // security: only owner can delete
-    if ($rdv->getPatient() !== $this->getUser()) {
-        throw $this->createAccessDeniedException();
+    public function delete(Request $request, RendezVous $rdv, EntityManagerInterface $entityManager): Response
+    {
+        if ($rdv->getPatient() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        if ($this->isCsrfTokenValid('delete' . $rdv->getId(), $request->request->get('_token'))) {
+            $entityManager->remove($rdv);
+            $entityManager->flush();
+        }
+
+        return $this->redirectToRoute('app_medical');
     }
 
-    if ($this->isCsrfTokenValid('delete' . $rdv->getId(), $request->request->get('_token'))) {
-        $entityManager->remove($rdv);
-        $entityManager->flush();
-    }
-
-    return $this->redirectToRoute('app_medical');
-}
-#[Route('/{id}/confirme', name: 'app_medical_confirme', methods: ['POST'])]
-public function confirme(RendezVous $rdv, EntityManagerInterface $entityManager): Response
-{
-    $rdv->setStatut('CONFIRME');
-    $entityManager->flush();
-
-    return $this->redirectToRoute('app_medical');
-}
-#[Route('/{id}/edit', name: 'app_medical_edit')]
-public function edit(
-    Request $request,
-    RendezVous $rdv,
-    EntityManagerInterface $entityManager
-): Response {
-    if ($rdv->getPatient() !== $this->getUser()) {
-        throw $this->createAccessDeniedException();
-    }
-
-    $form = $this->createForm(RendezVousType::class, $rdv);
-    $form->handleRequest($request);
-
-    if ($form->isSubmitted() && $form->isValid()) {
+    #[Route('/{id}/confirme', name: 'app_medical_confirme', methods: ['POST'])]
+    public function confirme(RendezVous $rdv, EntityManagerInterface $entityManager): Response
+    {
+        $rdv->setStatut('CONFIRME');
         $entityManager->flush();
 
         return $this->redirectToRoute('app_medical');
     }
 
-    return $this->render('medical/edit.html.twig', [
-        'form' => $form->createView(),
-        'rdv' => $rdv,
-    ]);
-}
+    #[Route('/{id}/edit', name: 'app_medical_edit')]
+    public function edit(
+        Request                $request,
+        RendezVous             $rdv,
+        EntityManagerInterface $entityManager
+    ): Response {
+        if ($rdv->getPatient() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
 
+        $form = $this->createForm(RendezVousType::class, $rdv);
+        $form->handleRequest($request);
 
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->flush();
+            return $this->redirectToRoute('app_medical');
+        }
+
+        return $this->render('medical/edit.html.twig', [
+            'form' => $form->createView(),
+            'rdv'  => $rdv,
+        ]);
+    }
 }

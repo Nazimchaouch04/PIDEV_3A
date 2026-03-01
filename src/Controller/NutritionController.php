@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Repas;
 use App\Entity\Aliment;
+use App\Entity\Utilisateur;
 use App\Form\RepasType;
 use App\Repository\RepasRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -18,8 +19,10 @@ class NutritionController extends AbstractController
     #[Route('', name: 'app_nutrition')]
     public function index(RepasRepository $repasRepository): Response
     {
-        $user = $this->getUser();
-        $repas = $repasRepository->findByUtilisateur($user);
+        // FIX :22 & :23 — cast UserInterface → Utilisateur
+        /** @var Utilisateur $user */
+        $user       = $this->getUser();
+        $repas      = $repasRepository->findByUtilisateur($user);
         $todayRepas = $repasRepository->findTodayByUtilisateur($user);
 
         $totalCaloriesToday = 0;
@@ -28,9 +31,9 @@ class NutritionController extends AbstractController
         }
 
         return $this->render('nutrition/index.html.twig', [
-            'repas' => $repas,
-            'todayRepas' => $todayRepas,
-            'totalCaloriesToday' => $totalCaloriesToday,
+            'repas'               => $repas,
+            'todayRepas'          => $todayRepas,
+            'totalCaloriesToday'  => $totalCaloriesToday,
         ]);
     }
 
@@ -38,7 +41,11 @@ class NutritionController extends AbstractController
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $repas = new Repas();
-        $repas->setUtilisateur($this->getUser());
+
+        // FIX :41 — cast UserInterface → Utilisateur
+        /** @var Utilisateur $user */
+        $user = $this->getUser();
+        $repas->setUtilisateur($user);
 
         $form = $this->createForm(RepasType::class, $repas);
         $form->handleRequest($request);
@@ -86,7 +93,7 @@ class NutritionController extends AbstractController
 
         return $this->render('nutrition/edit.html.twig', [
             'repas' => $repas,
-            'form' => $form,
+            'form'  => $form,
         ]);
     }
 
@@ -97,7 +104,7 @@ class NutritionController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        if ($this->isCsrfTokenValid('delete'.$repas->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $repas->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($repas);
             $entityManager->flush();
             $this->addFlash('success', 'Repas supprime!');

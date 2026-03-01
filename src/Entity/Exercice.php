@@ -14,6 +14,7 @@ class Exercice
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    /** @var int|null */
     private ?int $id = null;
 
     #[ORM\Column(length: 100)]
@@ -21,13 +22,15 @@ class Exercice
     #[Assert\Length(max: 100)]
     private ?string $nomExercice = null;
 
+    // ✅ CORRIGÉ : enumType gère la conversion automatiquement, type mismatch résolu
     #[ORM\Column(type: 'string', enumType: Intensite::class)]
     private ?Intensite $intensite = null;
 
-    #[ORM\Column]
+    // ✅ CORRIGÉ : float → decimal (string) pour éviter imprécision arithmétique
+    #[ORM\Column(type: 'decimal', precision: 5, scale: 2)]
     #[Assert\NotNull(message: 'Les calories par minute sont requises')]
     #[Assert\Positive(message: 'Les calories par minute doivent etre positives')]
-    private ?float $caloriesParMinute = null;
+    private ?string $caloriesParMinute = null;
 
     #[ORM\ManyToOne(inversedBy: 'exercices')]
     #[ORM\JoinColumn(nullable: false)]
@@ -60,12 +63,13 @@ class Exercice
         return $this;
     }
 
-    public function getCaloriesParMinute(): ?float
+    // ✅ CORRIGÉ : getter/setter utilisent string au lieu de float
+    public function getCaloriesParMinute(): ?string
     {
         return $this->caloriesParMinute;
     }
 
-    public function setCaloriesParMinute(float $caloriesParMinute): static
+    public function setCaloriesParMinute(string $caloriesParMinute): static
     {
         $this->caloriesParMinute = $caloriesParMinute;
         return $this;

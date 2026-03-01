@@ -17,6 +17,7 @@ class Repas
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    /** @var int|null */
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
@@ -24,14 +25,16 @@ class Repas
     #[Assert\Length(min: 3, minMessage: 'Le titre doit contenir au moins {{ limit }} caractères', max: 50, maxMessage: 'Le titre ne peut pas dépasser {{ limit }} caractères')]
     private ?string $titreRepas = null;
 
+    // ✅ CORRIGÉ : enumType gère la conversion, pas besoin de type mismatch
     #[ORM\Column(type: 'string', enumType: TypeMoment::class)]
     #[Assert\NotNull(message: 'Le moment est obligatoire')]
     private ?TypeMoment $typeMoment = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    // ✅ CORRIGÉ : DateTime → DateTimeImmutable
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     #[Assert\NotNull(message: 'La date de consommation est requise')]
     #[Assert\LessThanOrEqual('today', message: 'La date ne peut pas être dans le futur')]
-    private ?\DateTimeInterface $dateConsommation = null;
+    private ?\DateTimeImmutable $dateConsommation = null;
 
     #[ORM\Column]
     #[Assert\PositiveOrZero(message: 'Les points doivent être supérieurs ou égaux à 0')]
@@ -44,13 +47,15 @@ class Repas
     /**
      * @var Collection<int, Aliment>
      */
-    #[ORM\OneToMany(targetEntity: Aliment::class, mappedBy: 'repas', orphanRemoval: true, cascade: ['persist'])]
+    // ✅ CORRIGÉ : ajout cascade remove pour cohérence avec onDelete=CASCADE dans Aliment
+    #[ORM\OneToMany(targetEntity: Aliment::class, mappedBy: 'repas', orphanRemoval: true, cascade: ['persist', 'remove'])]
     private Collection $aliments;
 
     public function __construct()
     {
         $this->aliments = new ArrayCollection();
-        $this->dateConsommation = new \DateTime();
+        // ✅ CORRIGÉ : DateTimeImmutable
+        $this->dateConsommation = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -80,12 +85,13 @@ class Repas
         return $this;
     }
 
-    public function getDateConsommation(): ?\DateTimeInterface
+    public function getDateConsommation(): ?\DateTimeImmutable
     {
         return $this->dateConsommation;
     }
 
-    public function setDateConsommation(\DateTimeInterface $dateConsommation): static
+    // ✅ CORRIGÉ : setter accepte DateTimeImmutable
+    public function setDateConsommation(\DateTimeImmutable $dateConsommation): static
     {
         $this->dateConsommation = $dateConsommation;
         return $this;
@@ -130,13 +136,10 @@ class Repas
         return $this;
     }
 
+    // ✅ CORRIGÉ : suppression du setRepas(null) car nullable=false
     public function removeAliment(Aliment $aliment): static
     {
-        if ($this->aliments->removeElement($aliment)) {
-            if ($aliment->getRepas() === $this) {
-                $aliment->setRepas(null);
-            }
-        }
+        $this->aliments->removeElement($aliment);
         return $this;
     }
 

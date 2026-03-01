@@ -1,26 +1,42 @@
 {% extends 'base_back.html.twig' %}
 
-{% block title %}Admin - Gestion Séances Sport{% endblock %}
+{% block title %}Gestion Séances Sport — BioSync{% endblock %}
 
 {% block body %}
 <div style="padding: 20px;">
 
+    {# ── Entête ── #}
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-        <div>
-            <h1 style="margin:0;">Gestion des Séances Sport</h1>
-            <p style="color:#888;">Administration de toutes les séances.</p>
+        <div style="display:flex; align-items:center; gap:14px;">
+            <div style="
+                background: linear-gradient(135deg, #4f46e5, #7c3aed);
+                width:50px; height:50px; border-radius:14px;
+                display:flex; align-items:center; justify-content:center;
+                font-size:22px; box-shadow:0 4px 12px rgba(79,70,229,0.3);
+            ">🏋️</div>
+            <div>
+                <h1 style="margin:0; font-size:1.6rem;">Gestion des Séances Sport</h1>
+                <p style="color:#888; margin:4px 0 0 0; font-size:14px;">Administration · Alertes intelligentes en temps réel</p>
+            </div>
         </div>
         <div style="display:flex; gap:10px;">
             <a href="{{ path('app_seance_sport_defis') }}" style="background:linear-gradient(135deg,#f59e0b,#ef4444); color:white; padding:10px 20px; border-radius:8px; text-decoration:none; font-weight:600; box-shadow:0 4px 12px rgba(245,158,11,0.3);">🏅 Défis & Médailles</a>
             <a href="{{ path('app_seance_sport_stats') }}" style="background:#6366f1; color:white; padding:10px 20px; border-radius:8px; text-decoration:none; font-weight:600;">📊 Statistiques</a>
-            <a href="{{ path('app_seance_sport_new') }}" style="background:#4f46e5; color:white; padding:10px 20px; border-radius:8px; text-decoration:none;">+ Nouvelle séance</a>
+            <a href="{{ path('app_seance_sport_new') }}" style="background:#4f46e5; color:white; padding:10px 20px; border-radius:8px; text-decoration:none; font-weight:600;">+ Nouvelle séance</a>
         </div>
     </div>
 
+    {# ── Flash messages ── #}
     {% for message in app.flashes('success') %}
         <div style="background:#d1fae5; color:#065f46; padding:12px; border-radius:8px; margin-bottom:15px;">✅ {{ message }}</div>
     {% endfor %}
 
+    {# =========================================================================
+       🚨 ZONE ALERTES INTELLIGENTES — Mise à jour toutes les 30 secondes
+       ========================================================================= #}
+    <div id="zone-alertes" style="margin-bottom:20px;"></div>
+
+    {# ── Stats cards ── #}
     <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:15px; margin-bottom:20px;">
         <div style="background:white; padding:15px; border-radius:10px; box-shadow:0 1px 4px rgba(0,0,0,0.1);">
             <div style="font-size:24px; font-weight:bold; color:#4f46e5;">{{ seance_sports|length }}</div>
@@ -44,6 +60,7 @@
         </div>
     </div>
 
+    {# ── Filtres ── #}
     <div style="display:flex; gap:10px; margin-bottom:15px;">
         <input type="text" id="searchInput" placeholder="🔍 Rechercher par nom, utilisateur..." onkeyup="filterTable()" style="padding:10px; border:1px solid #ddd; border-radius:8px; flex:1;"/>
         <select id="filterMedaille" onchange="filterTable()" style="padding:10px; border:1px solid #ddd; border-radius:8px;">
@@ -60,6 +77,7 @@
         </select>
     </div>
 
+    {# ── Tableau ── #}
     <div style="background:white; border-radius:10px; box-shadow:0 1px 4px rgba(0,0,0,0.1); overflow:hidden;">
         <table style="width:100%; border-collapse:collapse;" id="seancesTable">
             <thead style="background:#f8fafc;">
@@ -72,25 +90,31 @@
                     <th onclick="sortByColumn(5)" style="padding:12px; text-align:left; cursor:pointer; border-bottom:2px solid #e2e8f0;">Durée ▲▼</th>
                     <th style="padding:12px; text-align:left; border-bottom:2px solid #e2e8f0;">Médaille</th>
                     <th style="padding:12px; text-align:left; border-bottom:2px solid #e2e8f0;">Exercices</th>
+                    <th style="padding:12px; text-align:left; border-bottom:2px solid #e2e8f0;">Statut</th>
                     <th style="padding:12px; text-align:left; border-bottom:2px solid #e2e8f0;">Actions</th>
                 </tr>
             </thead>
             <tbody id="tableBody">
                 {% for seance in seance_sports %}
+
+                {# ── Calcul date pour logique bouton ── #}
+                {% set aujourdhui = "now"|date("Y-m-d") %}
+                {% set dateSeance = seance.dateSeance|date("Y-m-d") %}
+
                 <tr style="border-bottom:1px solid #f1f5f9;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='white'">
                     <td style="padding:12px;">{{ seance.id }}</td>
-                    <td style="padding:12px; font-weight:500;">{{ seance.nomSeance }}</td>
+                    <td style="padding:12px; font-weight:500; text-transform:capitalize;">{{ seance.nomSeance }}</td>
                     <td style="padding:12px;">{{ seance.utilisateur ? seance.utilisateur.id : '-' }}</td>
                     <td style="padding:12px;">{{ seance.dateSeance|date('d/m/Y') }}</td>
                     <td style="padding:12px;">{{ seance.heureDebut|date('H:i') }}</td>
                     <td style="padding:12px;">{{ seance.dureeMinutes }} min</td>
                     <td style="padding:12px;">
                         {% if seance.medailleObtenue %}
-                            {% if '🥇' in seance.medailleObtenue or 'or' in seance.medailleObtenue|lower %}
+                            {% if 'Or' in seance.medailleObtenue %}
                                 <span style="background:#fef3c7; color:#92400e; padding:3px 10px; border-radius:20px; font-size:12px;">🥇 Or</span>
-                            {% elseif '🥈' in seance.medailleObtenue or 'argent' in seance.medailleObtenue|lower %}
+                            {% elseif 'Argent' in seance.medailleObtenue %}
                                 <span style="background:#f1f5f9; color:#475569; padding:3px 10px; border-radius:20px; font-size:12px;">🥈 Argent</span>
-                            {% elseif '🥉' in seance.medailleObtenue or 'bronze' in seance.medailleObtenue|lower %}
+                            {% elseif 'Bronze' in seance.medailleObtenue %}
                                 <span style="background:#fef3c7; color:#78350f; padding:3px 10px; border-radius:20px; font-size:12px;">🥉 Bronze</span>
                             {% else %}
                                 <span style="background:#f1f5f9; color:#888; padding:3px 10px; border-radius:20px; font-size:12px;">{{ seance.medailleObtenue }}</span>
@@ -102,6 +126,37 @@
                     <td style="padding:12px;">
                         <span style="background:#ede9fe; color:#4f46e5; padding:3px 10px; border-radius:20px; font-size:12px;">{{ seance.exercices|length }} exercice(s)</span>
                     </td>
+
+                    {# ── Statut intelligent selon la date ── #}
+                    <td style="padding:12px;">
+                        {% if seance.heureDebutReelle %}
+                            {# Séance déjà démarrée #}
+                            <span style="background:#dcfce7; color:#166534; padding:3px 10px; border-radius:20px; font-size:12px;">
+                                🟢 En cours
+                            </span>
+
+                        {% elseif dateSeance == aujourdhui %}
+                            {# Séance d'aujourd'hui → bouton Démarrer #}
+                            <button
+                                onclick="demarrerSeance({{ seance.id }}, this)"
+                                style="background:#2563eb; color:white; padding:4px 12px; border-radius:6px; border:none; cursor:pointer; font-size:12px; font-weight:600;">
+                                ▶ Démarrer
+                            </button>
+
+                        {% elseif dateSeance > aujourdhui %}
+                            {# Séance future → planifiée #}
+                            <span style="background:#eff6ff; color:#2563eb; padding:3px 10px; border-radius:20px; font-size:12px;">
+                                📅 Planifiée
+                            </span>
+
+                        {% else %}
+                            {# Séance passée → terminée #}
+                            <span style="background:#f1f5f9; color:#94a3b8; padding:3px 10px; border-radius:20px; font-size:12px;">
+                                ✅ Terminée
+                            </span>
+                        {% endif %}
+                    </td>
+
                     <td style="padding:12px;">
                         <div style="display:flex; gap:5px;">
                             <a href="{{ path('app_seance_sport_show', {'id': seance.id}) }}" style="background:#e0f2fe; color:#0369a1; padding:5px 10px; border-radius:6px; text-decoration:none; font-size:13px;">👁 Voir</a>
@@ -115,7 +170,7 @@
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="9" style="padding:30px; text-align:center; color:#888;">Aucune séance trouvée.</td>
+                    <td colspan="10" style="padding:30px; text-align:center; color:#888;">Aucune séance trouvée.</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -124,6 +179,98 @@
 </div>
 
 <script>
+// =========================================================================
+// 🚨 ALERTES INTELLIGENTES — Vérification toutes les 30 secondes
+// =========================================================================
+function verifierAlertes() {
+    fetch('/seance/sport/alertes/check')
+        .then(r => r.json())
+        .then(data => {
+            const zone = document.getElementById('zone-alertes');
+            if (data.count === 0) { zone.innerHTML = ''; return; }
+
+            let html = '';
+            data.alertes.forEach(a => {
+                const isCritique = a.niveau === 'critique';
+                const bg       = isCritique ? '#fef2f2' : '#fffbeb';
+                const border   = isCritique ? '#ef4444' : '#f59e0b';
+                const color    = isCritique ? '#991b1b' : '#92400e';
+                const icon     = isCritique ? '🚨' : '⚠️';
+                const barColor = isCritique ? '#ef4444' : '#f59e0b';
+
+                html += `
+                <div style="
+                    background:${bg};
+                    border-left:5px solid ${border};
+                    border-radius:10px;
+                    padding:16px 20px;
+                    margin-bottom:10px;
+                    display:flex;
+                    align-items:flex-start;
+                    gap:14px;
+                    box-shadow:0 2px 8px rgba(0,0,0,0.08);
+                    animation: slideIn 0.4s ease;
+                ">
+                    <span style="font-size:24px; margin-top:2px;">${icon}</span>
+                    <div style="flex:1;">
+                        <div style="font-weight:700; color:${color}; font-size:15px; margin-bottom:4px;">
+                            ${a.message}
+                        </div>
+                        <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:8px;">
+                            <span style="background:white; border:1px solid ${border}; color:${color}; padding:3px 10px; border-radius:20px; font-size:12px;">
+                                ⏰ +${a.depassement} min de dépassement
+                            </span>
+                            ${a.calories_predites ? `
+                            <span style="background:white; border:1px solid #2563eb; color:#1d4ed8; padding:3px 10px; border-radius:20px; font-size:12px;">
+                                🔥 ${a.calories_predites} kcal prédites (ML)
+                            </span>` : ''}
+                            <span style="background:white; border:1px solid ${border}; color:${color}; padding:3px 10px; border-radius:20px; font-size:12px;">
+                                📊 Score risque : ${a.score}/100
+                            </span>
+                        </div>
+                        <div style="margin-top:10px; background:#e5e7eb; border-radius:10px; height:6px; overflow:hidden;">
+                            <div style="width:${a.score}%; background:${barColor}; height:100%; border-radius:10px; transition:width 0.5s;"></div>
+                        </div>
+                    </div>
+                    <button onclick="this.parentElement.remove()" style="background:none; border:none; font-size:18px; cursor:pointer; color:#9ca3af; padding:0 4px;">✕</button>
+                </div>`;
+            });
+
+            zone.innerHTML = html;
+            try { new Audio('/sounds/alert.mp3').play(); } catch(e) {}
+        })
+        .catch(() => {});
+}
+
+verifierAlertes();
+setInterval(verifierAlertes, 30000);
+
+// =========================================================================
+// ▶ DÉMARRER une séance
+// =========================================================================
+function demarrerSeance(id, btn) {
+    btn.disabled = true;
+    btn.textContent = '⏳ Démarrage...';
+
+    fetch(`/seance/sport/${id}/demarrer`, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.status === 'success') {
+            btn.parentElement.innerHTML = `
+                <span style="background:#dcfce7; color:#166534; padding:3px 10px; border-radius:20px; font-size:12px;">
+                    🟢 En cours
+                </span>`;
+        }
+    })
+    .catch(() => { btn.disabled = false; btn.textContent = '▶ Démarrer'; });
+}
+
+// =========================================================================
+// Filtres + Tri
+// =========================================================================
 function filterTable() {
     const search   = document.getElementById('searchInput').value.toLowerCase();
     const medaille = document.getElementById('filterMedaille').value.toLowerCase();
@@ -141,6 +288,7 @@ function filterTable() {
         row.style.display = (matchSearch && matchMedaille && matchDuree) ? '' : 'none';
     });
 }
+
 let sortDirection = {};
 function sortByColumn(colIndex) {
     const tbody  = document.querySelector('#tableBody');
@@ -155,4 +303,11 @@ function sortByColumn(colIndex) {
     sorted.forEach(row => tbody.appendChild(row));
 }
 </script>
+
+<style>
+@keyframes slideIn {
+    from { opacity:0; transform:translateY(-10px); }
+    to   { opacity:1; transform:translateY(0); }
+}
+</style>
 {% endblock %}

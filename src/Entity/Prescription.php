@@ -13,6 +13,7 @@ class Prescription
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    /** @var int|null */
     private ?int $id = null;
 
     #[ORM\Column(length: 100)]
@@ -44,7 +45,8 @@ class Prescription
     private ?string $instructions = null;
 
     #[ORM\ManyToOne(inversedBy: 'prescriptions')]
-    #[ORM\JoinColumn(nullable: false)]
+    // ✅ CORRIGÉ : ajout onDelete CASCADE pour cohérence ORM/DB
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Consultation $consultation = null;
 
     public function getId(): ?int
@@ -60,7 +62,6 @@ class Prescription
     public function setNomMedicament(string $nomMedicament): static
     {
         $this->nomMedicament = $nomMedicament;
-
         return $this;
     }
 
@@ -72,7 +73,6 @@ class Prescription
     public function setDose(string $dose): static
     {
         $this->dose = $dose;
-
         return $this;
     }
 
@@ -84,7 +84,6 @@ class Prescription
     public function setFrequence(string $frequence): static
     {
         $this->frequence = $frequence;
-
         return $this;
     }
 
@@ -96,7 +95,6 @@ class Prescription
     public function setDuree(int $duree): static
     {
         $this->duree = $duree;
-
         return $this;
     }
 
@@ -108,7 +106,6 @@ class Prescription
     public function setInstructions(?string $instructions): static
     {
         $this->instructions = $instructions;
-
         return $this;
     }
 
@@ -120,7 +117,6 @@ class Prescription
     public function setConsultation(?Consultation $consultation): static
     {
         $this->consultation = $consultation;
-
         return $this;
     }
 }

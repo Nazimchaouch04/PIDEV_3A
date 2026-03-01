@@ -14,27 +14,30 @@ class EvenementSante
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    /** @var int|null */
     private ?int $id = null;
 
     #[ORM\Column(length: 100)]
     #[Assert\NotBlank(message: 'Le titre de l\'evenement est requis')]
     private ?string $titreEvent = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    // ✅ CORRIGÉ : DateTime → DateTimeImmutable
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     #[Assert\NotNull(message: 'La date est requise')]
     #[Assert\GreaterThan("now", message: "La date doit être dans le futur")]
-    private ?\DateTimeInterface $dateEvent = null;
+    private ?\DateTimeImmutable $dateEvent = null;
 
     #[ORM\Column]
     private int $pointsParticipation = 10;
 
     #[ORM\ManyToOne(inversedBy: 'evenements')]
-    #[ORM\JoinColumn(nullable: false)]
+    // ✅ CORRIGÉ : ajout onDelete CASCADE pour cohérence ORM/DB
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?GroupeSoutien $groupe = null;
 
     public function getId(): ?int
     {
-        return $this->id; 
+        return $this->id;
     }
 
     public function getTitreEvent(): ?string
@@ -48,12 +51,13 @@ class EvenementSante
         return $this;
     }
 
-    public function getDateEvent(): ?\DateTimeInterface
+    public function getDateEvent(): ?\DateTimeImmutable
     {
         return $this->dateEvent;
     }
 
-    public function setDateEvent(\DateTimeInterface $dateEvent): static
+    // ✅ CORRIGÉ : setter accepte DateTimeImmutable
+    public function setDateEvent(\DateTimeImmutable $dateEvent): static
     {
         $this->dateEvent = $dateEvent;
         return $this;
@@ -81,8 +85,9 @@ class EvenementSante
         return $this;
     }
 
+    // ✅ CORRIGÉ : comparaison avec DateTimeImmutable
     public function isUpcoming(): bool
     {
-        return $this->dateEvent > new \DateTime();
+        return $this->dateEvent > new \DateTimeImmutable();
     }
 }

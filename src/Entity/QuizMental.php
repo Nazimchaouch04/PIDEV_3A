@@ -16,6 +16,7 @@ class QuizMental
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    /** @var int|null */
     private ?int $id = null;
 
     #[ORM\Column(length: 100)]
@@ -33,26 +34,30 @@ class QuizMental
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $medailleQuiz = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $dateQuiz = null;
+    // ✅ CORRIGÉ : DateTime → DateTimeImmutable
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+    private ?\DateTimeImmutable $dateQuiz = null;
 
     #[ORM\Column(length: 20, options: ['default' => 'disponible'])]
     private string $statut = 'disponible';
 
     #[ORM\ManyToOne(inversedBy: 'quizMentaux')]
-    #[ORM\JoinColumn(nullable: false)]
+    // ✅ CORRIGÉ : ajout onDelete CASCADE pour cohérence ORM/DB
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Utilisateur $utilisateur = null;
 
     /**
      * @var Collection<int, Question>
      */
-    #[ORM\OneToMany(targetEntity: Question::class, mappedBy: 'quiz', orphanRemoval: true, cascade: ['persist'])]
+    // ✅ CORRIGÉ : ajout cascade='remove' pour cohérence ORM/DB
+    #[ORM\OneToMany(targetEntity: Question::class, mappedBy: 'quiz', orphanRemoval: true, cascade: ['persist', 'remove'])]
     private Collection $questions;
 
     public function __construct()
     {
         $this->questions = new ArrayCollection();
-        $this->dateQuiz = new \DateTime();
+        // ✅ CORRIGÉ : DateTimeImmutable
+        $this->dateQuiz = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -104,12 +109,13 @@ class QuizMental
         return $this;
     }
 
-    public function getDateQuiz(): ?\DateTimeInterface
+    public function getDateQuiz(): ?\DateTimeImmutable
     {
         return $this->dateQuiz;
     }
 
-    public function setDateQuiz(\DateTimeInterface $dateQuiz): static
+    // ✅ CORRIGÉ : setter accepte DateTimeImmutable
+    public function setDateQuiz(\DateTimeImmutable $dateQuiz): static
     {
         $this->dateQuiz = $dateQuiz;
         return $this;

@@ -4,13 +4,8 @@ namespace App\Service;
 
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-/**
- * Service pour l'API ExerciseDB (gratuite via RapidAPI)
- * Donne : muscles ciblés, gif animation, niveau difficulté
- */
 class ExerciseDBService
 {
-    // Mapping nom exercice français → nom anglais pour l'API
     private const TRADUCTIONS = [
         'yoga'          => 'yoga',
         'course'        => 'running',
@@ -36,8 +31,7 @@ class ExerciseDBService
     }
 
     /**
-     * Cherche les infos d'un exercice par nom
-     * Retourne : ['muscle' => '...', 'equipment' => '...', 'niveau' => '...', 'gif' => '...']
+     * @return array<string, mixed>
      */
     public function getInfosExercice(string $nomExercice): array
     {
@@ -45,7 +39,6 @@ class ExerciseDBService
             return $this->getInfosDefaut($nomExercice);
         }
 
-        // Traduire le nom en anglais
         $nomAnglais = $this->traduire($nomExercice);
 
         try {
@@ -64,12 +57,12 @@ class ExerciseDBService
             if (!empty($data[0])) {
                 $ex = $data[0];
                 return [
-                    'muscle'     => ucfirst($ex['target'] ?? 'Non défini'),
+                    'muscle'              => ucfirst($ex['target'] ?? 'Non défini'),
                     'muscles_secondaires' => implode(', ', $ex['secondaryMuscles'] ?? []),
-                    'equipment'  => ucfirst($ex['equipment'] ?? 'Aucun'),
-                    'niveau'     => $this->traduireNiveau($ex['difficulty'] ?? ''),
-                    'gif'        => $ex['gifUrl'] ?? null,
-                    'found'      => true,
+                    'equipment'           => ucfirst($ex['equipment'] ?? 'Aucun'),
+                    'niveau'              => $this->traduireNiveau($ex['difficulty'] ?? ''),
+                    'gif'                 => $ex['gifUrl'] ?? null,
+                    'found'               => true,
                 ];
             }
 
@@ -81,14 +74,13 @@ class ExerciseDBService
     }
 
     /**
-     * Enrichit une liste d'exercices avec les infos ExerciseDB
-     * @param array $exercices liste d'objets Exercice
-     * @return array [['exercice' => ..., 'infos' => [...]], ...]
+     * @param array<int, mixed> $exercices
+     * @return array<int, mixed>
      */
     public function enrichirExercices(array $exercices): array
     {
         $enrichis = [];
-        $dejaVus  = []; // cache pour éviter les doublons d'appels API
+        $dejaVus  = [];
 
         foreach ($exercices as $exercice) {
             $nom = strtolower($exercice->getNomExercice());
@@ -107,25 +99,23 @@ class ExerciseDBService
     }
 
     /**
-     * Retourne les muscles les plus travaillés (pour les stats)
-     * @return array ['Pectoraux' => 5, 'Biceps' => 3, ...]
+     * @param array<int, mixed> $exercices
+     * @return array<string, int>
      */
     public function getMusclesLesPlusTravailles(array $exercices): array
     {
         $muscleCount = [];
 
         foreach ($exercices as $exercice) {
-            $nom   = strtolower($exercice->getNomExercice());
-            $infos = $this->getInfosExercice($nom);
+            $nom    = strtolower($exercice->getNomExercice());
+            $infos  = $this->getInfosExercice($nom);
             $muscle = $infos['muscle'] ?? 'Inconnu';
             $muscleCount[$muscle] = ($muscleCount[$muscle] ?? 0) + 1;
         }
 
         arsort($muscleCount);
-        return array_slice($muscleCount, 0, 5, true); // top 5
+        return array_slice($muscleCount, 0, 5, true);
     }
-
-    // ── Privés ────────────────────────────────────────────────────────────────
 
     private function traduire(string $nom): string
     {
@@ -135,7 +125,7 @@ class ExerciseDBService
                 return $en;
             }
         }
-        return $nomLower; // envoie tel quel si pas de traduction
+        return $nomLower;
     }
 
     private function traduireNiveau(string $niveau): string
@@ -148,9 +138,11 @@ class ExerciseDBService
         };
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function getInfosDefaut(string $nom): array
     {
-        // Infos de fallback basées sur des règles simples
         $nomLower = strtolower($nom);
 
         $muscle = match(true) {
@@ -164,7 +156,7 @@ class ExerciseDBService
             str_contains($nomLower, 'natation')    => 'Corps entier',
             str_contains($nomLower, 'musculation') => 'Muscles variés',
             str_contains($nomLower, 'corde')       => 'Cardio',
-            default                                 => 'Non défini',
+            default                                => 'Non défini',
         };
 
         return [

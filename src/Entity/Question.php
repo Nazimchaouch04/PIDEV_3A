@@ -14,6 +14,7 @@ class Question
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    /** @var int|null */
     private ?int $id = null;
 
     #[ORM\Column(type: Types::TEXT)]
@@ -34,7 +35,8 @@ class Question
     private ?int $pointsValeur = null;
 
     #[ORM\ManyToOne(inversedBy: 'questions')]
-    #[ORM\JoinColumn(nullable: false)]
+    // ✅ CORRIGÉ : ajout onDelete CASCADE pour cohérence ORM/DB
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?QuizMental $quiz = null;
 
     public function getId(): ?int
@@ -75,17 +77,26 @@ class Question
         return $this;
     }
 
+    /**
+     * @return array<string>
+     */
     public function getOptionsFaussesArray(): array
     {
         return explode('|', $this->optionsFausses ?? '');
     }
 
+    /**
+     * @param array<string> $options
+     */
     public function setOptionsFaussesFromArray(array $options): static
     {
         $this->optionsFausses = implode('|', $options);
         return $this;
     }
 
+    /**
+     * @return array<string>
+     */
     public function getAllOptions(): array
     {
         $options = $this->getOptionsFaussesArray();

@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\SeanceSport;
+use App\Entity\Utilisateur;
 use App\Form\SeanceSportType;
 use App\Repository\SeanceSportRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -17,8 +18,10 @@ class SportsController extends AbstractController
     #[Route('', name: 'app_sports')]
     public function index(SeanceSportRepository $seanceSportRepository): Response
     {
-        $user = $this->getUser();
-        $seances = $seanceSportRepository->findByUtilisateur($user);
+        // FIX :21 & :22 — cast UserInterface → Utilisateur
+        /** @var Utilisateur $user */
+        $user        = $this->getUser();
+        $seances     = $seanceSportRepository->findByUtilisateur($user);
         $weekSeances = $seanceSportRepository->findThisWeekByUtilisateur($user);
 
         $totalMinutes = 0;
@@ -27,9 +30,9 @@ class SportsController extends AbstractController
         }
 
         return $this->render('sports/index.html.twig', [
-            'seances' => $seances,
-            'weekSeances' => $weekSeances,
-            'totalMinutesWeek' => $totalMinutes,
+            'seances'           => $seances,
+            'weekSeances'       => $weekSeances,
+            'totalMinutesWeek'  => $totalMinutes,
         ]);
     }
 
@@ -37,7 +40,11 @@ class SportsController extends AbstractController
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $seance = new SeanceSport();
-        $seance->setUtilisateur($this->getUser());
+
+        // FIX :40 — cast UserInterface → Utilisateur
+        /** @var Utilisateur $user */
+        $user = $this->getUser();
+        $seance->setUtilisateur($user);
 
         $form = $this->createForm(SeanceSportType::class, $seance);
         $form->handleRequest($request);
@@ -85,7 +92,7 @@ class SportsController extends AbstractController
 
         return $this->render('sports/edit.html.twig', [
             'seance' => $seance,
-            'form' => $form,
+            'form'   => $form,
         ]);
     }
 
@@ -96,7 +103,7 @@ class SportsController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        if ($this->isCsrfTokenValid('delete'.$seance->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $seance->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($seance);
             $entityManager->flush();
             $this->addFlash('success', 'Seance supprimee!');

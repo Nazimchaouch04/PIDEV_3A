@@ -1,12 +1,28 @@
 {% extends 'base_back.html.twig' %}
 
-{% block title %}Admin - Détail Exercice{% endblock %}
+{% block title %}{{ exercice.nomExercice|capitalize }} — Détail Exercice — BioSync{% endblock %}
 
 {% block body %}
-<div class="page-header flex-between">
-    <div>
-        <h1 class="page-title">{{ exercice.nomExercice }}</h1>
-        <p class="page-subtitle">Détails de l'exercice.</p>
+
+{# ── Entête page améliorée ── #}
+<div class="page-header flex-between" style="margin-bottom:24px;">
+    <div style="display:flex; align-items:center; gap:16px;">
+        <div style="
+            background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+            width: 52px; height: 52px;
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(37,99,235,0.3);
+        ">🏋️</div>
+        <div>
+            <h1 class="page-title" style="margin:0; text-transform:capitalize; font-size:1.8rem;">
+                {{ exercice.nomExercice }}
+            </h1>
+            <p style="margin:4px 0 0 0; color:#6b7280; font-size:14px;">
+                Détails et prédiction IA personnalisée pour cet exercice
+            </p>
+        </div>
     </div>
     <div style="display:flex; gap:10px;">
         <a href="{{ path('app_exercice_edit', {id: exercice.id}) }}" class="btn btn-secondary">✏️ Modifier</a>
@@ -14,10 +30,11 @@
     </div>
 </div>
 
+{# ── Stats cards ── #}
 <div class="grid grid-cols-3 gap-4 mb-6">
     <div class="stat-card">
-        <div class="stat-card-label">Nom</div>
-        <div class="stat-card-value">{{ exercice.nomExercice }}</div>
+        <div class="stat-card-label">Nom de l'exercice</div>
+        <div class="stat-card-value" style="text-transform:capitalize;">{{ exercice.nomExercice }}</div>
     </div>
     <div class="stat-card">
         <div class="stat-card-label">Intensité</div>
@@ -32,14 +49,186 @@
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-card-label">Calories/min</div>
+        <div class="stat-card-label">
+            Calories/min
+            <span style="font-size:11px; color:#9ca3af; font-weight:400;">(valeur de base)</span>
+        </div>
         <div class="stat-card-value">{{ exercice.caloriesParMinute }} kcal</div>
     </div>
     <div class="stat-card">
         <div class="stat-card-label">Séance associée</div>
-        <div class="stat-card-value">{{ exercice.seance.nomSeance }}</div>
+        <div class="stat-card-value" style="text-transform:capitalize;">{{ exercice.seance.nomSeance }}</div>
     </div>
 </div>
+
+{# ===================================================================== #}
+{# ══════════  🧠 PRÉDICTION IA — Calories personnalisées  ════════════= #}
+{# ===================================================================== #}
+<div style="
+    background: #ffffff;
+    border: 2px solid #2563eb;
+    border-radius: 16px;
+    overflow: hidden;
+    margin: 0 0 24px 0;
+    box-shadow: 0 4px 20px rgba(37, 99, 235, 0.15);
+">
+    {# ── Header bleu ── #}
+    <div style="
+        background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 60%, #3b82f6 100%);
+        padding: 18px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    ">
+        <div style="display:flex; align-items:center; gap:12px;">
+            <span style="font-size:24px;">🧠</span>
+            <div>
+                <div style="color:#ffffff; font-size:17px; font-weight:700;">
+                    Prédiction IA — Calories personnalisées
+                </div>
+                <div style="color:#bfdbfe; font-size:13px; margin-top:3px;">
+                    Calculé pour
+                    <strong style="color:#ffffff;">
+                        {% if app.user.profilSante %}
+                            {{ app.user.profilSante.age }} ans · {{ app.user.profilSante.poids }} kg
+                        {% else %}
+                            profil non configuré
+                        {% endif %}
+                    </strong>
+                    · Intensité <strong style="color:#ffffff;">{{ exercice.intensite.value|upper }}</strong>
+                </div>
+            </div>
+        </div>
+        <span style="
+            background: rgba(255,255,255,0.2);
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 20px;
+            letter-spacing: 1px;
+            border: 1px solid rgba(255,255,255,0.4);
+            white-space: nowrap;
+        ">🤖 Random Forest ML</span>
+    </div>
+
+    {# ── Corps blanc ── #}
+    <div style="padding: 32px 24px; text-align: center; background: #ffffff;">
+
+        {# Chargement #}
+        <div id="prediction-loading">
+            <div style="
+                display:inline-block;
+                width: 40px; height: 40px;
+                border: 4px solid #dbeafe;
+                border-top: 4px solid #2563eb;
+                border-radius: 50%;
+                animation: spin 0.8s linear infinite;
+            "></div>
+            <p style="color:#6b7280; margin-top:12px; font-size:14px;">
+                Analyse de ton profil en cours...
+            </p>
+        </div>
+
+        {# Résultat #}
+        <div id="prediction-result" style="display:none;">
+            <div id="calories-value" style="
+                font-size: 72px;
+                font-weight: 900;
+                color: #1d4ed8;
+                line-height: 1;
+                letter-spacing: -2px;
+            ">0</div>
+            <div style="color:#6b7280; font-size:15px; margin-top:6px; margin-bottom:16px;">
+                kcal estimées pour cette séance
+            </div>
+
+            <div id="intensite-badge" style="
+                display:inline-block;
+                padding: 6px 18px;
+                border-radius: 20px;
+                font-size: 13px;
+                font-weight: 600;
+                margin-bottom: 14px;
+            "></div>
+
+            <p id="prediction-message" style="
+                color: #374151;
+                font-style: italic;
+                font-size: 14px;
+                margin-bottom: 20px;
+            "></p>
+
+            {# Tableau paramètres #}
+            <div style="
+                background: #eff6ff;
+                border: 1px solid #bfdbfe;
+                border-radius: 12px;
+                padding: 16px 20px;
+                display: inline-block;
+                text-align: left;
+                min-width: 300px;
+                margin-bottom: 20px;
+            ">
+                <div style="color:#1d4ed8; font-size:12px; font-weight:700; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.5px;">
+                    📊 Paramètres utilisés par le modèle
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                    <div style="color:#374151; font-size:13px;">
+                        👤 Âge : <strong>{% if app.user.profilSante %}{{ app.user.profilSante.age }} ans{% else %}N/A{% endif %}</strong>
+                    </div>
+                    <div style="color:#374151; font-size:13px;">
+                        ⚖️ Poids : <strong>{% if app.user.profilSante %}{{ app.user.profilSante.poids }} kg{% else %}N/A{% endif %}</strong>
+                    </div>
+                    <div style="color:#374151; font-size:13px;">
+                        ⚡ Intensité : <strong>{{ exercice.intensite.value|upper }}</strong>
+                    </div>
+                    <div style="color:#374151; font-size:13px;">
+                        🔥 Base : <strong>{{ exercice.caloriesParMinute }} kcal/min</strong>
+                    </div>
+                </div>
+            </div>
+
+            {# Footer propre sans fond bleu #}
+            <div style="
+                border-top: 1px solid #e5e7eb;
+                padding-top: 14px;
+                color: #6b7280;
+                font-size: 12px;
+            ">
+                🧠 Prédit par <strong style="color:#1d4ed8;">Random Forest</strong>
+                (100 arbres de décision) ·
+                Entraîné sur <strong style="color:#1d4ed8;">500 profils</strong> ·
+                Précision <strong style="color:#16a34a;">98%</strong> ·
+                Résultat unique pour <strong style="color:#1d4ed8;">ton profil</strong>
+            </div>
+        </div>
+
+        {# Erreur / profil incomplet #}
+        <div id="prediction-error" style="display:none;">
+            <div style="
+                background: #eff6ff;
+                border: 1px solid #bfdbfe;
+                border-radius: 12px;
+                padding: 24px;
+            ">
+                <div style="font-size:2rem; margin-bottom:8px;">ℹ️</div>
+                <p id="error-message" style="margin-bottom:16px; color:#1e40af;"></p>
+                <a href="{{ path('app_profile_health') }}" style="
+                    background: #2563eb;
+                    color: white;
+                    padding: 8px 20px;
+                    border-radius: 8px;
+                    text-decoration: none;
+                    font-size: 13px;
+                    font-weight: 600;
+                ">→ Configurer mon Profil Santé</a>
+            </div>
+        </div>
+
+    </div>
+</div>
+{# ===================================================================== #}
 
 <div class="card" style="border:1px solid #ffcccc;">
     <div class="card-header" style="background:#fff3f3;">
@@ -55,7 +244,69 @@
     </div>
 </div>
 
+<style>
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes fadeInUp {
+    from { opacity:0; transform:translateY(16px); }
+    to   { opacity:1; transform:translateY(0); }
+}
+</style>
+
 <script>
+document.addEventListener('DOMContentLoaded', function () {
+    const exerciceId = {{ exercice.id }};
+
+    fetch(`/exercice/prediction/calories/${exerciceId}`)
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('prediction-loading').style.display = 'none';
+
+            if (data.status === 'success') {
+                const result = document.getElementById('prediction-result');
+                result.style.display = 'block';
+                result.style.animation = 'fadeInUp 0.4s ease';
+
+                document.getElementById('prediction-message').textContent = data.message;
+
+                const badge  = document.getElementById('intensite-badge');
+                const colors = {
+                    'FAIBLE':  { bg:'#dbeafe', color:'#1d4ed8', border:'#93c5fd', label:'🟢 Intensité FAIBLE'  },
+                    'MODEREE': { bg:'#dbeafe', color:'#1e40af', border:'#60a5fa', label:'🔵 Intensité MODÉRÉE' },
+                    'ELEVEE':  { bg:'#1d4ed8', color:'#ffffff', border:'#1d4ed8', label:'⚡ Intensité ÉLEVÉE'  },
+                };
+                const c = colors[data.intensite] || colors['FAIBLE'];
+                badge.style.background = c.bg;
+                badge.style.color      = c.color;
+                badge.style.border     = `1px solid ${c.border}`;
+                badge.textContent      = c.label;
+
+                animateCounter('calories-value', 0, Math.round(data.calories_predites), 1200);
+
+            } else {
+                document.getElementById('prediction-error').style.display = 'block';
+                document.getElementById('error-message').textContent =
+                    data.message || 'Complète ton Profil Santé pour voir ta prédiction personnalisée.';
+            }
+        })
+        .catch(() => {
+            document.getElementById('prediction-loading').style.display = 'none';
+            document.getElementById('prediction-error').style.display   = 'block';
+            document.getElementById('error-message').textContent = 'Connexion au modèle impossible.';
+        });
+
+    function animateCounter(id, start, end, duration) {
+        const el        = document.getElementById(id);
+        const range     = end - start;
+        const startTime = performance.now();
+        function update(now) {
+            const progress = Math.min((now - startTime) / duration, 1);
+            el.textContent = Math.round(start + range * progress);
+            if (progress < 1) requestAnimationFrame(update);
+        }
+        requestAnimationFrame(update);
+    }
+});
+
 function confirmDelete(formId) {
     if (confirm('Supprimer cet exercice définitivement ?')) document.getElementById(formId).submit();
 }

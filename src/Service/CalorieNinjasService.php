@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Service;
 
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -10,7 +11,9 @@ class CalorieNinjasService
         private string $apiKey = ''
     ) {}
 
-    // ✅ Déjà existant
+    /**
+     * @return array<string, mixed>
+     */
     public function getCaloriesBrulees(string $activite, int $dureeMinutes): array
     {
         try {
@@ -42,7 +45,9 @@ class CalorieNinjasService
         }
     }
 
-    // ✅ NOUVEAU — Recommandations d'exercices
+    /**
+     * @return array<int, mixed>
+     */
     public function getExercicesByMuscle(string $muscle): array
     {
         try {
