@@ -1,0 +1,265 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+    .resultat-page {
+        min-height: 100vh;
+        background: #0a0a0f;
+        font-family: 'DM Sans', sans-serif;
+        padding: 60px 20px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .resultat-page::before {
+        content: '';
+        position: fixed;
+        top: -200px; left: -200px;
+        width: 600px; height: 600px;
+        background: radial-gradient(circle, rgba(255, 100, 50, 0.12) 0%, transparent 70%);
+        pointer-events: none;
+        animation: drift 8s ease-in-out infinite alternate;
+    }
+
+    .resultat-page::after {
+        content: '';
+        position: fixed;
+        bottom: -200px; right: -100px;
+        width: 500px; height: 500px;
+        background: radial-gradient(circle, rgba(100, 50, 255, 0.1) 0%, transparent 70%);
+        pointer-events: none;
+        animation: drift 10s ease-in-out infinite alternate-reverse;
+    }
+
+    @keyframes drift {
+        from { transform: translate(0, 0); }
+        to { transform: translate(40px, 30px); }
+    }
+
+    .resultat-container {
+        max-width: 680px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Header état */
+    .etat-card {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 20px;
+        padding: 24px 28px;
+        margin-bottom: 20px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .etat-badge {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 100px;
+        padding: 8px 16px;
+        color: rgba(255,255,255,0.7);
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .etat-badge strong {
+        color: #ff6432;
+    }
+
+    /* Résultat principal */
+    .resultat-card {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 24px;
+        padding: 40px 44px;
+        margin-bottom: 24px;
+        animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+    }
+
+    .resultat-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 32px;
+    }
+
+    .resultat-icon {
+        width: 52px;
+        height: 52px;
+        background: linear-gradient(135deg, #ff6432, #ff9500);
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        flex-shrink: 0;
+        box-shadow: 0 8px 20px rgba(255, 100, 50, 0.3);
+    }
+
+    .resultat-title {
+        font-family: 'Syne', sans-serif;
+        font-size: 22px;
+        font-weight: 800;
+        color: #ffffff;
+        margin: 0 0 4px 0;
+    }
+
+    .resultat-subtitle {
+        color: rgba(255,255,255,0.4);
+        font-size: 13px;
+        margin: 0;
+    }
+
+    .resultat-content {
+        color: rgba(255,255,255,0.75);
+        font-size: 15px;
+        line-height: 1.8;
+        white-space: pre-line;
+    }
+
+    /* Sections IA */
+    .resultat-content strong,
+    .resultat-content b {
+        color: #ff6432;
+        font-weight: 600;
+    }
+
+    /* Actions */
+    .actions-row {
+        display: flex;
+        gap: 12px;
+        animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+    }
+
+    .btn-primary-custom {
+        flex: 1;
+        padding: 16px 20px;
+        background: linear-gradient(135deg, #ff6432, #ff9500);
+        border: none;
+        border-radius: 14px;
+        color: #fff;
+        font-family: 'Syne', sans-serif;
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .btn-primary-custom:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(255, 100, 50, 0.4);
+        color: #fff;
+        text-decoration: none;
+    }
+
+    .btn-secondary-custom {
+        flex: 1;
+        padding: 16px 20px;
+        background: rgba(255,255,255,0.05);
+        border: 1.5px solid rgba(255,255,255,0.1);
+        border-radius: 14px;
+        color: rgba(255,255,255,0.7);
+        font-family: 'Syne', sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        text-align: center;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .btn-secondary-custom:hover {
+        background: rgba(255,255,255,0.08);
+        border-color: rgba(255,255,255,0.2);
+        color: #fff;
+        text-decoration: none;
+        transform: translateY(-2px);
+    }
+
+    .page-title-top {
+        font-family: 'Syne', sans-serif;
+        font-size: 28px;
+        font-weight: 800;
+        color: #fff;
+        margin: 0 0 8px 0;
+    }
+
+    .page-title-top span {
+        background: linear-gradient(135deg, #ff6432, #ff9500);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .page-desc {
+        color: rgba(255,255,255,0.4);
+        font-size: 14px;
+        margin: 0 0 28px 0;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="resultat-page">
+    <div class="resultat-container">
+
+        <h1 class="page-title-top">Ta séance <span>personnalisée</span> 🎯</h1>
+        <p class="page-desc">Analyse basée sur ton état du moment par notre IA coach</p>
+
+        {# Badges état #}
+        <div class="etat-card">
+            <div class="etat-badge">😊 Humeur : <strong>{{ humeur }}</strong></div>
+            <div class="etat-badge">⚡ Énergie : <strong>{{ energie }}/5</strong></div>
+            <div class="etat-badge">😴 Sommeil : <strong>{{ sommeil }}h</strong></div>
+            <div class="etat-badge">🧠 Stress : <strong>{{ stress }}</strong></div>
+        </div>
+
+        {# Résultat IA #}
+        <div class="resultat-card">
+            <div class="resultat-header">
+                <div class="resultat-icon">🤖</div>
+                <div>
+                    <h2 class="resultat-title">Analyse de ton coach IA</h2>
+                    <p class="resultat-subtitle">Généré spécialement pour ton état aujourd'hui</p>
+                </div>
+            </div>
+            <div class="resultat-content">{{ resultat|nl2br }}</div>
+        </div>
+
+        {# Actions #}
+        <div class="actions-row">
+            <a href="{{ path('app_exercice_motivation') }}" class="btn-secondary-custom">
+                ← Nouvelle analyse
+            </a>
+            <a href="{{ path('app_exercice_index') }}" class="btn-primary-custom">
+                🏋️ Voir mes exercices
+            </a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,435 @@
+{% extends 'base.html.twig' %}
+{% block title %}Statistiques Coach{% endblock %}
+
+{% block stylesheets %}{{ parent() }}
+<style>
+.stats-page { padding: 2rem; }
+.page-header { margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; }
+.page-header h1 { font-size: 1.8rem; font-weight: 700; color: #1e293b; }
+.page-header p  { color: #64748b; margin-top: 0.25rem; }
+.btn-back { background: #f1f5f9; color: #475569; border: none; padding: 0.5rem 1.2rem; border-radius: 8px; text-decoration: none; font-size: 0.9rem; }
+.btn-objectif { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border: none; padding: 0.5rem 1.2rem; border-radius: 8px; text-decoration: none; font-size: 0.9rem; font-weight: 600; }
+
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+.kpi-card { background: #fff; border-radius: 12px; padding: 1.25rem 1.5rem; box-shadow: 0 1px 4px rgba(0,0,0,0.08); border-left: 4px solid transparent; transition: transform 0.2s; }
+.kpi-card:hover { transform: translateY(-2px); }
+.kpi-card.blue   { border-color: #6366f1; }
+.kpi-card.green  { border-color: #10b981; }
+.kpi-card.orange { border-color: #f59e0b; }
+.kpi-card.red    { border-color: #ef4444; }
+.kpi-card.purple { border-color: #8b5cf6; }
+.kpi-card.teal   { border-color: #14b8a6; }
+.kpi-card.pink   { border-color: #ec4899; }
+.kpi-card.indigo { border-color: #3b82f6; }
+.kpi-icon  { font-size: 1.4rem; margin-bottom: 0.4rem; }
+.kpi-value { font-size: 1.9rem; font-weight: 700; color: #1e293b; line-height: 1.1; }
+.kpi-label { font-size: 0.75rem; color: #94a3b8; margin-top: 0.3rem; text-transform: uppercase; letter-spacing: 0.04em; }
+
+/* ── Analyse de Progression IA ── */
+.progression-section {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+.progression-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1.5rem;
+}
+.progression-header h2 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+}
+.progression-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+.prog-card {
+    border-radius: 12px;
+    padding: 1.25rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+.prog-card.hausse  { background: #f0fdf4; border: 2px solid #10b981; }
+.prog-card.baisse  { background: #fff7ed; border: 2px solid #f59e0b; }
+.prog-card.neutre  { background: #f8fafc; border: 2px solid #94a3b8; }
+.prog-card-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+.prog-card-value { font-size: 1.6rem; font-weight: 800; color: #1e293b; }
+.prog-card-label { font-size: 0.75rem; color: #64748b; margin-top: 0.25rem; text-transform: uppercase; }
+.prog-card-trend { font-size: 0.85rem; font-weight: 600; margin-top: 0.4rem; }
+.trend-up   { color: #10b981; }
+.trend-down { color: #f59e0b; }
+.trend-flat { color: #94a3b8; }
+
+/* Score de progression */
+.score-progression {
+    background: linear-gradient(135deg, #1e293b, #334155);
+    border-radius: 12px;
+    padding: 1.5rem;
+    color: white;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+.score-circle {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    font-weight: 800;
+    font-size: 1.6rem;
+    flex-shrink: 0;
+    border: 4px solid;
+}
+.score-circle.excellent { border-color: #10b981; color: #10b981; }
+.score-circle.bon       { border-color: #6366f1; color: #6366f1; }
+.score-circle.moyen     { border-color: #f59e0b; color: #f59e0b; }
+.score-circle.faible    { border-color: #ef4444; color: #ef4444; }
+.score-details h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; }
+.score-details p  { font-size: 0.85rem; color: #94a3b8; margin: 0; line-height: 1.6; }
+.score-barre { margin-top: 0.75rem; background: rgba(255,255,255,0.15); border-radius: 10px; height: 8px; overflow: hidden; }
+.score-barre-fill { height: 100%; border-radius: 10px; transition: width 1s ease; }
+
+/* Analyse Groq */
+.ia-section {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    border-radius: 16px;
+    padding: 2rem;
+    color: white;
+    margin-bottom: 2rem;
+}
+.ia-section h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem; }
+.ia-conseil {
+    background: rgba(255,255,255,0.15);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    line-height: 1.7;
+    white-space: pre-line;
+    font-size: 0.95rem;
+}
+.ia-analyse-progression {
+    background: rgba(255,255,255,0.12);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    margin-top: 1rem;
+    line-height: 1.7;
+    white-space: pre-line;
+    font-size: 0.9rem;
+    border-left: 4px solid rgba(255,255,255,0.4);
+}
+.ia-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+.chart-card { background: #fff; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+.chart-card h3 { font-size: 1rem; font-weight: 600; color: #1e293b; margin-bottom: 1rem; }
+.chart-card canvas { max-height: 250px; }
+
+.details-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+.detail-card { background: #fff; border-radius: 12px; padding: 1.25rem 1.5rem; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+.detail-card h4 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 0.75rem; }
+.detail-item { display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
+.detail-item:last-child { border-bottom: none; }
+.detail-item .label { color: #64748b; }
+.detail-item .value { font-weight: 600; color: #1e293b; }
+
+@keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+.fadeIn { animation: fadeIn 0.5s ease forwards; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="stats-page">
+
+    {# ── Entête ── #}
+    <div class="page-header">
+        <div>
+            <h1>📊 Statistiques Globales — Coach</h1>
+            <p>Vue d'ensemble de toutes les séances · Analyse de progression IA</p>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+            <a href="{{ path('app_seance_sport_objectif') }}" class="btn-objectif">🎯 Prédiction Objectif</a>
+            <a href="{{ path('app_seance_sport_index') }}" class="btn-back">← Retour aux séances</a>
+        </div>
+    </div>
+
+    {# ── KPI ── #}
+    <div class="kpi-grid">
+        <div class="kpi-card blue">
+            <div class="kpi-icon">🏋️</div>
+            <div class="kpi-value">{{ totalSeances }}</div>
+            <div class="kpi-label">Séances totales</div>
+        </div>
+        <div class="kpi-card green">
+            <div class="kpi-icon">📅</div>
+            <div class="kpi-value">{{ seanceCetteSemaine }}</div>
+            <div class="kpi-label">Cette semaine</div>
+        </div>
+        <div class="kpi-card orange">
+            <div class="kpi-icon">🗓️</div>
+            <div class="kpi-value">{{ seanceCeMois }}</div>
+            <div class="kpi-label">Ce mois</div>
+        </div>
+        <div class="kpi-card purple">
+            <div class="kpi-icon">⏱️</div>
+            <div class="kpi-value">{{ dureeTotal }}</div>
+            <div class="kpi-label">Minutes totales</div>
+        </div>
+        <div class="kpi-card teal">
+            <div class="kpi-icon">⚡</div>
+            <div class="kpi-value">{{ dureeMoyenne }}</div>
+            <div class="kpi-label">Min/séance moy.</div>
+        </div>
+        <div class="kpi-card red">
+            <div class="kpi-icon">🔥</div>
+            <div class="kpi-value">{{ caloriesTotales|number_format(0, '.', ' ') }}</div>
+            <div class="kpi-label">Calories brûlées</div>
+        </div>
+        <div class="kpi-card pink">
+            <div class="kpi-icon">🏅</div>
+            <div class="kpi-value">{{ totalMedailles }}</div>
+            <div class="kpi-label">Médailles</div>
+        </div>
+        <div class="kpi-card indigo">
+            <div class="kpi-icon">👤</div>
+            <div class="kpi-value">{{ userLePlusActif ? userLePlusActif.id : '—' }}</div>
+            <div class="kpi-label">User le + actif</div>
+        </div>
+    </div>
+
+    {# =========================================================================
+       🧠 ANALYSE DE PROGRESSION IA
+       ========================================================================= #}
+    <div class="progression-section fadeIn">
+        <div class="progression-header">
+            <span style="font-size:2rem;">📈</span>
+            <div>
+                <h2>Analyse de Progression Intelligente</h2>
+                <p style="color:#64748b; margin:0; font-size:0.85rem;">Comparaison semaine actuelle vs semaine précédente · Calculé automatiquement</p>
+            </div>
+        </div>
+
+        {# Score de progression global #}
+        {% set scoreProgression = progressionData.score ?? 0 %}
+        {% set scoreClass = scoreProgression >= 75 ? 'excellent' : (scoreProgression >= 50 ? 'bon' : (scoreProgression >= 25 ? 'moyen' : 'faible')) %}
+        {% set scoreLabel = scoreProgression >= 75 ? '🚀 Excellent' : (scoreProgression >= 50 ? '✅ Bon' : (scoreProgression >= 25 ? '⚠️ Moyen' : '📉 Faible')) %}
+        {% set scoreColor = scoreProgression >= 75 ? '#10b981' : (scoreProgression >= 50 ? '#6366f1' : (scoreProgression >= 25 ? '#f59e0b' : '#ef4444')) %}
+
+        <div class="score-progression">
+            <div class="score-circle {{ scoreClass }}">
+                <span>{{ scoreProgression }}</span>
+                <span style="font-size:0.6rem; font-weight:400;">/100</span>
+            </div>
+            <div class="score-details" style="flex:1;">
+                <h3>Score de Progression Global — {{ scoreLabel }}</h3>
+                <p>Basé sur l'évolution du nombre de séances, de la durée totale et des calories brûlées entre cette semaine et la semaine précédente.</p>
+                <div class="score-barre">
+                    <div class="score-barre-fill" style="width:{{ scoreProgression }}%; background:{{ scoreColor }};"></div>
+                </div>
+            </div>
+        </div>
+
+        {# 3 indicateurs de progression #}
+        <div class="progression-grid">
+
+            {# Séances #}
+            {% set diffSeances = progressionData.diffSeances ?? 0 %}
+            {% set classSeances = diffSeances > 0 ? 'hausse' : (diffSeances < 0 ? 'baisse' : 'neutre') %}
+            <div class="prog-card {{ classSeances }}">
+                <div class="prog-card-icon">🏋️</div>
+                <div class="prog-card-value">{{ seanceCetteSemaine }}</div>
+                <div class="prog-card-label">Séances cette semaine</div>
+                <div class="prog-card-trend {{ diffSeances > 0 ? 'trend-up' : (diffSeances < 0 ? 'trend-down' : 'trend-flat') }}">
+                    {% if diffSeances > 0 %}↑ +{{ diffSeances }} vs semaine passée
+                    {% elseif diffSeances < 0 %}↓ {{ diffSeances }} vs semaine passée
+                    {% else %}→ Stable vs semaine passée
+                    {% endif %}
+                </div>
+            </div>
+
+            {# Durée #}
+            {% set diffDuree = progressionData.diffDuree ?? 0 %}
+            {% set classDuree = diffDuree > 0 ? 'hausse' : (diffDuree < 0 ? 'baisse' : 'neutre') %}
+            <div class="prog-card {{ classDuree }}">
+                <div class="prog-card-icon">⏱️</div>
+                <div class="prog-card-value">{{ progressionData.dureeSemaineCourante ?? 0 }}</div>
+                <div class="prog-card-label">Minutes cette semaine</div>
+                <div class="prog-card-trend {{ diffDuree > 0 ? 'trend-up' : (diffDuree < 0 ? 'trend-down' : 'trend-flat') }}">
+                    {% if diffDuree > 0 %}↑ +{{ diffDuree }} min vs semaine passée
+                    {% elseif diffDuree < 0 %}↓ {{ diffDuree }} min vs semaine passée
+                    {% else %}→ Stable vs semaine passée
+                    {% endif %}
+                </div>
+            </div>
+
+            {# Calories #}
+            {% set diffCal = progressionData.diffCalories ?? 0 %}
+            {% set classCal = diffCal > 0 ? 'hausse' : (diffCal < 0 ? 'baisse' : 'neutre') %}
+            <div class="prog-card {{ classCal }}">
+                <div class="prog-card-icon">🔥</div>
+                <div class="prog-card-value">{{ progressionData.calSemaineCourante ?? 0 }}</div>
+                <div class="prog-card-label">Calories cette semaine</div>
+                <div class="prog-card-trend {{ diffCal > 0 ? 'trend-up' : (diffCal < 0 ? 'trend-down' : 'trend-flat') }}">
+                    {% if diffCal > 0 %}↑ +{{ diffCal }} kcal vs semaine passée
+                    {% elseif diffCal < 0 %}↓ {{ diffCal }} kcal vs semaine passée
+                    {% else %}→ Stable vs semaine passée
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+
+        {# Graphique progression calories par semaine #}
+        <div style="background:#f8fafc; border-radius:10px; padding:1.25rem;">
+            <h3 style="font-size:0.9rem; font-weight:600; color:#64748b; margin-bottom:1rem; text-transform:uppercase; letter-spacing:0.05em;">📊 Évolution des calories brûlées par semaine</h3>
+            <canvas id="chartProgression" style="max-height:200px;"></canvas>
+        </div>
+    </div>
+
+    {# ── Analyse IA Groq ── #}
+    <div class="ia-section fadeIn">
+        <div class="ia-badge">🤖 Powered by Groq AI · Llama 3.3</div>
+        <h2>Analyse IA Globale du Groupe</h2>
+        <div class="ia-conseil">{{ conseilIA }}</div>
+        {% if analyseProgression is defined and analyseProgression %}
+        <div class="ia-analyse-progression">
+            <strong style="font-size:0.85rem; opacity:0.8;">📈 ANALYSE DE PROGRESSION :</strong><br>
+            {{ analyseProgression }}
+        </div>
+        {% endif %}
+    </div>
+
+    {# ── Graphiques ── #}
+    <div class="charts-grid">
+        <div class="chart-card">
+            <h3>📈 Séances par semaine</h3>
+            <canvas id="chartSeancesSemaine"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3>⏱️ Durée par mois (minutes)</h3>
+            <canvas id="chartDureeMois"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3>🎯 Répartition par intensité</h3>
+            <canvas id="chartIntensite"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3>🏆 Top 5 exercices pratiqués</h3>
+            <canvas id="chartTop5"></canvas>
+        </div>
+    </div>
+
+    {# ── Détails ── #}
+    <div class="details-grid">
+        <div class="detail-card">
+            <h4>📊 Détails Séances</h4>
+            <div class="detail-item"><span class="label">Séance la plus longue</span><span class="value">{{ seancePlusLongue }} min</span></div>
+            <div class="detail-item"><span class="label">Séance la plus courte</span><span class="value">{{ seancePlusCourte }} min</span></div>
+            <div class="detail-item"><span class="label">Durée moyenne</span><span class="value">{{ dureeMoyenne }} min</span></div>
+            <div class="detail-item"><span class="label">Médailles attribuées</span><span class="value">{{ totalMedailles }} 🏅</span></div>
+        </div>
+        <div class="detail-card">
+            <h4>📅 Activité</h4>
+            <div class="detail-item"><span class="label">Cette semaine</span><span class="value">{{ seanceCetteSemaine }} séances</span></div>
+            <div class="detail-item"><span class="label">Ce mois</span><span class="value">{{ seanceCeMois }} séances</span></div>
+            <div class="detail-item"><span class="label">Calories totales</span><span class="value">{{ caloriesTotales|number_format(1) }} kcal</span></div>
+            <div class="detail-item"><span class="label">Score progression</span><span class="value" style="color:{{ scoreColor }};">{{ scoreProgression }}/100</span></div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block javascripts %}{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const C = {
+    blue:  'rgba(99,102,241,.85)',
+    green: 'rgba(16,185,129,.85)',
+    orange:'rgba(245,158,11,.85)',
+    red:   'rgba(239,68,68,.85)',
+    purple:'rgba(139,92,246,.85)',
+    teal:  'rgba(20,184,166,.85)'
+};
+
+// ── Graphique progression calories ──
+new Chart(document.getElementById('chartProgression'), {
+    type: 'line',
+    data: {
+        labels: {{ progressionLabels|raw }},
+        datasets: [{
+            label: 'Calories brûlées',
+            data: {{ progressionCalories|raw }},
+            borderColor: 'rgba(239,68,68,0.9)',
+            backgroundColor: 'rgba(239,68,68,0.1)',
+            borderWidth: 2.5,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 5,
+            pointBackgroundColor: 'rgba(239,68,68,0.9)'
+        }, {
+            label: 'Séances × 10',
+            data: {{ progressionSeancesX10|raw }},
+            borderColor: 'rgba(99,102,241,0.7)',
+            backgroundColor: 'transparent',
+            borderWidth: 2,
+            borderDash: [5, 5],
+            fill: false,
+            tension: 0.4,
+            pointRadius: 4
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { position: 'bottom' } },
+        scales: { y: { beginAtZero: true } }
+    }
+});
+
+// ── Séances par semaine ──
+new Chart(document.getElementById('chartSeancesSemaine'), {
+    type:'line',
+    data:{ labels:{{ seancesParSemaineLabels|raw }}, datasets:[{ label:'Séances', data:{{ seancesParSemaineData|raw }}, borderColor:C.blue, backgroundColor:'rgba(99,102,241,.1)', borderWidth:2.5, fill:true, tension:0.4, pointRadius:5 }] },
+    options:{ responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true, ticks:{stepSize:1}}} }
+});
+
+// ── Durée par mois ──
+new Chart(document.getElementById('chartDureeMois'), {
+    type:'bar',
+    data:{ labels:{{ dureeParMoisLabels|raw }}, datasets:[{ label:'Minutes', data:{{ dureeParMoisData|raw }}, backgroundColor:C.green, borderRadius:6 }] },
+    options:{ responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
+});
+
+// ── Intensité ──
+new Chart(document.getElementById('chartIntensite'), {
+    type:'doughnut',
+    data:{ labels:{{ intensiteLabels|raw }}, datasets:[{ data:{{ intensiteData|raw }}, backgroundColor:[C.green,C.orange,C.red,C.purple], borderWidth:2, borderColor:'#fff' }] },
+    options:{ responsive:true, cutout:'62%', plugins:{legend:{position:'bottom'}} }
+});
+
+// ── Top 5 exercices ──
+new Chart(document.getElementById('chartTop5'), {
+    type:'bar',
+    data:{ labels:{{ top5Labels|raw }}, datasets:[{ label:'Fois', data:{{ top5Data|raw }}, backgroundColor:[C.purple,C.blue,C.teal,C.green,C.orange], borderRadius:6 }] },
+    options:{ indexAxis:'y', responsive:true, plugins:{legend:{display:false}}, scales:{x:{beginAtZero:true, ticks:{stepSize:1}}} }
+});
+</script>
+{% endblock %}

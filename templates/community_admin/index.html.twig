@@ -1,0 +1,74 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Admin - Gestion Communauté{% endblock %}
+
+{% block body %}
+    <div class="page-header flex-between">
+        <div>
+            <h1 class="page-title">Gestion de la Communauté</h1>
+            <p class="page-subtitle">Pilotez les groupes et les événements.</p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <a href="{{ path('app_admin_group_new') }}" class="btn btn-primary">+ Nouveau Groupe</a>
+            <a href="{{ path('app_admin_event_new') }}" class="btn btn-secondary">+ Nouvel Événement</a>
+            {% if is_granted('ROLE_ADMIN') %}
+                <a href="{{ path('app_admin_dashboard') }}" class="btn btn-ghost">Retour Dashboard</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Recherche & Tri -->
+    <div class="card" style="margin: 20px 0; display: flex; gap: 20px; align-items: center;">
+        <div style="flex: 1;">
+            <input type="text" id="admin-search" class="form-control" placeholder="Rechercher par nom..." autocomplete="off">
+        </div>
+        <div>
+            <select class="form-control" style="width: 200px;" onchange="window.location.href='{{ path('app_admin_community_index') }}?sort=' + this.value">
+                <option value="recent" {{ currentSort == 'recent' ? 'selected' }}>Plus récents</option>
+                <option value="name" {{ currentSort == 'name' ? 'selected' }}>Nom (A-Z)</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Groupes -->
+    <h2 style="margin-bottom: 20px;">Liste des Groupes</h2>
+    <div class="grid-3" id="admin-groups-container" style="margin-bottom: 40px;">
+        {% include 'community_admin/_group_list_admin.html.twig' %}
+    </div>
+
+    <!-- Événements -->
+    <h2 style="margin-bottom: 20px;">Liste des Événements</h2>
+    <div class="card">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="text-align: left; border-bottom: 2px solid var(--border-light);">
+                    <th style="padding: 12px;">Titre</th>
+                    <th style="padding: 12px;">Groupe</th>
+                    <th style="padding: 12px;">Date</th>
+                    <th style="padding: 12px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="admin-events-container">
+                {% include 'community_admin/_event_list_admin.html.twig' %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('admin-search');
+        searchInput.addEventListener('keyup', function() {
+            fetch('{{ path("app_admin_community_index") }}?search=' + searchInput.value, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('admin-groups-container').innerHTML = data.groupsHtml;
+                document.getElementById('admin-events-container').innerHTML = data.eventsHtml;
+            });
+        });
+    });
+</script>
+{% endblock %}

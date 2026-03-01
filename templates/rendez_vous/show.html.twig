@@ -1,0 +1,23 @@
+{% extends 'base_back.html.twig' %}
+{% block title %}Détails rendez-vous{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+
+<div class="rdv-card">
+
+<h3>Détails du rendez-vous</h3>
+
+<p><b>Date :</b> {{ rendez_vous.dateHeure|date('d/m/Y H:i') }}</p>
+<p><b>Motif :</b> {{ rendez_vous.motif }}</p>
+<p><b>Statut :</b> {{ rendez_vous.statut }}</p>
+<p><b>Mode :</b> {{ rendez_vous .mode }}</p>
+
+<a class="btn btn-primary mt-3"
+   href="{{ path('app_rendez_vous_edit',{id:rendez_vous.id}) }}">
+   Modifier
+</a>
+
+</div>
+</div>
+{% endblock %}

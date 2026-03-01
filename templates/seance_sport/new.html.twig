@@ -1,0 +1,58 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Admin - Nouvelle Séance{% endblock %}
+
+{% block body %}
+<div style="padding: 20px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <div>
+            <h1 style="margin:0;">Nouvelle Séance</h1>
+            <p style="color:#888;">Créer une nouvelle séance sport.</p>
+        </div>
+        <a href="{{ path('app_seance_sport_index') }}" style="background:#6c757d; color:white; padding:10px 20px; border-radius:8px; text-decoration:none;">← Retour</a>
+    </div>
+
+    <div style="background:white; padding:30px; border-radius:10px; box-shadow:0 1px 4px rgba(0,0,0,0.1); max-width:700px;">
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'id': 'seanceForm'}}) }}
+
+        <div style="margin-bottom:15px;">
+            {{ form_label(form.nomSeance, 'Nom de la séance') }}
+            {{ form_widget(form.nomSeance, {'attr': {'class': 'form-control', 'placeholder': 'Min 2 caractères'}}) }}
+            {{ form_errors(form.nomSeance) }}
+        </div>
+
+        <div style="display:flex; gap:15px; margin-bottom:15px;">
+            <div style="flex:1;">
+                {{ form_label(form.dateSeance, 'Date') }}
+                {{ form_widget(form.dateSeance, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.dateSeance) }}
+            </div>
+            <div style="flex:1;">
+                {{ form_label(form.heureDebut, 'Heure de début') }}
+                {{ form_widget(form.heureDebut, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.heureDebut) }}
+            </div>
+        </div>
+
+        <div style="display:flex; gap:15px; margin-bottom:15px;">
+            <div style="flex:1;">
+                {{ form_label(form.dureeMinutes, 'Durée (minutes)') }}
+                {{ form_widget(form.dureeMinutes, {'attr': {'class': 'form-control', 'placeholder': 'Multiple de 5', 'min': '5', 'step': '5'}}) }}
+                {{ form_errors(form.dureeMinutes) }}
+            </div>
+            <div style="flex:1;">
+                {{ form_label(form.medailleObtenue, 'Médaille obtenue') }}
+                {{ form_widget(form.medailleObtenue, {'attr': {'class': 'form-control', 'placeholder': 'Or, Argent, Bronze...'}}) }}
+                {{ form_errors(form.medailleObtenue) }}
+            </div>
+        </div>
+
+        <div style="margin-top:20px;">
+            <button type="submit" style="background:#4f46e5; color:white; padding:10px 25px; border:none; border-radius:8px; cursor:pointer;">Créer la séance</button>
+            <a href="{{ path('app_seance_sport_index') }}" style="margin-left:10px; color:#6c757d;">Annuler</a>
+        </div>
+
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

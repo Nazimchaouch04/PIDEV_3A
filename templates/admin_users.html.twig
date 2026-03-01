@@ -1,0 +1,127 @@
+{% extends 'base_back.html.twig' %}
+
+{% block body %}
+<div class="page-header flex-between">
+    <div>
+        <h1 class="page-title">Utilisateurs BioSync</h1>
+        <p class="page-subtitle">Gérez les membres de la plateforme</p>
+    </div>
+    <div style="display: flex; gap: 1rem;">
+        <a href="{{ path('app_admin_user_new') }}" class="btn btn-primary">+ Nouvel utilisateur</a>
+        <a href="{{ path('app_admin_users_pdf') }}" class="btn btn-success" target="_blank">📄 Exporter PDF</a>
+        <a href="{{ path('app_admin_dashboard') }}" class="btn btn-secondary">Retour au Dashboard</a>
+    </div>
+</div>
+
+{# Barre de Recherche et Tri #}
+<div class="card mb-4">
+    <div class="flex gap-4">
+        <input type="text" name="q" id="user-search" value="{{ current_q }}" placeholder="Rechercher un nom ou email..." class="form-control" style="flex: 2;">
+        
+        <button type="button" onclick="sortUsers('nomComplet')" class="btn btn-outline">
+            Nom 
+            {% if current_sort == 'nomComplet' %}
+                {% if current_direction == 'ASC' %}
+                    ↑
+                {% else %}
+                    ↓
+                {% endif %}
+            {% else %}
+                ↕
+            {% endif %}
+        </button>
+
+        <button type="button" onclick="sortUsers('dateInscription')" class="btn btn-outline">
+            Date 
+            {% if current_sort == 'dateInscription' %}
+                {% if current_direction == 'ASC' %}
+                    ↑
+                {% else %}
+                    ↓
+                {% endif %}
+            {% else %}
+                ↕
+            {% endif %}
+        </button>
+
+        <button type="button" onclick="sortUsers('scoreGlobal')" class="btn btn-outline">
+            Score 
+            {% if current_sort == 'scoreGlobal' %}
+                {% if current_direction == 'ASC' %}
+                    ↑
+                {% else %}
+                    ↓
+                {% endif %}
+            {% else %}
+                ↕
+            {% endif %}
+        </button>
+    </div>
+</div>
+
+<div class="card">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Email</th>
+                <th>Date d'inscription</th>
+                <th>Score</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="users-table-body">
+            {% include 'admin/_user_list.html.twig' %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+let currentSort = '{{ current_sort }}';
+let currentDirection = '{{ current_direction }}';
+
+function sortUsers(field) {
+    if (currentSort === field) {
+        currentDirection = currentDirection === 'ASC' ? 'DESC' : 'ASC';
+    } else {
+        currentSort = field;
+        currentDirection = 'ASC';
+    }
+    
+    loadUsers();
+}
+
+function loadUsers() {
+    const searchValue = document.getElementById('user-search').value;
+    const url = new URL('{{ path('app_admin_users') }}', window.location.origin);
+    
+    url.searchParams.set('sort', currentSort);
+    url.searchParams.set('direction', currentDirection);
+    if (searchValue) {
+        url.searchParams.set('q', searchValue);
+    }
+    
+    fetch(url, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('users-table-body').innerHTML = data.usersHtml;
+    })
+    .catch(error => console.error('Erreur:', error));
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Recherche en temps réel
+    const searchInput = document.getElementById('user-search');
+    if (searchInput) {
+        searchInput.addEventListener('keyup', function() {
+            clearTimeout(this.timeout);
+            this.timeout = setTimeout(loadUsers, 300);
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}BioSync - Communautés{% endblock %}
+
+{% block body %}
+<div class="app-layout">
+    {% include 'partials/_sidebar.html.twig' with {'active': 'community'} %}
+
+    <main class="main-content">
+        <div class="page-header flex-between">
+            <div>
+                <h1 class="page-title">Communautés de Bien-être</h1>
+                <p class="page-subtitle">Rejoignez des cercles et progressez ensemble.</p>
+            </div>
+            <div class="card" style="padding: 10px 20px; border-left: 4px solid var(--warning-orange);">
+                <p style="font-size: 12px; color: var(--text-secondary);">☀️ Infos Soleil :</p>
+                <p style="font-size: 13px; font-weight: 600;">Lever : {{ sunData.sunrise|date('H:i') }}</p>
+            </div>
+        </div>
+
+        <!-- Recherche et Tri -->
+        <div class="card" style="margin-bottom: 30px; display: flex; gap: 15px; align-items: center;">
+            <div style="flex: 1;">
+                <input type="text" id="ajax-search" class="form-control" placeholder="Recherche par thématique..." autocomplete="off">
+            </div>
+            <div style="width: 200px;">
+                <select id="sort-select" class="form-control" onchange="window.location.href='{{ path('app_community') }}?sort=' + this.value">
+                    <option value="date" {{ currentSort == 'date' ? 'selected' }}>Trier par Date</option>
+                    <option value="name" {{ currentSort == 'name' ? 'selected' }}>Trier par Nom</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Grille des Groupes -->
+        <div class="grid-3" id="group-grid" style="margin-bottom: 50px;">
+            {% include 'community/_group_list.html.twig' %}
+        </div>
+
+        <!-- Section Événements -->
+        <h2 style="margin-bottom: 20px; font-size: 24px; font-weight: 700;">Calendrier des Événements</h2>
+        <div class="card">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="text-align: left; border-bottom: 2px solid var(--border-light);">
+                        <th style="padding: 15px;">Événement</th>
+                        <th style="padding: 15px;">Groupe</th>
+                        <th style="padding: 15px;">Date & Heure</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in upcomingEvents %}
+                        <tr style="border-bottom: 1px solid var(--border-light);">
+                            <td style="padding: 15px; font-weight: 600;">{{ event.titreEvent }}</td>
+                            <td style="padding: 15px;"><span class="badge badge-fitness">{{ event.groupe.nomGroupe }}</span></td>
+                            <td style="padding: 15px;">{{ event.dateEvent|date('d/m/Y H:i') }}</td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="3" style="padding: 30px; text-align: center; color: var(--text-secondary);">Aucun événement programmé.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('ajax-search');
+        const groupGrid = document.getElementById('group-grid');
+        searchInput.addEventListener('keyup', function() {
+            fetch('{{ path("app_community") }}?search=' + searchInput.value, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => response.text())
+            .then(html => groupGrid.innerHTML = html);
+        });
+    });
+</script>
+{% endblock %}

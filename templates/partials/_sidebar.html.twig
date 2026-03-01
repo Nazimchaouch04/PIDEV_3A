@@ -1,0 +1,237 @@
+<aside class="sidebar">
+    {# Logo Header #}
+    <div class="sidebar-header">
+        <a href="{{ is_granted('ROLE_ADMIN') ? path('app_admin_dashboard') : path('app_dashboard') }}" class="navbar-brand">
+            <div class="navbar-logo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                </svg>
+            </div>
+            <span class="brand-text">BioSync</span>
+        </a>
+    </div>
+
+    {# Navigation Menu #}
+    <nav class="sidebar-menu">
+
+        {# ── DASHBOARD (tous les rôles) ── #}
+        <a href="{{ is_granted('ROLE_ADMIN') ? path('app_admin_dashboard') : path('app_dashboard') }}" class="menu-item {{ active|default('') == 'dashboard' ? 'active' : '' }}">
+            <span class="menu-item-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="3" y="3" width="7" height="7"/>
+                    <rect x="14" y="3" width="7" height="7"/>
+                    <rect x="14" y="14" width="7" height="7"/>
+                    <rect x="3" y="14" width="7" height="7"/>
+                </svg>
+            </span>
+            <span class="menu-item-text">Dashboard</span>
+        </a>
+
+        {# ══════════════════════════════════════════════ #}
+        {# ADMIN ONLY — Gestion utilisateurs + Certifs   #}
+        {# ══════════════════════════════════════════════ #}
+        {% if is_granted('ROLE_ADMIN') %}
+            <a href="{{ path('app_admin_users') }}" class="menu-item {{ active|default('') == 'admin_users' ? 'active' : '' }}">
+                <span class="menu-item-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                </span>
+                <div class="menu-item-text">
+                    Utilisateurs
+                    <span class="menu-item-subtitle">Gestion &amp; Tri</span>
+                </div>
+            </a>
+
+            <a href="{{ path('app_admin_certifications') }}" class="menu-item {{ active|default('') == 'admin_certs' ? 'active' : '' }}">
+                <span class="menu-item-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                </span>
+                <div class="menu-item-text">
+                    Certifications
+                    <span class="menu-item-subtitle">Demandes Pro</span>
+                </div>
+            </a>
+        {% endif %}
+
+        {# ══════════════════════════════════════════════ #}
+        {# PROFILE — masqué pour l'admin                 #}
+        {# ══════════════════════════════════════════════ #}
+        {% if not is_granted('ROLE_ADMIN') %}
+            <a href="{{ path('app_profile') }}" class="menu-item {{ active|default('') == 'profile' ? 'active' : '' }}">
+                <span class="menu-item-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                </span>
+                <div class="menu-item-text">
+                    Profile
+                    <span class="menu-item-subtitle">Mes données</span>
+                </div>
+            </a>
+        {% endif %}
+
+        {# ══════════════════════════════════════════════ #}
+        {# NUTRITION                                      #}
+        {# Admin/Coach → page admin nutrition (users)    #}
+        {# Specialist   → même page repas (utilisateur) #}
+        {# User         → page repas (utilisateur)      #}
+        {# ══════════════════════════════════════════════ #}
+        <a href="{{ (is_granted('ROLE_ADMIN') or is_granted('ROLE_COACH') or is_granted('ROLE_SPECIALISTE')) ? path('admin_users_index') : path('app_repas_index') }}" class="menu-item {{ active|default('') == 'nutrition' ? 'active' : '' }}">
+            <span class="menu-item-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/>
+                    <path d="M7 2v20"/>
+                    <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>
+                </svg>
+            </span>
+            <div class="menu-item-text">Nutrition</div>
+        </a>
+
+        {# ══════════════════════════════════════════════ #}
+        {# GESTION RDV — Admin + Spécialiste uniquement  #}
+        {# ══════════════════════════════════════════════ #}
+        {% if is_granted('ROLE_ADMIN') %}
+            <a href="{{ path('app_admin_rendez_vous_index') }}" class="menu-item {{ active|default('') == 'admin-rendezvous' ? 'active' : '' }}">
+                <span class="menu-item-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                </span>
+                <div class="menu-item-text">Gestion RDV</div>
+            </a>
+        {% elseif is_granted('ROLE_SPECIALISTE') %}
+            <a href="{{ path('app_specialiste') }}" class="menu-item {{ active|default('') == 'admin-rendezvous' ? 'active' : '' }}">
+                <span class="menu-item-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                </span>
+                <div class="menu-item-text">Mes RDV</div>
+            </a>
+        {% endif %}
+
+        {# ══════════════════════════════════════════════ #}
+        {# SPORT — Admin, Coach, User (pas Spécialiste)  #}
+        {# ══════════════════════════════════════════════ #}
+        {% if not is_granted('ROLE_SPECIALISTE') %}
+            <a href="{{ path('app_sports') }}" class="menu-item {{ active|default('') == 'sports' ? 'active' : '' }}">
+                <span class="menu-item-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                    </svg>
+                </span>
+                <div class="menu-item-text">Sports</div>
+            </a>
+        {% endif %}
+
+        {# ══════════════════════════════════════════════ #}
+        {# MENTAL                                         #}
+        {# Admin / Spécialiste → vue admin               #}
+        {# User / Coach        → vue utilisateur         #}
+        {# ══════════════════════════════════════════════ #}
+        {% if not is_granted('ROLE_COACH') %}
+            <a href="{{ (is_granted('ROLE_ADMIN') or is_granted('ROLE_SPECIALISTE')) ? path('app_mental_admin_dashboard') : path('app_mental') }}" class="menu-item {{ active|default('') == 'mental' ? 'active' : '' }}">
+                <span class="menu-item-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+                        <line x1="9" y1="9" x2="9.01" y2="9"/>
+                        <line x1="15" y1="9" x2="15.01" y2="9"/>
+                    </svg>
+                </span>
+                <div class="menu-item-text">Mental</div>
+            </a>
+        {% endif %}
+
+        {# ══════════════════════════════════════════════ #}
+        {# MEDICAL — Utilisateur normal uniquement        #}
+        {# (ni Admin, ni Coach, ni Spécialiste)           #}
+        {# ══════════════════════════════════════════════ #}
+        {% if not is_granted('ROLE_ADMIN') and not is_granted('ROLE_COACH') and not is_granted('ROLE_SPECIALISTE') %}
+            <a href="{{ path('app_medical') }}" class="menu-item {{ active|default('') == 'medical' ? 'active' : '' }}">
+                <span class="menu-item-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                    </svg>
+                </span>
+                <div class="menu-item-text">Medical</div>
+            </a>
+        {% endif %}
+
+        {# ══════════════════════════════════════════════ #}
+        {# COMMUNITY — Admin + Coach uniquement           #}
+        {# (pas de vue publique pour les utilisateurs)   #}
+        {# ══════════════════════════════════════════════ #}
+        {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_COACH') %}
+            <a href="{{ path('app_admin_community_index') }}" class="menu-item {{ active|default('') == 'community' ? 'active' : '' }}">
+                <span class="menu-item-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                </span>
+                <div class="menu-item-text">Community</div>
+            </a>
+        {% elseif not is_granted('ROLE_SPECIALISTE') %}
+            <a href="{{ path('app_community') }}" class="menu-item {{ active|default('') == 'community' ? 'active' : '' }}">
+                <span class="menu-item-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                </span>
+                <div class="menu-item-text">Community</div>
+            </a>
+        {% endif %}
+
+    </nav>
+
+    {# User Profile Footer #}
+    <div class="sidebar-footer">
+        <div class="user-profile">
+            <div class="user-avatar">
+                {{ app.user.nomComplet|slice(0, 2)|upper }}
+            </div>
+            <div class="user-info">
+                <div class="user-name">{{ app.user.nomComplet }}</div>
+                <div class="user-role">
+                    {% if is_granted('ROLE_ADMIN') %}
+                        Administrateur
+                    {% elseif 'ROLE_COACH' in app.user.roles %}
+                        Coach
+                    {% elseif 'ROLE_SPECIALISTE' in app.user.roles %}
+                        Spécialiste
+                    {% else %}
+                        Membre
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <a href="{{ path('app_logout') }}" class="logout-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+            Logout
+        </a>
+    </div>
+</aside>

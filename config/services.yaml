@@ -1,24 +1,43 @@
-# This file is the entry point to configure your own services.
-# Files in the packages/ subdirectory configure your dependencies.
-
-# Put parameters here that don't need to change on each machine where the app is deployed
-# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    app.quiz_api_url: '%env(QUIZ_API_URL)%'
+    app.api_key: '%env(QUIZ_API_KEY)%'
+    google_recaptcha_site_key: '%env(GOOGLE_RECAPTCHA_SITE_KEY)%'
+    app.recaptcha_site_key: '%env(RECAPTCHA_SITE_KEY)%'
+    app.recaptcha_secret_key: '%env(RECAPTCHA_SECRET_KEY)%'
+    app.calorie_ninjas_key: '%env(CALORIE_NINJAS_API_KEY)%'
+    app.groq_api_key: '%env(GROQ_API_KEY)%'
 
 services:
-    # default configuration for services in *this* file
     _defaults:
-        autowire: true      # Automatically injects dependencies in your services.
-        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        autowire: true
+        autoconfigure: true
 
-    # makes classes in src/ available to be used as services
-    # this creates a service per class whose id is the fully-qualified class name
     App\:
         resource: '../src/'
         exclude:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
             - '../src/Kernel.php'
+            - '../src/Service/QuizService.php'
+            - '../src/Service/RecaptchaService.php'
+            - '../src/Service/CalorieNinjasService.php'
 
-    # add more service definitions when explicit configuration is needed
-    # please note that last definitions always *replace* previous ones
+    App\Service\QuizService:
+        arguments:
+            $quizApiUrl: '%app.quiz_api_url%'
+            $apiKey: '%app.api_key%'
+
+    App\Service\RecaptchaService:
+        arguments:
+            $recaptchaSecretKey: '%app.recaptcha_secret_key%'
+
+    App\Service\CalorieNinjasService:
+        arguments:
+            $client: '@http_client'
+            $apiKey: '%app.calorie_ninjas_key%'
+
+    App\Service\ProgrammeIAService:
+        public: true
+        arguments:
+            $client: '@http_client'
+            $groqApiKey: '%app.groq_api_key%'

@@ -1,0 +1,18 @@
+{# templates/community/_group_list.html.twig #}
+{% for group in groupes %}
+    <div class="group-card">
+        <img src="{{ group.image ?: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=400' }}" 
+             class="group-image" alt="{{ group.nomGroupe }}">
+        <div class="group-content">
+            <div class="group-header">
+                <h3 class="group-title">{{ group.nomGroupe }}</h3>
+                <span class="badge badge-mental-health">{{ group.thematique }}</span>
+            </div>
+            <p class="group-description">{{ group.description|slice(0, 80) }}...</p>
+            <div class="group-meta">
+                <span class="group-meta-item">👥 {{ group.nombreMembres }}/{{ group.capaciteMax }} membres</span>
+            </div>
+            <a href="{{ path('app_community_groupe', {id: group.id}) }}" class="btn btn-primary group-btn">Voir Détails</a>
+        </div>
+    </div>
+{% endfor %}

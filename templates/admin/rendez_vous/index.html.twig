@@ -1,0 +1,161 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Gestion des Rendez-vous{% endblock %}
+
+{% block body %}
+
+<div class="page-header flex-between">
+    <div>
+        <h1 class="page-title">Gestion des Rendez-vous</h1>
+        <p class="page-subtitle">Tous les rendez-vous par spécialiste</p>
+    </div>
+    <div>
+        <a href="{{ path('app_admin_rendez_vous_new') }}" class="btn btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Nouveau rendez-vous
+        </a>
+    </div>
+</div>
+
+{% for specialisteData in rendezVousBySpecialiste %}
+<div class="card mb-4">
+    <div class="card-header">
+        <h3 class="card-title">
+            Dr. {{ specialisteData.specialiste.nomComplet }}
+        </h3>
+        <span class="badge bg-info">
+            {{ specialisteData.rendezVous|length }} rendez-vous
+        </span>
+    </div>
+    
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Patient</th>
+                        <th>Date</th>
+                        <th>Motif</th>
+                        <th>Mode</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rdv in specialisteData.rendezVous %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="user-avatar-sm">
+                                    {{ rdv.patient.nomComplet|slice(0, 2)|upper }}
+                                </div>
+                                <div class="ms-2">
+                                    <div class="fw-medium">{{ rdv.patient.nomComplet }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="text-muted small">
+                                {{ rdv.dateHeure|date('d/m/Y') }}
+                            </div>
+                            <div class="fw-medium">
+                                {{ rdv.dateHeure|date('H:i') }}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="text-truncate d-inline-block" style="max-width: 200px;" title="{{ rdv.motif }}">
+                                {{ rdv.motif|slice(0, 50) }}{% if rdv.motif|length > 50 %}...{% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge {% if rdv.mode == 'PRESENTIEL' %}bg-primary{% else %}bg-secondary{% endif %}">
+                                {{ rdv.mode == 'PRESENTIEL' ? 'Présentiel' : 'Téléconsultation' }}
+                            </span>
+                        </td>
+                        <td>
+                            {% set statusClass = {
+                                'DEMANDE': 'bg-warning',
+                                'CONFIRME': 'bg-success',
+                                'REALISE': 'bg-info',
+                                'ANNULE': 'bg-danger'
+                            } %}
+                            <span class="badge {{ statusClass[rdv.statut] ?? 'bg-secondary' }}">
+                                {{ rdv.statut }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <a href="{{ path('app_admin_rendez_vous_edit', {id: rdv.id}) }}" 
+                                   class="btn btn-sm btn-outline-primary" title="Modifier">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                    </svg>
+                                </a>
+
+                                {% if rdv.statut == 'DEMANDE' %}
+                                    <form method="post" action="{{ path('app_admin_rendez_vous_confirmer', {id: rdv.id}) }}" 
+                                          class="d-inline" onsubmit="return confirm('Confirmer ce rendez-vous ?')">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('confirm' ~ rdv.id) }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-success" title="Confirmer">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <polyline points="20 6 9 17 4 12"/>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                {% endif %}
+
+                                {% if rdv.statut not in ['REALISE', 'ANNULE'] %}
+                                    <form method="post" action="{{ path('app_admin_rendez_vous_annuler', {id: rdv.id}) }}" 
+                                          class="d-inline" onsubmit="return confirm('Annuler ce rendez-vous ?')">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ rdv.id) }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Annuler">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <line x1="18" y1="6" x2="6" y2="18"/>
+                                                <line x1="6" y1="6" x2="18" y2="18"/>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                {% endif %}
+
+                                <form method="post" action="{{ path('app_admin_rendez_vous_delete', {id: rdv.id}) }}" 
+                                      class="d-inline" onsubmit="return confirm('Supprimer ce rendez-vous ?')">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ rdv.id) }}">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="3 6 5 6 21 6"/>
+                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                        </svg>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-state-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+    </div>
+    <h3>Aucun rendez-vous</h3>
+    <p>Il n'y a aucun rendez-vous enregistré pour le moment.</p>
+    <a href="{{ path('app_admin_rendez_vous_new') }}" class="btn btn-primary">
+        Créer le premier rendez-vous
+    </a>
+</div>
+{% endfor %}
+
+{% endblock %}

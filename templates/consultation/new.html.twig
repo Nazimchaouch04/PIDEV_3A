@@ -1,0 +1,62 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Nouvelle Consultation{% endblock %}
+
+{% block body %}
+
+<div class="page-header flex-between">
+    <div>
+        <h1 class="page-title">Nouvelle Consultation</h1>
+        <p class="page-subtitle">Consultation pour {{ rendezVous.patient.nomComplet }}</p>
+    </div>
+</div>
+
+<div class="form-container">
+    {{ form_start(form) }}
+
+        <div class="form-group">
+            {{ form_label(form.dateConsultation, 'Date de consultation') }}
+            {{ form_widget(form.dateConsultation) }}
+            {{ form_errors(form.dateConsultation) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.symptomes, 'Symptômes') }}
+            {{ form_widget(form.symptomes) }}
+            {{ form_errors(form.symptomes) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.diagnostic, 'Diagnostic') }}
+            {{ form_widget(form.diagnostic) }}
+            {{ form_errors(form.diagnostic) }}
+        </div>
+
+        <div class="form-group">
+            {{ form_label(form.recommandations, 'Recommandations') }}
+            {{ form_widget(form.recommandations) }}
+            {{ form_errors(form.recommandations) }}
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                    <polyline points="17 21 17 13 7 13 7 21"/>
+                    <polyline points="7 3 7 8 15 8"/>
+                </svg>
+                Enregistrer la consultation
+            </button>
+            <a href="{{ path('app_specialiste') }}" class="btn btn-secondary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="19" y1="12" x2="5" y2="12"/>
+                    <polyline points="12 19 5 12 12 5"/>
+                </svg>
+                Annuler
+            </a>
+        </div>
+
+    {{ form_end(form) }}
+</div>
+
+{% endblock %}
