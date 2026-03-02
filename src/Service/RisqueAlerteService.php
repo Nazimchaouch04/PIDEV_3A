@@ -33,9 +33,11 @@ class RisqueAlerteService
 
         foreach ($seances as $seance) {
             if ($seance->getHeureDebutReelle() === null) continue;
+
+            // ✅ Si alerte déjà envoyée → on skip (son + alerte ne reviennent pas)
             if ($seance->isAlerteEnvoyee()) continue;
 
-            // ✅ CORRECTION — calcul précis avec timestamps (évite le bug diff())
+            // ✅ Calcul précis avec timestamps
             $secondesEcoulees = $maintenant->getTimestamp() - $seance->getHeureDebutReelle()->getTimestamp();
             $minutesEcoulees  = (int)($secondesEcoulees / 60);
             $depassement      = $minutesEcoulees - (int)$seance->getDureeMinutes();
@@ -62,7 +64,6 @@ class RisqueAlerteService
                             $caloriesPredites = (float) $mlResult['calories_predites'];
                         }
                     } catch (\Exception $e) {
-                        // ML non disponible — on continue sans calories
                         $caloriesPredites = null;
                     }
                 }
@@ -76,6 +77,7 @@ class RisqueAlerteService
             if ($niveau === 'normal') continue;
 
             $alertes[] = [
+                'id'                => $seance->getId(),
                 'seance_id'         => $seance->getId(),
                 'nom'               => $seance->getNomSeance(),
                 'utilisateur'       => $seance->getUtilisateur()?->getNomComplet() ?? 'Inconnu',
@@ -88,12 +90,13 @@ class RisqueAlerteService
                 'message'           => $this->genererMessage($seance, $score, $niveau, $depassement, $caloriesPredites),
             ];
 
-            // NOTE : on ne marque pas alerteEnvoyee pour que l'alerte reste visible
-            // $seance->setAlerteEnvoyee(true);
-            // $this->em->persist($seance);
+            // ✅ MARQUER alerte envoyée en DB → son ne rejoue JAMAIS pour cette séance
+            $seance->setAlerteEnvoyee(true);
+            $this->em->persist($seance);
         }
 
-        // $this->em->flush();
+        // ✅ Sauvegarder en base de données
+        $this->em->flush();
 
         return $alertes;
     }
@@ -105,7 +108,18 @@ class RisqueAlerteService
     public function demarrerSeance(SeanceSport $seance): void
     {
         $seance->setHeureDebutReelle(new \DateTime());
-        $seance->setAlerteEnvoyee(false);
+        $seance->setAlerteEnvoyee(false); // ✅ Reset pour que l'alerte puisse se déclencher
+        $this->em->persist($seance);
+        $this->em->flush();
+    }
+
+    // =========================================================================
+    // ════════════  Termine une séance depuis l'alerte  ═══════════════════════
+    // =========================================================================
+
+    public function terminerSeance(SeanceSport $seance): void
+    {
+        $seance->setAlerteEnvoyee(true); // ✅ Plus d'alerte pour cette séance
         $this->em->persist($seance);
         $this->em->flush();
     }

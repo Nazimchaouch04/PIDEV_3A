@@ -93,8 +93,12 @@ final class SeanceSportController extends AbstractController
     #[Route('', name: 'app_seance_sport_index', methods: ['GET'])]
     public function index(SeanceSportRepository $seanceSportRepository): Response
     {
+        /** @var Utilisateur $user */
+        $user = $this->getUser();
+
         return $this->render('seance_sport/index.html.twig', [
-            'seance_sports' => $seanceSportRepository->findAll(),
+            // ✅ CORRIGÉ : findAll() → findByUtilisateur() — uniquement les séances de l'utilisateur connecté
+            'seance_sports' => $seanceSportRepository->findByUtilisateur($user),
         ]);
     }
 
@@ -151,11 +155,15 @@ final class SeanceSportController extends AbstractController
         SeanceSportRepository $seanceSportRepository,
         HttpClientInterface   $httpClient
     ): Response {
+        /** @var Utilisateur $user */
+        $user = $this->getUser();
+
         $now          = new \DateTime();
         $debutSemaine = (clone $now)->modify('monday this week 00:00:00');
         $finSemaine   = (clone $now)->modify('sunday this week 23:59:59');
 
-        $toutesSeances  = $seanceSportRepository->findAll();
+        // ✅ CORRIGÉ : findAll() → findByUtilisateur()
+        $toutesSeances  = $seanceSportRepository->findByUtilisateur($user);
         $seancesSemaine = array_filter($toutesSeances,
             fn($s) => $s->getDateSeance() >= $debutSemaine && $s->getDateSeance() <= $finSemaine
         );
@@ -246,7 +254,9 @@ final class SeanceSportController extends AbstractController
         $debutSemaine = (clone $now)->modify('monday this week 00:00:00');
         $finSemaine   = (clone $now)->modify('sunday this week 23:59:59');
 
-        $toutesSeances  = $repo->findAll();
+        // ✅ CORRIGÉ : findAll() → findByUtilisateur() avec l'objet Utilisateur
+        $utilisateur    = $seanceSport->getUtilisateur();
+        $toutesSeances  = $repo->findByUtilisateur($utilisateur);
         $seancesSemaine = array_filter($toutesSeances,
             fn($s) => $s->getDateSeance() >= $debutSemaine && $s->getDateSeance() <= $finSemaine
         );
@@ -347,8 +357,13 @@ Utilise des emojis sportifs. Termine par un encouragement pour la semaine procha
         SeanceSportRepository $seanceSportRepository,
         HttpClientInterface   $httpClient
     ): Response {
-        $prediction      = null;
-        $toutesSeances   = $seanceSportRepository->findAll();
+        /** @var Utilisateur $user */
+        $user = $this->getUser();
+
+        $prediction = null;
+
+        // ✅ CORRIGÉ : findAll() → findByUtilisateur()
+        $toutesSeances   = $seanceSportRepository->findByUtilisateur($user);
         $totalSeances    = count($toutesSeances);
         $dureeTotal      = array_sum(array_map(fn($s) => $s->getDureeMinutes(), $toutesSeances));
         $dureeMoyenne    = $totalSeances > 0 ? round($dureeTotal / $totalSeances) : 0;
@@ -417,6 +432,23 @@ Utilise des emojis sportifs. Termine par un encouragement pour la semaine procha
     }
 
     // =========================================================================
+    // ═══════════  ✅ TERMINER une séance depuis l'alerte  ════════════════════
+    // ✅ NOUVEAU — Stoppe l'alerte + son définitivement via DB
+    // =========================================================================
+
+    #[Route('/{id}/terminer', name: 'app_seance_sport_terminer', methods: ['POST'])]
+    public function terminer(
+        SeanceSport         $seanceSport,
+        RisqueAlerteService $alerteService
+    ): JsonResponse {
+        $alerteService->terminerSeance($seanceSport);
+        return $this->json([
+            'status'  => 'success',
+            'message' => 'Séance terminée avec succès',
+        ]);
+    }
+
+    // =========================================================================
     // ════════════════════  SHOW / EDIT / DELETE  ══════════════════════════════
     // =========================================================================
 
@@ -473,7 +505,11 @@ Utilise des emojis sportifs. Termine par un encouragement pour la semaine procha
         ExerciceRepository    $exerciceRepository,
         HttpClientInterface   $httpClient
     ): Response {
-        $toutesSeances    = $seanceSportRepository->findAll();
+        /** @var Utilisateur $user */
+        $user = $this->getUser();
+
+        // ✅ CORRIGÉ : findAll() → findByUtilisateur()
+        $toutesSeances    = $seanceSportRepository->findByUtilisateur($user);
         $totalSeances     = count($toutesSeances);
         $dureeTotal       = array_sum(array_map(fn($s) => $s->getDureeMinutes(), $toutesSeances));
         $dureeMoyenne     = $totalSeances > 0 ? round($dureeTotal / $totalSeances) : 0;
@@ -482,11 +518,11 @@ Utilise des emojis sportifs. Termine par un encouragement pour la semaine procha
         $seancePlusCourte = !empty($durees) ? min($durees) : 0;
         $totalMedailles   = count(array_filter($toutesSeances, fn($s) => $s->getMedailleObtenue() !== null));
 
-        $now                = new \DateTime();
-        $debutSemaine       = (clone $now)->modify('monday this week 00:00:00');
-        $finSemaine         = (clone $now)->modify('sunday this week 23:59:59');
-        $debutMois          = (clone $now)->modify('first day of this month 00:00:00');
-        $finMois            = (clone $now)->modify('last day of this month 23:59:59');
+        $now          = new \DateTime();
+        $debutSemaine = (clone $now)->modify('monday this week 00:00:00');
+        $finSemaine   = (clone $now)->modify('sunday this week 23:59:59');
+        $debutMois    = (clone $now)->modify('first day of this month 00:00:00');
+        $finMois      = (clone $now)->modify('last day of this month 23:59:59');
 
         $seanceCetteSemaine = count(array_filter($toutesSeances,
             fn($s) => $s->getDateSeance() >= $debutSemaine && $s->getDateSeance() <= $finSemaine
@@ -545,7 +581,6 @@ Utilise des emojis sportifs. Termine par un encouragement pour la semaine procha
         $diffDuree    = $dureeSemCourante - $dureeSemPrecedente;
         $diffCalories = round($calSemCourante - $calSemPrecedente, 1);
 
-        // Score de progression 0-100
         $scoreSeances     = $diffSeances > 0  ? 40 : ($diffSeances == 0  ? 20 : 0);
         $scoreDuree       = $diffDuree > 0    ? 30 : ($diffDuree == 0    ? 15 : 0);
         $scoreCalories    = $diffCalories > 0 ? 30 : ($diffCalories == 0 ? 15 : 0);
@@ -560,7 +595,6 @@ Utilise des emojis sportifs. Termine par un encouragement pour la semaine procha
             'calSemaineCourante'   => $calSemCourante,
         ];
 
-        // Graphique : 8 dernières semaines
         $progressionLabels     = [];
         $progressionCalories   = [];
         $progressionSeancesX10 = [];
@@ -578,17 +612,11 @@ Utilise des emojis sportifs. Termine par un encouragement pour la semaine procha
             $progressionSeancesX10[] = count($seancesSem) * 10;
         }
 
-        // =====================================================================
-        // Graphiques existants
-        // =====================================================================
-        $seancesParSemaine    = $seanceSportRepository->getSeancesParSemaine();
-        $dureeParMois         = $seanceSportRepository->getDureeParMois();
+        $seancesParSemaine    = $seanceSportRepository->getSeancesParSemaine($user);
+        $dureeParMois         = $seanceSportRepository->getDureeParMois($user);
         $repartitionIntensite = $exerciceRepository->getRepartitionParIntensiteGlobal();
         $top5Exercices        = $exerciceRepository->getTop5ExercicesGlobal();
 
-        // =====================================================================
-        // 🤖 Groq — Conseils + Analyse Progression
-        // =====================================================================
         $conseilIA = $this->getConseilGroqCoach($httpClient, [
             'totalSeances'       => $totalSeances,
             'seanceCetteSemaine' => $seanceCetteSemaine,
@@ -620,13 +648,11 @@ Utilise des emojis sportifs. Termine par un encouragement pour la semaine procha
             'seanceCeMois'            => $seanceCeMois,
             'caloriesTotales'         => $caloriesTotales,
             'userLePlusActif'         => $userLePlusActif,
-            // ── Progression ──
             'progressionData'         => $progressionData,
             'progressionLabels'       => json_encode($progressionLabels),
             'progressionCalories'     => json_encode($progressionCalories),
             'progressionSeancesX10'   => json_encode($progressionSeancesX10),
             'analyseProgression'      => $analyseProgression,
-            // ── Graphiques existants ──
             'seancesParSemaineLabels' => json_encode($seancesParSemaine['labels']),
             'seancesParSemaineData'   => json_encode($seancesParSemaine['data']),
             'dureeParMoisLabels'      => json_encode($dureeParMois['labels']),

@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Ignore;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UtilisateurRepository::class)]
@@ -59,10 +60,14 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     /** @var array<string> */
     private array $roles = [];
 
+    // ✅ CORRIGÉ : #[Ignore] protège contre la sérialisation JSON
     #[ORM\Column(length: 255, nullable: true)]
+    #[Ignore]
     private ?string $resetToken = null;
 
+    // ✅ CORRIGÉ : #[Ignore] protège contre la sérialisation JSON
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[Ignore]
     private ?\DateTimeInterface $resetTokenExpiresAt = null;
 
     #[ORM\OneToOne(mappedBy: 'utilisateur', targetEntity: ProfilSante::class, cascade: ['persist', 'remove'])]
@@ -87,7 +92,9 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     /**
      * @var Collection<int, Repas>
      */
+    // ✅ CORRIGÉ : ajout onDelete CASCADE pour correspondre au cascade ORM
     #[ORM\OneToMany(targetEntity: Repas::class, mappedBy: 'utilisateur', cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ORM\JoinColumn(onDelete: 'CASCADE')]
     private Collection $repas;
 
     /**
@@ -401,7 +408,8 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->resetToken;
     }
 
-    public function setResetToken(?string $resetToken): static
+    // ✅ CORRIGÉ : #[SensitiveParameter] empêche la valeur d'apparaître dans les stack traces
+    public function setResetToken(#[\SensitiveParameter] ?string $resetToken): static
     {
         $this->resetToken = $resetToken;
         return $this;
@@ -412,7 +420,8 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->resetTokenExpiresAt;
     }
 
-    public function setResetTokenExpiresAt(?\DateTimeInterface $resetTokenExpiresAt): static
+    // ✅ CORRIGÉ : setter public conservé car utilisé dans le reset password
+    public function setResetTokenExpiresAt(#[\SensitiveParameter] ?\DateTimeInterface $resetTokenExpiresAt): static
     {
         $this->resetTokenExpiresAt = $resetTokenExpiresAt;
         return $this;

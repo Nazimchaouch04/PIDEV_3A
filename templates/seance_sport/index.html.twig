@@ -130,27 +130,20 @@
                     {# ── Statut intelligent selon la date ── #}
                     <td style="padding:12px;">
                         {% if seance.heureDebutReelle %}
-                            {# Séance déjà démarrée #}
                             <span style="background:#dcfce7; color:#166534; padding:3px 10px; border-radius:20px; font-size:12px;">
                                 🟢 En cours
                             </span>
-
                         {% elseif dateSeance == aujourdhui %}
-                            {# Séance d'aujourd'hui → bouton Démarrer #}
                             <button
                                 onclick="demarrerSeance({{ seance.id }}, this)"
                                 style="background:#2563eb; color:white; padding:4px 12px; border-radius:6px; border:none; cursor:pointer; font-size:12px; font-weight:600;">
                                 ▶ Démarrer
                             </button>
-
                         {% elseif dateSeance > aujourdhui %}
-                            {# Séance future → planifiée #}
                             <span style="background:#eff6ff; color:#2563eb; padding:3px 10px; border-radius:20px; font-size:12px;">
                                 📅 Planifiée
                             </span>
-
                         {% else %}
-                            {# Séance passée → terminée #}
                             <span style="background:#f1f5f9; color:#94a3b8; padding:3px 10px; border-radius:20px; font-size:12px;">
                                 ✅ Terminée
                             </span>
@@ -180,26 +173,45 @@
 
 <script>
 // =========================================================================
-// 🚨 ALERTES INTELLIGENTES — Vérification toutes les 30 secondes
+// 🚨 ALERTES INTELLIGENTES
 // =========================================================================
+// Logique :
+// 1. Le backend marque alerteEnvoyee=true en DB après avoir envoyé l'alerte
+// 2. Le JS reçoit l'alerte UNE SEULE FOIS → l'affiche + joue le son
+// 3. Après, le backend ne renvoie plus cette alerte (alerteEnvoyee=true)
+// 4. Le bouton "Terminer" stoppe la séance → plus jamais d'alerte
+// =========================================================================
+
 function verifierAlertes() {
     fetch('/seance/sport/alertes/check')
         .then(r => r.json())
         .then(data => {
             const zone = document.getElementById('zone-alertes');
-            if (data.count === 0) { zone.innerHTML = ''; return; }
 
-            let html = '';
+            // Aucune alerte → on vide la zone si vide
+            if (data.count === 0) return;
+
+            let nouvelleAlerte = false;
+
             data.alertes.forEach(a => {
+                // Vérifier si l'alerte est déjà affichée dans le DOM
+                if (document.getElementById(`alerte-${a.id}`)) return;
+
+                // Nouvelle alerte → on l'affiche
+                nouvelleAlerte = true;
+
                 const isCritique = a.niveau === 'critique';
                 const bg       = isCritique ? '#fef2f2' : '#fffbeb';
                 const border   = isCritique ? '#ef4444' : '#f59e0b';
                 const color    = isCritique ? '#991b1b' : '#92400e';
                 const icon     = isCritique ? '🚨' : '⚠️';
                 const barColor = isCritique ? '#ef4444' : '#f59e0b';
+                const btnColor = isCritique ? '#fee2e2' : '#dcfce7';
+                const btnTxt   = isCritique ? '#991b1b' : '#166534';
 
-                html += `
-                <div style="
+                const div = document.createElement('div');
+                div.id = `alerte-${a.id}`;
+                div.style.cssText = `
                     background:${bg};
                     border-left:5px solid ${border};
                     border-radius:10px;
@@ -210,13 +222,15 @@ function verifierAlertes() {
                     gap:14px;
                     box-shadow:0 2px 8px rgba(0,0,0,0.08);
                     animation: slideIn 0.4s ease;
-                ">
+                `;
+
+                div.innerHTML = `
                     <span style="font-size:24px; margin-top:2px;">${icon}</span>
                     <div style="flex:1;">
                         <div style="font-weight:700; color:${color}; font-size:15px; margin-bottom:4px;">
                             ${a.message}
                         </div>
-                        <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:8px;">
+                        <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:8px; align-items:center;">
                             <span style="background:white; border:1px solid ${border}; color:${color}; padding:3px 10px; border-radius:20px; font-size:12px;">
                                 ⏰ +${a.depassement} min de dépassement
                             </span>
@@ -227,23 +241,93 @@ function verifierAlertes() {
                             <span style="background:white; border:1px solid ${border}; color:${color}; padding:3px 10px; border-radius:20px; font-size:12px;">
                                 📊 Score risque : ${a.score}/100
                             </span>
+                            <button
+                                onclick="terminerSeance(${a.seance_id}, 'alerte-${a.id}', this)"
+                                style="
+                                    background:${btnColor};
+                                    color:${btnTxt};
+                                    border:none;
+                                    padding:5px 14px;
+                                    border-radius:20px;
+                                    cursor:pointer;
+                                    font-weight:600;
+                                    font-size:12px;
+                                ">
+                                ✅ Terminer la séance
+                            </button>
                         </div>
                         <div style="margin-top:10px; background:#e5e7eb; border-radius:10px; height:6px; overflow:hidden;">
                             <div style="width:${a.score}%; background:${barColor}; height:100%; border-radius:10px; transition:width 0.5s;"></div>
                         </div>
                     </div>
-                    <button onclick="this.parentElement.remove()" style="background:none; border:none; font-size:18px; cursor:pointer; color:#9ca3af; padding:0 4px;">✕</button>
-                </div>`;
+                    <div style="display:flex; flex-direction:column; align-items:center; gap:6px; min-width:32px;">
+                        <button onclick="fermerAlerte('alerte-${a.id}')" style="background:none; border:none; font-size:18px; cursor:pointer; color:#9ca3af; line-height:1;">✕</button>
+                        <span id="timer-${a.id}" style="font-size:11px; color:#9ca3af; font-weight:700;">60s</span>
+                    </div>
+                `;
+
+                zone.appendChild(div);
+
+                // ✅ Compte à rebours 60s → disparition douce
+                let secondes = 60;
+                const interval = setInterval(() => {
+                    secondes--;
+                    const timerEl = document.getElementById(`timer-${a.id}`);
+                    if (timerEl) timerEl.textContent = secondes + 's';
+
+                    if (secondes <= 0) {
+                        clearInterval(interval);
+                        fermerAlerte(`alerte-${a.id}`);
+                    }
+                }, 1000);
             });
 
-            zone.innerHTML = html;
-            try { new Audio('/sounds/alert.mp3').play(); } catch(e) {}
+            // ✅ Son court UNE SEULE FOIS si nouvelle alerte (comme Messenger)
+            if (nouvelleAlerte) {
+                try { new Audio('/sounds/alert.mp3').play(); } catch(e) {}
+            }
         })
         .catch(() => {});
 }
 
-verifierAlertes();
-setInterval(verifierAlertes, 30000);
+// =========================================================================
+// Fermeture douce de l'alerte
+// =========================================================================
+function fermerAlerte(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.transition = 'opacity 0.8s, transform 0.8s';
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(-10px)';
+    setTimeout(() => el.remove(), 800);
+}
+
+// =========================================================================
+// ✅ TERMINER une séance depuis l'alerte
+// → Stoppe la séance en DB + ferme l'alerte définitivement
+// =========================================================================
+function terminerSeance(seanceId, alerteId, btn) {
+    btn.disabled = true;
+    btn.textContent = '⏳ En cours...';
+
+    fetch(`/seance/sport/${seanceId}/terminer`, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.status === 'success') {
+            fermerAlerte(alerteId);
+        } else {
+            btn.disabled = false;
+            btn.textContent = '✅ Terminer la séance';
+        }
+    })
+    .catch(() => {
+        btn.disabled = false;
+        btn.textContent = '✅ Terminer la séance';
+    });
+}
 
 // =========================================================================
 // ▶ DÉMARRER une séance
@@ -263,10 +347,18 @@ function demarrerSeance(id, btn) {
                 <span style="background:#dcfce7; color:#166534; padding:3px 10px; border-radius:20px; font-size:12px;">
                     🟢 En cours
                 </span>`;
+            // Vérifier immédiatement si une alerte doit apparaître
+            setTimeout(verifierAlertes, 1000);
         }
     })
     .catch(() => { btn.disabled = false; btn.textContent = '▶ Démarrer'; });
 }
+
+// =========================================================================
+// Lancer les vérifications
+// =========================================================================
+verifierAlertes();                          // Immédiatement au chargement
+setInterval(verifierAlertes, 30000);        // Puis toutes les 30 secondes
 
 // =========================================================================
 // Filtres + Tri

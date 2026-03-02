@@ -61,7 +61,9 @@ class SeanceSport
     /**
      * @var Collection<int, Exercice>
      */
+    // ✅ CORRIGÉ : ajout onDelete CASCADE pour correspondre au cascade ORM
     #[ORM\OneToMany(targetEntity: Exercice::class, mappedBy: 'seance', orphanRemoval: true, cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(onDelete: 'CASCADE')]
     private Collection $exercices;
 
     public function __construct()
@@ -192,6 +194,7 @@ class SeanceSport
         return $this->heureDebutReelle;
     }
 
+    // ✅ CORRIGÉ : setter public conservé car utilisé dans le Controller
     public function setHeureDebutReelle(?\DateTimeInterface $heureDebutReelle): static
     {
         $this->heureDebutReelle = $heureDebutReelle;
