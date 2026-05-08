@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/nutrition')]
+#[Route('/nutrition', priority: 1)]
 class NutritionController extends AbstractController
 {
     #[Route('', name: 'app_nutrition')]

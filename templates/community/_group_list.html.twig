@@ -1,8 +1,15 @@
 {# templates/community/_group_list.html.twig #}
 {% for group in groupes %}
     <div class="group-card">
-        <img src="{{ group.image ?: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=400' }}" 
-             class="group-image" alt="{{ group.nomGroupe }}">
+        {% if group.image starts with('http') or group.image starts with('data:image') %}
+            <img src="{{ group.image ?: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=400' }}" 
+                 class="group-image" alt="{{ group.nomGroupe }}">
+        {% else %}
+            <!-- Text-based placeholder image -->
+            <div class="group-image" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: bold; text-align: center; padding: 15px; line-height: 1.2;">
+                {{ group.image }}
+            </div>
+        {% endif %}
         <div class="group-content">
             <div class="group-header">
                 <h3 class="group-title">{{ group.nomGroupe }}</h3>
@@ -12,7 +19,20 @@
             <div class="group-meta">
                 <span class="group-meta-item">👥 {{ group.nombreMembres }}/{{ group.capaciteMax }} membres</span>
             </div>
-            <a href="{{ path('app_community_groupe', {id: group.id}) }}" class="btn btn-primary group-btn">Voir Détails</a>
+            <div class="group-actions">
+                <a href="{{ path('app_community_group', {id: group.id}) }}" class="btn btn-outline group-btn">Voir Détails</a>
+                {% if group.id in userGroupIds %}
+                    <form action="{{ path('app_community_leave', {id: group.id}) }}" method="post" style="display: inline;">
+                        <input type="hidden" name="_token" value="{{ csrf_token('leave' ~ group.id) }}">
+                        <button type="submit" class="btn btn-outline group-btn" style="color: #EF4444; border-color: #EF4444;">Quitter</button>
+                    </form>
+                {% else %}
+                    <form action="{{ path('app_community_join', {id: group.id}) }}" method="post" style="display: inline;">
+                        <input type="hidden" name="_token" value="{{ csrf_token('join' ~ group.id) }}">
+                        <button type="submit" class="btn btn-primary group-btn">Rejoindre</button>
+                    </form>
+                {% endif %}
+            </div>
         </div>
     </div>
 {% endfor %}

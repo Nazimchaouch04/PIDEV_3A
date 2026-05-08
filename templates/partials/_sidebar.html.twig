@@ -125,17 +125,43 @@
         {% endif %}
 
         {# ══════════════════════════════════════════════ #}
-        {# SPORT — Admin, Coach, User (pas Spécialiste)  #}
+        {# SPORT                                          #}
+        {# Coach  → Gestion Séances (seance_sport)       #}
+        {# User   → Mes Exercices (exercice)             #}
+        {# Admin  → Vue Sports générale                  #}
         {# ══════════════════════════════════════════════ #}
         {% if not is_granted('ROLE_SPECIALISTE') %}
-            <a href="{{ path('app_sports') }}" class="menu-item {{ active|default('') == 'sports' ? 'active' : '' }}">
-                <span class="menu-item-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-                    </svg>
-                </span>
-                <div class="menu-item-text">Sports</div>
-            </a>
+            {% if is_granted('ROLE_COACH') %}
+                {# Coach → Gestion des séances sport #}
+                <a href="{{ path('app_seance_sport_index') }}" class="menu-item {{ active|default('') == 'sports' ? 'active' : '' }}">
+                    <span class="menu-item-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                        </svg>
+                    </span>
+                    <div class="menu-item-text">Séances Sport</div>
+                </a>
+            {% elseif is_granted('ROLE_USER') and not is_granted('ROLE_ADMIN') %}
+                {# User → Ses exercices #}
+                <a href="{{ path('app_exercice_index') }}" class="menu-item {{ active|default('') == 'sports' ? 'active' : '' }}">
+                    <span class="menu-item-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                        </svg>
+                    </span>
+                    <div class="menu-item-text">Exercices</div>
+                </a>
+            {% else %}
+                {# Admin → Vue générale sports #}
+                <a href="{{ path('app_sports') }}" class="menu-item {{ active|default('') == 'sports' ? 'active' : '' }}">
+                    <span class="menu-item-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                        </svg>
+                    </span>
+                    <div class="menu-item-text">Sports</div>
+                </a>
+            {% endif %}
         {% endif %}
 
         {# ══════════════════════════════════════════════ #}

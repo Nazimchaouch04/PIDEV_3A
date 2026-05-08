@@ -16,13 +16,21 @@ class Repas1Type extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('titreRepas')
+            ->add('titreRepas', \Symfony\Component\Form\Extension\Core\Type\TextType::class, [
+                'label' => 'Titre du repas',
+                'attr' => ['class' => 'form-control']
+            ])
             ->add('typeMoment', ChoiceType::class, [
                 'choices' => TypeMoment::cases(),
                 'choice_label' => fn(TypeMoment $type) => $type->label(),
                 'placeholder' => 'Choisir un moment',
+                'attr' => ['class' => 'form-control']
             ])
-            ->add('dateConsommation')
+            ->add('dateConsommation', \Symfony\Component\Form\Extension\Core\Type\DateTimeType::class, [
+                'widget' => 'single_text',
+                'label' => 'Date et heure',
+                'attr' => ['class' => 'form-control']
+            ])
             ->add('utilisateur', EntityType::class, [
                 'class' => Utilisateur::class,
                 'choice_label' => 'id',

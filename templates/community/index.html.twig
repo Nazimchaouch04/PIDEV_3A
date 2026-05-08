@@ -12,10 +12,6 @@
                 <h1 class="page-title">Communautés de Bien-être</h1>
                 <p class="page-subtitle">Rejoignez des cercles et progressez ensemble.</p>
             </div>
-            <div class="card" style="padding: 10px 20px; border-left: 4px solid var(--warning-orange);">
-                <p style="font-size: 12px; color: var(--text-secondary);">☀️ Infos Soleil :</p>
-                <p style="font-size: 13px; font-weight: 600;">Lever : {{ sunData.sunrise|date('H:i') }}</p>
-            </div>
         </div>
 
         <!-- Recherche et Tri -->
@@ -32,9 +28,12 @@
         </div>
 
         <!-- Grille des Groupes -->
-        <div class="grid-3" id="group-grid" style="margin-bottom: 50px;">
+        <div class="grid-3" id="group-grid" style="margin-bottom: 30px;">
             {% include 'community/_group_list.html.twig' %}
         </div>
+        <div class="navigation flex-center" style="margin-bottom: 50px;">
+    {{ knp_pagination_render(groupes) }}
+</div>
 
         <!-- Section Événements -->
         <h2 style="margin-bottom: 20px; font-size: 24px; font-weight: 700;">Calendrier des Événements</h2>
@@ -48,7 +47,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for event in upcomingEvents %}
+                    {% for event in events %}
                         <tr style="border-bottom: 1px solid var(--border-light);">
                             <td style="padding: 15px; font-weight: 600;">{{ event.titreEvent }}</td>
                             <td style="padding: 15px;"><span class="badge badge-fitness">{{ event.groupe.nomGroupe }}</span></td>

@@ -1,0 +1,410 @@
+{% extends 'base.html.twig' %}
+{% block title %}Mon Objectif Personnel — IA{% endblock %}
+
+{% block stylesheets %}{{ parent() }}
+<style>
+/* ═══════════════════════════════════════
+   BASE
+═══════════════════════════════════════ */
+.objectif-page {
+    padding: 2rem;
+    max-width: 960px;
+    margin: 0 auto;
+}
+
+/* ═══════════════════════════════════════
+   HEADER HERO
+═══════════════════════════════════════ */
+.hero-header {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 40%, #ec4899 100%);
+    border-radius: 20px;
+    padding: 2.5rem 2rem;
+    color: white;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.hero-header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 220px; height: 220px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 50%;
+}
+.hero-header::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; left: 30%;
+    width: 140px; height: 140px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 50%;
+}
+.hero-title { font-size: 2rem; font-weight: 800; margin-bottom: 0.3rem; position: relative; z-index: 1; }
+.hero-sub   { font-size: 0.95rem; opacity: 0.85; position: relative; z-index: 1; }
+.btn-back {
+    background: rgba(255,255,255,0.18);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 0.55rem 1.3rem;
+    border-radius: 10px;
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 600;
+    backdrop-filter: blur(6px);
+    transition: background 0.2s;
+    position: relative; z-index: 1;
+    white-space: nowrap;
+}
+.btn-back:hover { background: rgba(255,255,255,0.28); color: white; }
+
+/* ═══════════════════════════════════════
+   PROFIL CARD
+═══════════════════════════════════════ */
+.profil-card {
+    background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+    border: 1px solid #86efac;
+    border-radius: 16px;
+    padding: 1.25rem 1.75rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+.profil-card h3 {
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: #065f46;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0;
+    white-space: nowrap;
+}
+.profil-items { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+.profil-item {
+    font-size: 0.88rem;
+    color: #047857;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.profil-item strong { font-weight: 700; color: #065f46; }
+
+/* ═══════════════════════════════════════
+   STATS MINI
+═══════════════════════════════════════ */
+.current-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+@media (max-width: 640px) { .current-stats { grid-template-columns: repeat(2,1fr); } }
+
+.stat-mini {
+    border-radius: 16px;
+    padding: 1.25rem 1rem;
+    text-align: center;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+.stat-mini::after {
+    content: '';
+    position: absolute;
+    bottom: -20px; right: -20px;
+    width: 70px; height: 70px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+}
+.stat-mini.s1 { background: linear-gradient(135deg, #6366f1, #4f46e5); }
+.stat-mini.s2 { background: linear-gradient(135deg, #10b981, #059669); }
+.stat-mini.s3 { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.stat-mini.s4 { background: linear-gradient(135deg, #ef4444, #dc2626); }
+.stat-mini .val { font-size: 1.6rem; font-weight: 800; line-height: 1.1; position: relative; z-index: 1; }
+.stat-mini .lbl { font-size: 0.7rem; opacity: 0.85; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.3rem; position: relative; z-index: 1; }
+
+/* ═══════════════════════════════════════
+   FORM CARD
+═══════════════════════════════════════ */
+.form-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 2rem 2.5rem;
+    box-shadow: 0 4px 24px rgba(99,102,241,0.1);
+    border: 1px solid #e0e7ff;
+    margin-bottom: 2rem;
+}
+.form-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.75rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 2px solid #f1f5f9;
+}
+.form-card-header .icon {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem;
+}
+.form-card-header h2 { font-size: 1.15rem; font-weight: 700; color: #1e293b; margin: 0; }
+.form-card-header p  { font-size: 0.8rem; color: #94a3b8; margin: 0; }
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+@media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+
+.form-group { display: flex; flex-direction: column; gap: 0.45rem; }
+.form-group.full { grid-column: 1 / -1; }
+.form-group label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #475569;
+    display: flex; align-items: center; gap: 0.35rem;
+}
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 0.7rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    color: #1e293b;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background: #f8fafc;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+    background: #fff;
+}
+.form-group textarea { resize: vertical; min-height: 70px; }
+
+.btn-submit {
+    margin-top: 1.75rem;
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+    letter-spacing: 0.02em;
+    box-shadow: 0 4px 15px rgba(99,102,241,0.35);
+}
+.btn-submit:hover  { opacity: 0.92; transform: translateY(-1px); }
+.btn-submit:active { transform: translateY(0); }
+.btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+/* ═══════════════════════════════════════
+   PREDICTION CARD
+═══════════════════════════════════════ */
+.prediction-card {
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(99,102,241,0.2);
+    margin-top: 2rem;
+}
+.prediction-header {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.prediction-header .pred-icon {
+    width: 48px; height: 48px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem;
+}
+.prediction-header h2 { color: #fff; font-size: 1.15rem; font-weight: 700; margin: 0; }
+.prediction-header p  { color: rgba(255,255,255,0.8); font-size: 0.82rem; margin: 0; }
+.prediction-body {
+    background: #0f172a;
+    padding: 2rem;
+}
+.prediction-content {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 1.5rem 1.75rem;
+    line-height: 1.9;
+    white-space: pre-line;
+    font-size: 0.93rem;
+    color: #cbd5e1;
+}
+
+/* ═══════════════════════════════════════
+   LOADING OVERLAY
+═══════════════════════════════════════ */
+.loading-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15,23,42,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 1rem;
+    color: white;
+}
+.loading-overlay.active { display: flex; }
+.loader-ring {
+    width: 56px; height: 56px;
+    border: 4px solid rgba(255,255,255,0.15);
+    border-top-color: #a78bfa;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loader-text { font-size: 1rem; font-weight: 600; color: #c4b5fd; }
+</style>
+{% endblock %}
+
+{% block body %}
+
+{# Loading overlay #}
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loader-ring"></div>
+    <div class="loader-text">🤖 Groq analyse votre profil...</div>
+</div>
+
+<div class="objectif-page">
+
+    {# ── Hero Header ── #}
+    <div class="hero-header">
+        <div>
+            <div class="hero-title">🎯 Mon Objectif Personnel — IA</div>
+            <div class="hero-sub">Groq analyse votre profil et génère un plan sur mesure</div>
+        </div>
+        <a href="{{ path('app_exercice_stats') }}" class="btn-back">← Retour aux stats</a>
+    </div>
+
+    {# ── Profil actuel ── #}
+    <div class="profil-card">
+        <h3>👤 Profil actuel</h3>
+        <div class="profil-items">
+            <div class="profil-item">🏋️ Exercice favori : <strong>{{ exercicePlusPratique ?? '—' }}</strong></div>
+            <div class="profil-item">⚡ Intensité : <strong>{{ intensitePlusCourante ?? '—' }}</strong></div>
+            <div class="profil-item">🔥 Cal/min : <strong>{{ caloriesMoyennesParMinute }}</strong></div>
+        </div>
+    </div>
+
+    {# ── Stats mini ── #}
+    <div class="current-stats">
+        <div class="stat-mini s1">
+            <div class="val">{{ totalSeances }}</div>
+            <div class="lbl">Séances totales</div>
+        </div>
+        <div class="stat-mini s2">
+            <div class="val">{{ seanceCeMois }}</div>
+            <div class="lbl">Ce mois</div>
+        </div>
+        <div class="stat-mini s3">
+            <div class="val">{{ dureeMoyenne }} min</div>
+            <div class="lbl">Durée moyenne</div>
+        </div>
+        <div class="stat-mini s4">
+            <div class="val">{{ caloriesTotales|number_format(0, '.', ' ') }}</div>
+            <div class="lbl">Calories brûlées</div>
+        </div>
+    </div>
+
+    {# ── Formulaire ── #}
+    <div class="form-card">
+        <div class="form-card-header">
+            <div class="icon">🎯</div>
+            <div>
+                <h2>Définissez votre objectif personnel</h2>
+                <p>Remplissez le formulaire et laissez l'IA construire votre plan</p>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ path('app_exercice_objectif') }}" onsubmit="showLoading()">
+            <div class="form-grid">
+
+                <div class="form-group full">
+                    <label>📝 Mon objectif</label>
+                    <textarea name="objectif" rows="2"
+                        placeholder="Ex: Perdre du poids, gagner en endurance, muscler les bras...">{{ app.request.request.get('objectif') }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>📅 Séances souhaitées / semaine</label>
+                    <input type="number" name="seances_voulues" min="1" max="14"
+                           value="{{ app.request.request.get('seances_voulues', 4) }}">
+                </div>
+
+                <div class="form-group">
+                    <label>⏱️ Durée souhaitée / séance (min)</label>
+                    <input type="number" name="duree_voulue" min="10" max="300"
+                           value="{{ app.request.request.get('duree_voulue', 45) }}">
+                </div>
+
+                <div class="form-group">
+                    <label>🔥 Calories à brûler / séance (kcal)</label>
+                    <input type="number" name="calories_voulues" min="50" max="2000"
+                           value="{{ app.request.request.get('calories_voulues', 400) }}">
+                </div>
+
+                <div class="form-group">
+                    <label>🗓️ Mon délai</label>
+                    <select name="delai">
+                        <option value="2 semaines" {% if app.request.request.get('delai') == '2 semaines' %}selected{% endif %}>2 semaines</option>
+                        <option value="1 mois"     {% if app.request.request.get('delai', '1 mois') == '1 mois' %}selected{% endif %}>1 mois</option>
+                        <option value="2 mois"     {% if app.request.request.get('delai') == '2 mois' %}selected{% endif %}>2 mois</option>
+                        <option value="3 mois"     {% if app.request.request.get('delai') == '3 mois' %}selected{% endif %}>3 mois</option>
+                        <option value="6 mois"     {% if app.request.request.get('delai') == '6 mois' %}selected{% endif %}>6 mois</option>
+                    </select>
+                </div>
+
+            </div>
+            <button type="submit" class="btn-submit" id="submitBtn">
+                🤖 Générer Mon Plan Personnel
+            </button>
+        </form>
+    </div>
+
+    {# ── Résultat IA ── #}
+    {% if prediction %}
+    <div class="prediction-card">
+        <div class="prediction-header">
+            <div class="pred-icon">🤖</div>
+            <div>
+                <h2>Votre Plan Personnel — Groq IA</h2>
+                <p>Analyse basée sur vos données réelles d'entraînement</p>
+            </div>
+        </div>
+        <div class="prediction-body">
+            <div class="prediction-content">{{ prediction }}</div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+<script>
+function showLoading() {
+    document.getElementById('loadingOverlay').classList.add('active');
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = '⏳ Génération en cours...';
+}
+</script>
+{% endblock %}

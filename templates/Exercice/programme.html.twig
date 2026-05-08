@@ -1,0 +1,116 @@
+{% extends 'base_back.html.twig' %}
+{% block title %}Programme d'entraînement IA{% endblock %}
+{% block body %}
+
+<div class="page-header flex-between">
+    <div>
+        <h1 class="page-title">🤖 Programme d'entraînement IA</h1>
+        <p class="page-subtitle">Programme personnalisé généré par intelligence artificielle</p>
+    </div>
+    <a href="{{ path('app_exercice_recommandations') }}" class="btn btn-secondary">
+        ← Retour aux recommandations
+    </a>
+</div>
+
+{# FORMULAIRE #}
+<div class="card mb-4">
+    <div class="card-header"><h4 class="card-title">👤 Vos informations personnelles</h4></div>
+    <div style="padding: 20px;">
+        <form method="POST" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
+            
+            <div>
+                <label style="font-weight:600; display:block; margin-bottom:5px;">🎂 Âge</label>
+                <input type="number" name="age" value="25" min="10" max="99" class="form-control"/>
+            </div>
+
+            <div>
+                <label style="font-weight:600; display:block; margin-bottom:5px;">⚖️ Poids (kg)</label>
+                <input type="number" name="poids" value="70" min="30" max="200" class="form-control"/>
+            </div>
+
+            <div>
+                <label style="font-weight:600; display:block; margin-bottom:5px;">📏 Taille (cm)</label>
+                <input type="number" name="taille" value="170" min="100" max="250" class="form-control"/>
+            </div>
+
+            <div>
+                <label style="font-weight:600; display:block; margin-bottom:5px;">🎯 Objectif</label>
+                <select name="objectif" class="form-control">
+                    <option value="perte de poids">Perte de poids</option>
+                    <option value="musculation">Musculation</option>
+                    <option value="endurance">Endurance</option>
+                    <option value="remise en forme">Remise en forme</option>
+                </select>
+            </div>
+
+            <div>
+                <label style="font-weight:600; display:block; margin-bottom:5px;">📈 Niveau</label>
+                <select name="niveau" class="form-control">
+                    <option value="débutant">Débutant</option>
+                    <option value="intermédiaire">Intermédiaire</option>
+                    <option value="avancé">Avancé</option>
+                </select>
+            </div>
+
+            <div>
+                <label style="font-weight:600; display:block; margin-bottom:5px;">📅 Jours/semaine</label>
+                <select name="jours" class="form-control">
+                    <option value="3">3 jours</option>
+                    <option value="4">4 jours</option>
+                    <option value="5">5 jours</option>
+                </select>
+            </div>
+
+            <div>
+                <label style="font-weight:600; display:block; margin-bottom:5px;">💪 Muscle ciblé</label>
+                <select name="muscle" class="form-control">
+                    <option value="biceps">Biceps</option>
+                    <option value="triceps">Triceps</option>
+                    <option value="chest">Pectoraux</option>
+                    <option value="abdominals">Abdominaux</option>
+                    <option value="quadriceps">Quadriceps</option>
+                    <option value="hamstrings">Ischio-jambiers</option>
+                    <option value="glutes">Fessiers</option>
+                    <option value="lats">Dorsaux</option>
+                </select>
+            </div>
+
+            <div style="display:flex; align-items:flex-end;">
+                <button type="submit" class="btn btn-secondary" style="width:100%;">
+                    🚀 Générer mon programme
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+{# EXERCICES RECOMMANDÉS #}
+{% if exercices %}
+<div class="card mb-4">
+    <div class="card-header">
+        <h4 class="card-title">🏋️ Exercices recommandés ({{ exercices|length }})</h4>
+    </div>
+    <div style="padding: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+        {% for ex in exercices %}
+        <span style="background: #dbeafe; color: #1d4ed8; padding: 5px 12px; border-radius: 20px; font-size: 13px;">
+            🏋️ {{ ex.name ?? '' }}
+        </span>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{# PROGRAMME GÉNÉRÉ PAR IA #}
+{% if programme %}
+<div class="card">
+    <div class="card-header" style="background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; border-radius: 10px 10px 0 0;">
+        <h4 class="card-title" style="color: white;">🤖 Votre programme personnalisé</h4>
+    </div>
+    <div style="padding: 25px; line-height: 1.9; font-size: 15px; white-space: pre-line; color: #1e293b;">
+        {{ programme }}
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

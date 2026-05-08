@@ -1,0 +1,437 @@
+{% extends 'base_back.html.twig' %}
+{% block title %}Mes Statistiques{% endblock %}
+
+{% block stylesheets %}{{ parent() }}
+<style>
+.stats-page { padding: 2rem; }
+.page-header { margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; }
+.page-header h1 { font-size: 1.8rem; font-weight: 700; color: #1e293b; }
+.page-header p  { color: #64748b; margin-top: 0.25rem; }
+.btn-back { background:#f1f5f9; color:#475569; padding:0.5rem 1.2rem; border-radius:8px; text-decoration:none; font-size:0.9rem; }
+
+/* ── KPI ── */
+.kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:1rem; margin-bottom:2rem; }
+.kpi-card { background:#fff; border-radius:12px; padding:1.25rem 1.5rem; box-shadow:0 1px 4px rgba(0,0,0,0.08); border-left:4px solid transparent; }
+.kpi-card.blue   { border-color:#6366f1; }
+.kpi-card.green  { border-color:#10b981; }
+.kpi-card.orange { border-color:#f59e0b; }
+.kpi-card.red    { border-color:#ef4444; }
+.kpi-card.purple { border-color:#8b5cf6; }
+.kpi-card.teal   { border-color:#14b8a6; }
+.kpi-card.pink   { border-color:#ec4899; }
+.kpi-card.indigo { border-color:#3b82f6; }
+.kpi-icon  { font-size:1.4rem; margin-bottom:.4rem; }
+.kpi-value { font-size:1.9rem; font-weight:700; color:#1e293b; line-height:1.1; }
+.kpi-label { font-size:.75rem; color:#94a3b8; margin-top:.3rem; text-transform:uppercase; letter-spacing:.04em; }
+
+/* ══════════════════════════════════════
+   SECTION OBJECTIFS
+══════════════════════════════════════ */
+.objectifs-section {
+    background: #fff;
+    border-radius: 16px;
+    padding: 1.75rem 2rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 2rem;
+}
+.objectifs-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: .75rem;
+}
+.objectifs-header h2 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+}
+.objectifs-actions { display:flex; gap:.6rem; flex-wrap:wrap; }
+
+/* Boutons */
+.btn-obj {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .5rem 1.1rem;
+    border-radius: 8px;
+    font-size: .88rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    transition: filter .15s, transform .1s;
+}
+.btn-obj:hover { filter:brightness(.92); transform:translateY(-1px); }
+.btn-obj-primary { background:#6366f1; color:#fff; }
+.btn-obj-success { background:#10b981; color:#fff; }
+.btn-obj-outline { background:#f1f5f9; color:#475569; border:1px solid #e2e8f0; }
+.btn-obj-danger  { background:#fee2e2; color:#991b1b; }
+
+/* Grid cartes */
+.objectifs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px,1fr));
+    gap: 1rem;
+}
+.obj-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.25rem;
+    transition: box-shadow .15s;
+}
+.obj-card:hover { box-shadow:0 4px 16px rgba(0,0,0,0.1); }
+.obj-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: .75rem;
+}
+.obj-titre { font-weight:700; color:#1e293b; font-size:.95rem; flex:1; }
+
+/* Badges statut */
+.obj-badge { font-size:.72rem; font-weight:700; padding:.25rem .65rem; border-radius:20px; white-space:nowrap; margin-left:.5rem; }
+.obj-badge-en-cours   { background:#dbeafe; color:#1d4ed8; }
+.obj-badge-atteint    { background:#d1fae5; color:#065f46; }
+.obj-badge-echoue     { background:#fee2e2; color:#991b1b; }
+.obj-badge-en-attente { background:#f1f5f9; color:#475569; }
+
+/* Barre de progression */
+.obj-progress-wrap { margin-bottom:.6rem; }
+.obj-progress-info { display:flex; justify-content:space-between; font-size:.78rem; color:#64748b; margin-bottom:.3rem; }
+.obj-progress-bar  { height:8px; background:#f1f5f9; border-radius:99px; overflow:hidden; }
+.obj-progress-fill { height:100%; border-radius:99px; transition:width .6s ease; }
+.fill-blue   { background:linear-gradient(90deg,#6366f1,#818cf8); }
+.fill-green  { background:linear-gradient(90deg,#10b981,#34d399); }
+.fill-orange { background:linear-gradient(90deg,#f59e0b,#fbbf24); }
+.fill-red    { background:linear-gradient(90deg,#ef4444,#f87171); }
+
+.obj-meta { font-size:.78rem; color:#94a3b8; margin-top:.5rem; }
+.obj-meta span { margin-right:.75rem; }
+
+.obj-card-actions { display:flex; gap:.4rem; margin-top:.9rem; flex-wrap:wrap; }
+.btn-obj-sm { font-size:.78rem; padding:.3rem .75rem; border-radius:6px; }
+
+/* Empty state */
+.obj-empty { text-align:center; padding:3rem 1rem; color:#94a3b8; }
+.obj-empty .obj-empty-icon { font-size:3rem; margin-bottom:.75rem; }
+.obj-empty p { font-size:.95rem; margin-bottom:1.25rem; }
+
+/* ── Groq IA ── */
+.ia-section { background:linear-gradient(135deg,#10b981 0%,#059669 100%); border-radius:16px; padding:2rem; color:white; margin-bottom:2rem; }
+.ia-section h2 { font-size:1.2rem; font-weight:700; margin-bottom:1rem; }
+.ia-conseil { background:rgba(255,255,255,0.15); border-radius:10px; padding:1rem 1.25rem; line-height:1.7; white-space:pre-line; font-size:.95rem; }
+
+/* ── Charts ── */
+.charts-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(360px,1fr)); gap:1.5rem; margin-bottom:2rem; }
+.chart-card { background:#fff; border-radius:12px; padding:1.5rem; box-shadow:0 1px 4px rgba(0,0,0,0.08); }
+.chart-card h3 { font-size:1rem; font-weight:600; color:#1e293b; margin-bottom:1rem; }
+.chart-card canvas { max-height:250px; }
+
+/* ── ExerciseDB ── */
+.exercicedb-section { margin-bottom:2rem; }
+.exercicedb-section h2 { font-size:1.2rem; font-weight:700; color:#1e293b; margin-bottom:1rem; }
+.muscles-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1rem; }
+.muscle-card { background:#fff; border-radius:12px; padding:1.25rem; box-shadow:0 1px 4px rgba(0,0,0,0.08); border-top:3px solid #6366f1; display:flex; flex-direction:column; gap:.5rem; }
+.muscle-card .exo-nom { font-weight:700; color:#1e293b; font-size:.95rem; }
+.muscle-card .exo-muscle { display:inline-block; background:#ede9fe; color:#6d28d9; padding:3px 10px; border-radius:20px; font-size:.78rem; font-weight:600; }
+.muscle-card .exo-detail { font-size:.8rem; color:#64748b; }
+.muscle-card .exo-niveau { font-size:.8rem; }
+.muscle-card .exo-gif { width:100%; border-radius:8px; margin-top:.5rem; max-height:120px; object-fit:cover; }
+.no-api-banner { background:#fef3c7; border:1px solid #fcd34d; border-radius:10px; padding:1rem 1.25rem; color:#92400e; margin-bottom:1rem; font-size:.9rem; }
+
+/* ── Details ── */
+.details-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1rem; margin-bottom:2rem; }
+.detail-card { background:#fff; border-radius:12px; padding:1.25rem 1.5rem; box-shadow:0 1px 4px rgba(0,0,0,0.08); }
+.detail-card h4 { font-size:.8rem; text-transform:uppercase; letter-spacing:.05em; color:#94a3b8; margin-bottom:.75rem; }
+.detail-item { display:flex; justify-content:space-between; padding:.4rem 0; border-bottom:1px solid #f1f5f9; font-size:.9rem; }
+.detail-item:last-child { border-bottom:none; }
+.detail-item .label { color:#64748b; }
+.detail-item .value { font-weight:600; color:#1e293b; }
+.badge { display:inline-block; padding:.2rem .6rem; border-radius:20px; font-size:.75rem; font-weight:600; }
+.badge-faible  { background:#d1fae5; color:#065f46; }
+.badge-modere  { background:#fef3c7; color:#92400e; }
+.badge-eleve   { background:#fee2e2; color:#991b1b; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="stats-page">
+
+    {# ── En-tête ── #}
+    <div class="page-header">
+        <div>
+            <h1>📊 Mes Statistiques Personnelles</h1>
+            <p>Analyse de l'activité physique et conseils personnalisés</p>
+        </div>
+        <a href="{{ path('app_exercice_index') }}" class="btn-back">← Retour aux exercices</a>
+    </div>
+
+    {# ── KPI ── #}
+    <div class="kpi-grid">
+        <div class="kpi-card blue">
+            <div class="kpi-icon">🏋️</div>
+            <div class="kpi-value">{{ totalSeances }}</div>
+            <div class="kpi-label">Séances totales</div>
+        </div>
+        <div class="kpi-card green">
+            <div class="kpi-icon">📅</div>
+            <div class="kpi-value">{{ seanceCetteSemaine }}</div>
+            <div class="kpi-label">Cette semaine</div>
+        </div>
+        <div class="kpi-card orange">
+            <div class="kpi-icon">🗓️</div>
+            <div class="kpi-value">{{ seanceCeMois }}</div>
+            <div class="kpi-label">Ce mois</div>
+        </div>
+        <div class="kpi-card purple">
+            <div class="kpi-icon">⏱️</div>
+            <div class="kpi-value">{{ dureeTotal }}</div>
+            <div class="kpi-label">Minutes totales</div>
+        </div>
+        <div class="kpi-card teal">
+            <div class="kpi-icon">⚡</div>
+            <div class="kpi-value">{{ dureeMoyenne }}</div>
+            <div class="kpi-label">Min/séance moy.</div>
+        </div>
+        <div class="kpi-card red">
+            <div class="kpi-icon">🔥</div>
+            <div class="kpi-value">{{ caloriesTotales|number_format(0, '.', ' ') }}</div>
+            <div class="kpi-label">Calories brûlées</div>
+        </div>
+        <div class="kpi-card pink">
+            <div class="kpi-icon">🏅</div>
+            <div class="kpi-value">{{ totalMedailles }}</div>
+            <div class="kpi-label">Médailles</div>
+        </div>
+        <div class="kpi-card indigo">
+            <div class="kpi-icon">💧</div>
+            <div class="kpi-value">{{ caloriesMoyennesParMinute }}</div>
+            <div class="kpi-label">Cal/min moy.</div>
+        </div>
+    </div>
+
+    {# ══════════════════════════════════════
+       🎯 SECTION OBJECTIFS
+    ══════════════════════════════════════ #}
+    <div class="objectifs-section">
+
+        <div class="objectifs-header">
+            <h2>🎯 Mes Objectifs</h2>
+            <div class="objectifs-actions">
+                {# Bouton : Voir tous les objectifs #}
+                <a href="{{ path('app_exercice_objectif') }}" class="btn-obj btn-obj-outline">
+                    📋 Tous les objectifs
+                </a>
+                {# Bouton : Créer un nouvel objectif #}
+                <a href="{{ path('app_exercice_objectif') }}" class="btn-obj btn-obj-primary">
+                    ＋ Nouvel objectif
+                </a>
+            </div>
+        </div>
+
+        {% if objectifs is defined and objectifs|length > 0 %}
+
+            <div class="objectifs-grid">
+                {% for objectif in objectifs %}
+                <div class="obj-card">
+
+                    {# ── Titre + badge statut ── #}
+                    <div class="obj-card-top">
+                        <div class="obj-titre">{{ objectif.titre }}</div>
+                        {% set statut = objectif.statut ?? 'en-attente' %}
+                        {% if statut == 'atteint' %}
+                            <span class="obj-badge obj-badge-atteint">✅ Atteint</span>
+                        {% elseif statut == 'en-cours' %}
+                            <span class="obj-badge obj-badge-en-cours">🔵 En cours</span>
+                        {% elseif statut == 'echoue' %}
+                            <span class="obj-badge obj-badge-echoue">❌ Échoué</span>
+                        {% else %}
+                            <span class="obj-badge obj-badge-en-attente">⏳ En attente</span>
+                        {% endif %}
+                    </div>
+
+                    {# ── Barre de progression ── #}
+                    {% set pct = objectif.progression is defined ? objectif.progression : 0 %}
+                    {% if pct > 100 %}{% set pct = 100 %}{% endif %}
+                    {% if pct < 0 %}{% set pct = 0 %}{% endif %}
+                    {% if pct >= 80 %}{% set fillClass = 'fill-green' %}
+                    {% elseif pct >= 50 %}{% set fillClass = 'fill-blue' %}
+                    {% elseif pct >= 25 %}{% set fillClass = 'fill-orange' %}
+                    {% else %}{% set fillClass = 'fill-red' %}{% endif %}
+
+                    <div class="obj-progress-wrap">
+                        <div class="obj-progress-info">
+                            <span>Progression</span>
+                            <strong>{{ pct }}%</strong>
+                        </div>
+                        <div class="obj-progress-bar">
+                            <div class="obj-progress-fill {{ fillClass }}" style="width:{{ pct }}%"></div>
+                        </div>
+                    </div>
+
+                    {# ── Méta ── #}
+                    <div class="obj-meta">
+                        {% if objectif.dateEcheance is defined and objectif.dateEcheance %}
+                            <span>📅 {{ objectif.dateEcheance|date('d/m/Y') }}</span>
+                        {% endif %}
+                        {% if objectif.categorie is defined and objectif.categorie %}
+                            <span>🏷️ {{ objectif.categorie }}</span>
+                        {% endif %}
+                    </div>
+
+                    {# ── Actions rapides ── #}
+                    <div class="obj-card-actions">
+                        <a href="{{ path('app_exercice_objectif') }}"
+                           class="btn-obj btn-obj-outline btn-obj-sm">👁️ Voir</a>
+                        <a href="{{ path('app_exercice_objectif') }}"
+                           class="btn-obj btn-obj-success btn-obj-sm">✏️ Modifier</a>
+                        <a href="{{ path('app_exercice_objectif') }}"
+                           class="btn-obj btn-obj-danger btn-obj-sm"
+                           onclick="return confirm('Supprimer cet objectif ?')">🗑️</a>
+                    </div>
+
+                </div>
+                {% endfor %}
+            </div>
+
+        {% else %}
+
+            {# ── Empty state ── #}
+            <div class="obj-empty">
+                <div class="obj-empty-icon">🎯</div>
+                <p>Vous n'avez encore aucun objectif. Commencez dès maintenant !</p>
+                <a href="{{ path('app_exercice_objectif') }}" class="btn-obj btn-obj-primary">
+                    ＋ Créer mon premier objectif
+                </a>
+            </div>
+
+        {% endif %}
+
+    </div>{# fin .objectifs-section #}
+
+    {# ── Groq IA ── #}
+    <div class="ia-section">
+        <h2>🤖 Vos Conseils Personnalisés — Groq IA</h2>
+        <div class="ia-conseil">{{ conseilIA }}</div>
+    </div>
+
+    {# ── ExerciseDB ── #}
+    <div class="exercicedb-section">
+        <h2>💪 Analyse des Exercices — ExerciseDB</h2>
+
+        {% if not exerciseDBActive %}
+        <div class="no-api-banner">
+            ⚠️ <strong>ExerciseDB non configurée.</strong>
+            Ajoute <code>RAPIDAPI_KEY=ta_clé</code> dans <code>.env</code> pour voir les muscles ciblés et animations.
+            Clé gratuite sur <a href="https://rapidapi.com/justin-WFnsXH_t6/api/exercisedb" target="_blank" style="color:#92400e;">rapidapi.com</a>
+        </div>
+        {% endif %}
+
+        <div class="muscles-grid">
+            {% for item in exercicesEnrichis %}
+            <div class="muscle-card">
+                {% if item.infos.gif %}
+                    <img src="{{ item.infos.gif }}" alt="{{ item.exercice.nomExercice }}" class="exo-gif">
+                {% else %}
+                    <div style="background:#f1f5f9;border-radius:8px;height:80px;display:flex;align-items:center;justify-content:center;font-size:2rem;">🏋️</div>
+                {% endif %}
+                <div class="exo-nom">{{ item.exercice.nomExercice }}</div>
+                <div><span class="exo-muscle">🎯 {{ item.infos.muscle }}</span></div>
+                {% if item.infos.muscles_secondaires %}
+                <div class="exo-detail">Muscles 2nd : {{ item.infos.muscles_secondaires }}</div>
+                {% endif %}
+                <div class="exo-detail">🛠️ Équipement : {{ item.infos.equipment }}</div>
+                <div class="exo-niveau">{{ item.infos.niveau }}</div>
+                <div class="exo-detail">🔥 {{ item.exercice.caloriesParMinute }} kcal/min |
+                    {% if item.exercice.intensite.value == 'eleve' %}
+                        <span style="color:#dc2626;">🔴 Élevé</span>
+                    {% elseif item.exercice.intensite.value == 'modere' %}
+                        <span style="color:#d97706;">🟡 Modéré</span>
+                    {% else %}
+                        <span style="color:#065f46;">🟢 Faible</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <p style="color:#94a3b8;">Aucun exercice trouvé.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    {# ── Graphiques ── #}
+    <div class="charts-grid">
+        <div class="chart-card">
+            <h3>📈 Séances par semaine</h3>
+            <canvas id="chartSeancesSemaine"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3>⏱️ Durée par mois (minutes)</h3>
+            <canvas id="chartDureeMois"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3>🎯 Répartition par intensité</h3>
+            <canvas id="chartIntensite"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3>🏆 Top 5 exercices</h3>
+            <canvas id="chartTop5"></canvas>
+        </div>
+    </div>
+
+    {# ── Détails ── #}
+    <div class="details-grid">
+        <div class="detail-card">
+            <h4>📊 Séances</h4>
+            <div class="detail-item"><span class="label">Plus longue</span><span class="value">{{ seancePlusLongue }} min</span></div>
+            <div class="detail-item"><span class="label">Plus courte</span><span class="value">{{ seancePlusCourte }} min</span></div>
+            <div class="detail-item"><span class="label">Durée moyenne</span><span class="value">{{ dureeMoyenne }} min</span></div>
+            <div class="detail-item"><span class="label">Médailles</span><span class="value">{{ totalMedailles }} 🏅</span></div>
+        </div>
+        <div class="detail-card">
+            <h4>💪 Exercices</h4>
+            <div class="detail-item"><span class="label">Exercice favori</span><span class="value">{{ exercicePlusPratique ?? '—' }}</span></div>
+            <div class="detail-item">
+                <span class="label">Intensité habituelle</span>
+                <span class="value">
+                    {% if intensitePlusCourante %}
+                        <span class="badge badge-{{ intensitePlusCourante|lower }}">{{ intensitePlusCourante }}</span>
+                    {% else %}—{% endif %}
+                </span>
+            </div>
+            <div class="detail-item"><span class="label">Cal/min moyenne</span><span class="value">{{ caloriesMoyennesParMinute }} 🔥</span></div>
+            <div class="detail-item"><span class="label">Calories totales</span><span class="value">{{ caloriesTotales|number_format(1) }} kcal</span></div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block javascripts %}{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const C = {
+    blue:'rgba(99,102,241,.85)', green:'rgba(16,185,129,.85)',
+    orange:'rgba(245,158,11,.85)', red:'rgba(239,68,68,.85)',
+    purple:'rgba(139,92,246,.85)', teal:'rgba(20,184,166,.85)'
+};
+new Chart(document.getElementById('chartSeancesSemaine'), {
+    type:'line', data:{ labels:{{ seancesParSemaineLabels|raw }}, datasets:[{ label:'Séances', data:{{ seancesParSemaineData|raw }}, borderColor:C.green, backgroundColor:'rgba(16,185,129,.1)', borderWidth:2.5, fill:true, tension:0.4, pointRadius:5 }] },
+    options:{ responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true,ticks:{stepSize:1}}} }
+});
+new Chart(document.getElementById('chartDureeMois'), {
+    type:'bar', data:{ labels:{{ dureeParMoisLabels|raw }}, datasets:[{ label:'Minutes', data:{{ dureeParMoisData|raw }}, backgroundColor:C.teal, borderRadius:6 }] },
+    options:{ responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
+});
+new Chart(document.getElementById('chartIntensite'), {
+    type:'doughnut', data:{ labels:{{ intensiteLabels|raw }}, datasets:[{ data:{{ intensiteData|raw }}, backgroundColor:[C.green,C.orange,C.red,C.purple], borderWidth:2, borderColor:'#fff' }] },
+    options:{ responsive:true, cutout:'62%', plugins:{legend:{position:'bottom'}} }
+});
+new Chart(document.getElementById('chartTop5'), {
+    type:'bar', data:{ labels:{{ top5Labels|raw }}, datasets:[{ label:'Fois', data:{{ top5Data|raw }}, backgroundColor:[C.purple,C.blue,C.teal,C.green,C.orange], borderRadius:6 }] },
+    options:{ indexAxis:'y', responsive:true, plugins:{legend:{display:false}}, scales:{x:{beginAtZero:true,ticks:{stepSize:1}}} }
+});
+</script>
+{% endblock %}

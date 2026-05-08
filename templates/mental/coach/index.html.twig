@@ -25,9 +25,9 @@
                     </div>
                     <div class="fatigue-indicator-bar progress mb-3" style="height: 10px;">
                         <div class="progress-bar {{ fatigue.level == 'fatigue_haute' ? 'bg-danger' : (fatigue.level == 'fatigue_moderee' ? 'bg-warning' : 'bg-success') }}" 
-                             style="width: {{ fatigue.cv_score * 200 }}%"></div>
+                             style="width: {{ (fatigue.cv_score|default(0)) * 200 }}%"></div>
                     </div>
-                    <p class="card-text px-4 font-italic">{{ fatigue.message }}</p>
+                    <p class="card-text px-4 font-italic">{{ fatigue.message|default('Service indisponible') }}</p>
                 </div>
             </div>
         </div>
@@ -43,9 +43,9 @@
                     <div class="prediction-value display-2 font-weight-bold text-info mb-3">
                         {{ prediction.next_predicted_score|default('--') }}<span class="h4">/100</span>
                     </div>
-                    <div class="trend-indicator py-2 px-4 rounded-pill d-inline-block {{ prediction.trend == 'upward' ? 'bg-success-light text-success' : 'bg-warning-light text-warning' }}">
-                        <i class="fas {{ prediction.trend == 'upward' ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down' }} mr-2"></i>
-                        Tendance : {{ prediction.trend == 'upward' ? 'À la hausse' : 'En baisse' }}
+                    <div class="trend-indicator py-2 px-4 rounded-pill d-inline-block {{ (prediction.trend|default('unknown')) == 'upward' ? 'bg-success-light text-success' : 'bg-warning-light text-warning' }}">
+                        <i class="fas {{ (prediction.trend|default('unknown')) == 'upward' ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down' }} mr-2"></i>
+                        Tendance : {{ (prediction.trend|default('unknown')) == 'upward' ? 'À la hausse' : ((prediction.trend|default('unknown')) == 'downward' ? 'En baisse' : 'Inconnue') }}
                     </div>
                 </div>
             </div>

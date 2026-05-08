@@ -118,8 +118,8 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
      * Collection des rendez-vous médicaux de l'utilisateur (comme spécialiste)
      * Relation OneToMany : un spécialiste peut avoir plusieurs rendez-vous
      */
-    #[ORM\OneToMany(targetEntity: MembreGroupe::class, mappedBy: 'utilisateur', orphanRemoval: true)]
-    private Collection $membresGroupes;
+    #[ORM\OneToMany(targetEntity: RendezVous::class, mappedBy: 'specialiste', orphanRemoval: true)]
+    private Collection $rendezVousSpecialiste;
 
     /**
      * @var Specialiste|null
@@ -135,6 +135,13 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     private Collection $cognitiveInsights;
 
     /**
+     * @var Collection<int, MembreGroupe>
+     * Collection des groupes auxquels l'utilisateur est membre
+     */
+    #[ORM\OneToMany(targetEntity: MembreGroupe::class, mappedBy: 'utilisateur', orphanRemoval: true)]
+    private Collection $membresGroupes;
+
+    /**
      * Constructeur de l'entité Utilisateur
      * Initialise les valeurs par défaut et les collections vides
      */
@@ -147,6 +154,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         $this->quizMentaux = new ArrayCollection();   // Initialisation collection quiz mentaux
         $this->mentalCheckIns = new ArrayCollection(); // Initialisation collection mental check-ins
         $this->rendezVousPatient = new ArrayCollection();     // Initialisation collection rendez-vous patient
+        $this->rendezVousSpecialiste = new ArrayCollection(); // Initialisation collection rendez-vous spécialiste
         $this->membresGroupes = new ArrayCollection();  // Initialisation collection groupes
         $this->cognitiveInsights = new ArrayCollection();
     }
@@ -349,9 +357,55 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    public function getRendezVousSpecialiste(): Collection
+    {
+        return $this->rendezVousSpecialiste;
+    }
+    
+    public function addRendezVousSpecialiste(RendezVous $rendezVous): static
+    {
+        if (!$this->rendezVousSpecialiste->contains($rendezVous)) {
+            $this->rendezVousSpecialiste->add($rendezVous);
+            $rendezVous->setSpecialiste($this);
+        }
+        return $this;
+    }
+    
+    public function removeRendezVousSpecialiste(RendezVous $rendezVous): static
+    {
+        if ($this->rendezVousSpecialiste->removeElement($rendezVous)) {
+            if ($rendezVous->getSpecialiste() === $this) {
+                $rendezVous->setSpecialiste(null);
+            }
+        }
+        return $this;
+    }
+
     public function getMembresGroupes(): Collection
     {
         return $this->membresGroupes;
+    }
+
+    public function addMembreGroupe(MembreGroupe $membreGroupe): static
+    {
+        if (!$this->membresGroupes->contains($membreGroupe)) {
+            $this->membresGroupes->add($membreGroupe);
+            $membreGroupe->setUtilisateur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMembreGroupe(MembreGroupe $membreGroupe): static
+    {
+        if ($this->membresGroupes->removeElement($membreGroupe)) {
+            // set the owning side to null (unless already changed)
+            if ($membreGroupe->getUtilisateur() === $this) {
+                $membreGroupe->setUtilisateur(null);
+            }
+        }
+
+        return $this;
     }
 
     /**

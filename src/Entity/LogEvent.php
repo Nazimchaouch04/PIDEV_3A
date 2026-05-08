@@ -17,6 +17,7 @@ class LogEvent
     private ?string $action = null;
 
     #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?Utilisateur $utilisateur = null;
 
     #[ORM\Column]

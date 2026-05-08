@@ -32,6 +32,29 @@ services:
         arguments:
             $parameterBag: '@parameter_bag'
 
+    App\Service\GeminiService:
+        arguments:
+            $apiKey: '%env(GEMINI_API_KEY)%'
+
+    App\Service\HuggingFaceSpeechService:
+        arguments:
+            $apiKey: '%env(HUGGINGFACE_API_KEY)%'
+
+    App\Service\AlerteService:
+        arguments:
+            $twilioSid: '%env(TWILIO_SID)%'
+            $twilioAuthToken: '%env(TWILIO_AUTH_TOKEN)%'
+            $twilioPhoneNumber: '%env(TWILIO_PHONE_NUMBER)%'
+            $coachPhoneNumber: '%env(COACH_PHONE_NUMBER)%'
+
+    App\Service\AIService:
+        arguments:
+            $huggingFaceToken: '%env(HUGGINGFACE_API_KEY)%'
+
+    App\Service\WeatherService:
+        arguments:
+            $weatherApiKey: '%env(WEATHER_API_KEY)%'
+
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
     App\:
@@ -42,6 +65,11 @@ services:
             - '../src/Kernel.php'
             - '../src/Service/QuizService.php'
             - '../src/Service/RecaptchaService.php'
+            - '../src/Service/GeminiService.php'
+            - '../src/Service/HuggingFaceSpeechService.php'
+            - '../src/Service/AlerteService.php'
+            - '../src/Service/AIService.php'
+            - '../src/Service/WeatherService.php'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

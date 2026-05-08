@@ -137,7 +137,7 @@ class MentalController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_mental_show', methods: ['GET'])]
+    #[Route('/{id}', name: 'app_mental_show', requirements: ['id' => '\\d+'], methods: ['GET'])]
     public function show(QuizMental $quiz): Response
     {
         if ($quiz->getUtilisateur() !== $this->getUser()) {
@@ -149,7 +149,7 @@ class MentalController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/delete', name: 'app_mental_delete', methods: ['POST'])]
+    #[Route('/{id}/delete', name: 'app_mental_delete', requirements: ['id' => '\\d+'], methods: ['POST'])]
     public function delete(Request $request, QuizMental $quiz, EntityManagerInterface $entityManager): Response
     {
         if ($quiz->getUtilisateur() !== $this->getUser()) {

@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\SeanceSport;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -61,6 +62,18 @@ class SeanceSportType extends AbstractType
                     new NotBlank(['message' => 'La duree est requise.']),
                     new Range(['min' => 5, 'notInRangeMessage' => 'La duree doit être au moins {{ min }} minutes.']),
                 ],
+            ])
+            // ✅ Champ ajouté
+            ->add('medailleObtenue', ChoiceType::class, [
+                'label' => 'Médaille',
+                'required' => false,
+                'placeholder' => '-- Aucune médaille --',
+                'choices' => [
+                    'Or' => 'or',
+                    'Argent' => 'argent',
+                    'Bronze' => 'bronze',
+                ],
+                'attr' => ['class' => 'form-control'],
             ]);
     }
 

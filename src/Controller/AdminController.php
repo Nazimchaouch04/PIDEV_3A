@@ -34,6 +34,7 @@ class AdminController extends AbstractController
     }
 
     #[Route('/admin-users', name: 'app_admin_users')]
+    #[Route('/admin/users', name: 'app_admin_users_slash')]
     public function listUsers(UtilisateurRepository $userRepo, Request $request): Response
     {
         // Récupération des paramètres de recherche et tri depuis la requête

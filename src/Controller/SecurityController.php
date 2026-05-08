@@ -68,6 +68,17 @@ class SecurityController extends AbstractController
         ]);
     }
 
+    // ✅ AJOUT — Redirection selon le rôle après login
+    #[Route('/redirect-after-login', name: 'app_redirect_after_login')]
+    public function redirectAfterLogin(): Response
+    {
+        if ($this->isGranted('ROLE_COACH')) {
+            return $this->redirectToRoute('app_seance_sport_stats');
+        }
+
+        return $this->redirectToRoute('app_exercice');
+    }
+
     #[Route('/logout', name: 'app_logout')]
     public function logout(): void
     {

@@ -205,7 +205,7 @@
             </div>
 
             <p id="faceid-status" class="faceid-status">Positionnez votre visage dans le cercle</p>
-            <button id="faceid-capture-btn" class="modern-btn-gradient" style="width:100%;margin-top:10px;">📸 Capturer</button>
+            <button id="faceid-capture-btn" class="modern-btn-gradient" style="width:100%;margin-top:10px;cursor:pointer;" type="button">📸 Capturer</button>
         </div>
 
         {# ─ Success ─ #}
@@ -453,11 +453,20 @@
 
     // ─ Start camera ─
     async function startCamera() {
+        captureBtn.disabled = true;
+        statusMsg.textContent = '📷 Accès à la caméra...';
         try {
             stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 640, height: 640 } });
             video.srcObject = stream;
+            // Attendre que la vidéo soit prête
+            video.onloadedmetadata = () => {
+                video.play();
+                captureBtn.disabled = false;
+                statusMsg.textContent = '✅ Caméra prête. Positionnez votre visage dans le cercle.';
+            };
         } catch (err) {
-            statusMsg.textContent = '❌ Impossible d\'accéder à la caméra. Vérifiez les permissions.';
+            console.error('Camera error:', err);
+            statusMsg.textContent = '❌ Impossible d\'accéder à la caméra. Vérifiez les permissions navigateur.';
             captureBtn.disabled = true;
         }
     }

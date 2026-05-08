@@ -4,16 +4,16 @@ namespace App\Enum;
 
 enum Intensite: string
 {
-    case FAIBLE = 'faible';
-    case MODEREE = 'moderee';
-    case ELEVEE = 'elevee';
+    case FAIBLE  = 'Faible';
+    case MODEREE = 'Moyenne';
+    case ELEVEE  = 'Élevée';
 
     public function label(): string
     {
         return match($this) {
-            self::FAIBLE => 'Faible',
-            self::MODEREE => 'Moderee',
-            self::ELEVEE => 'Elevee',
+            self::FAIBLE  => 'Faible',
+            self::MODEREE => 'Moyenne',
+            self::ELEVEE  => 'Élevée',
         };
     }
 }

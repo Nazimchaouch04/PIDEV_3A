@@ -1,0 +1,103 @@
+{% extends 'base_back.html.twig' %}
+
+{% block title %}Admin - Détail Séance{% endblock %}
+
+{% block body %}
+<div class="page-header flex-between">
+    <div>
+        <h1 class="page-title">{{ seance_sport.nomSeance }}</h1>
+        <p class="page-subtitle">Détails complets de la séance.</p>
+    </div>
+    <div style="display:flex; gap:10px;">
+        <a href="{{ path('app_seance_sport_edit', {id: seance_sport.id}) }}" class="btn btn-secondary">✏️ Modifier</a>
+        <a href="{{ path('app_seance_sport_index') }}" class="btn">← Retour</a>
+    </div>
+</div>
+
+<div class="grid grid-cols-3 gap-4 mb-6">
+    <div class="stat-card">
+        <div class="stat-card-label">Utilisateur</div>
+        <div class="stat-card-value">{{ seance_sport.utilisateur ? seance_sport.utilisateur.email : '-' }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card-label">Date</div>
+        <div class="stat-card-value">{{ seance_sport.dateSeance|date('d/m/Y') }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card-label">Heure</div>
+        <div class="stat-card-value">{{ seance_sport.heureDebut|date('H:i') }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card-label">Durée</div>
+        <div class="stat-card-value">{{ seance_sport.dureeMinutes }} min</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card-label">Médaille</div>
+        <div class="stat-card-value">
+            {% if seance_sport.medailleObtenue %}
+                <span class="badge badge-warning">{{ seance_sport.medailleObtenue }}</span>
+            {% else %}
+                <span class="text-gray">Aucune</span>
+            {% endif %}
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card-label">Calories brûlées</div>
+        <div class="stat-card-value">{{ seance_sport.totalCaloriesBrulees|number_format(1) }} kcal</div>
+    </div>
+</div>
+
+{# Exercices #}
+<div class="card mb-4">
+    <div class="card-header">
+        <h4 class="card-title">Exercices ({{ seance_sport.exercices|length }})</h4>
+    </div>
+    {% if seance_sport.exercices|length > 0 %}
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Nom</th>
+                    <th>Calories/min</th>
+                    <th>Groupe musculaire</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for exercice in seance_sport.exercices %}
+                <tr>
+                    <td>{{ exercice.nomExercice }}</td>
+                    <td>{{ exercice.caloriesParMinute }}</td>
+                    <td>{{ exercice.groupeMusculaire ?? '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p class="text-gray">Aucun exercice associé.</p>
+    </div>
+    {% endif %}
+</div>
+
+{# Supprimer #}
+<div class="card" style="border:1px solid #ffcccc;">
+    <div class="card-header" style="background:#fff3f3;">
+        <h4 class="card-title" style="color:#dc3545;">Zone de danger</h4>
+    </div>
+    <div style="padding:20px;">
+        <form method="post" action="{{ path('app_seance_sport_delete', {id: seance_sport.id}) }}" id="delete-form-{{ seance_sport.id }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ seance_sport.id) }}">
+            <button type="button" class="btn" style="background:#dc3545; color:white;" onclick="confirmDelete('delete-form-{{ seance_sport.id }}')">
+                🗑 Supprimer la séance
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+function confirmDelete(formId) {
+    if (confirm('Supprimer cette séance définitivement ?')) document.getElementById(formId).submit();
+}
+</script>
+{% endblock %}

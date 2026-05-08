@@ -1,0 +1,214 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">{{ title }}</h3>
+                    </div>
+                    <div class="card-body">
+                        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+                            
+                            <div class="form-group mb-3">
+                                <label class="form-label">Nom du Groupe</label>
+                                {{ form_widget(form.nomGroupe, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.nomGroupe) }}
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label class="form-label">Thématique</label>
+                                {{ form_widget(form.thematique, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.thematique) }}
+                            </div>
+
+                            <!-- AI IMAGE GENERATION SECTION -->
+                            <div class="form-group mb-3">
+                                <label class="form-label">Image du Groupe</label>
+                                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                                    {{ form_widget(form.image, {'attr': {'class': 'form-control', 'placeholder': 'Collez une URL ou générez avec l\'IA'}}) }}
+                                    <button type="button" id="btn-ai-image" class="btn btn-success" style="white-space: nowrap;">
+                                        🎨 Générer Image IA
+                                    </button>
+                                </div>
+                                
+                                <!-- Image Preview Area -->
+                                <div id="ai-image-preview" style="display: none; margin-top: 15px; text-align: center; border: 2px dashed #10b981; padding: 10px; border-radius: 8px;">
+                                    <p style="font-size: 12px; color: #059669; font-weight: bold; margin-bottom: 8px;">✨ Image générée avec succès !</p>
+                                    <img id="preview-img-tag" src="" style="width: 100%; height: 250px; object-fit: cover; border-radius: 6px;">
+                                </div>
+                                <small id="image-loader" style="display: none; color: #10b981; font-weight: bold;">🎨 BioSync IA dessine votre image (environ 15-20s)...</small>
+                                {{ form_errors(form.image) }}
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label class="form-label">Capacité Maximale</label>
+                                {{ form_widget(form.capaciteMax, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.capaciteMax) }}
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label class="form-label">Description</label>
+                                <div style="display: flex; gap: 10px; margin-bottom: 5px; align-items: flex-start;">
+                                    <div style="flex: 1;">
+                                        {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 4}}) }}
+                                    </div>
+                                    <button type="button" id="btn-ai-generate" class="btn btn-primary" style="white-space: nowrap;">
+                                        ✨ Texte IA
+                                    </button>
+                                </div>
+                                <small id="ai-loader" style="display: none; color: #0d6efd; font-weight: bold;">🧬 Rédaction en cours...</small>
+                                {{ form_errors(form.description) }}
+                            </div>
+
+                            <div style="margin-top: 24px;">
+                                <button type="submit" class="btn btn-primary">Créer la Communauté</button>
+                                <a href="{{ path('app_community') }}" class="btn btn-secondary">Annuler</a>
+                            </div>
+
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const aiTextBtn = document.getElementById('btn-ai-generate');
+    const aiImgBtn = document.getElementById('btn-ai-image');
+    
+    // --- TEXT GENERATION LOGIC ---
+    aiTextBtn.addEventListener('click', async function() {
+        const nameInput = document.getElementById('{{ form.nomGroupe.vars.id }}');
+        const themeInput = document.getElementById('{{ form.thematique.vars.id }}');
+        const descField = document.getElementById('{{ form.description.vars.id }}');
+        const loader = document.getElementById('ai-loader');
+
+        if (!nameInput.value || !themeInput.value) {
+            alert('Veuillez remplir le Nom et la Thématique !'); return;
+        }
+
+        loader.style.display = 'block';
+        loader.textContent = '🧬 Génération en cours...';
+        this.disabled = true;
+
+        try {
+            const response = await fetch('/admin/community/ai/generate-description', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: nameInput.value, theme: themeInput.value })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Erreur réseau');
+            }
+            
+            const data = await response.json();
+            
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            
+            if (data.description && data.description.length > 20) {
+                descField.value = data.description;
+                loader.textContent = '✨ Description générée !';
+                setTimeout(() => { loader.style.display = 'none'; }, 1000);
+            } else {
+                throw new Error('Description trop courte');
+            }
+        } catch (e) {
+            alert('Erreur: ' + e.message);
+            loader.style.display = 'none';
+        } finally {
+            this.disabled = false;
+        }
+    });
+
+    // --- IMAGE GENERATION LOGIC ---
+    aiImgBtn.addEventListener('click', async function() {
+        const themeInput = document.getElementById('{{ form.thematique.vars.id }}');
+        const urlField = document.getElementById('{{ form.image.vars.id }}');
+        const loader = document.getElementById('image-loader');
+        const previewDiv = document.getElementById('ai-image-preview');
+        const previewImg = document.getElementById('preview-img-tag');
+
+        if (!themeInput.value) {
+            alert('Veuillez saisir une thématique d\'abord !'); return;
+        }
+
+        loader.style.display = 'block';
+        previewDiv.style.display = 'none';
+        this.disabled = true;
+        this.innerText = "⏳ Génération...";
+
+        try {
+            const response = await fetch('/admin/community/ai/generate-image', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ theme: themeInput.value })
+            });
+
+            if (!response.ok) {
+                throw new Error('Erreur réseau ou modèle indisponible');
+            }
+
+            const data = await response.json();
+
+            if (data.image) {
+                const isTextPlaceholder = data.image.includes('🧘') || 
+                                           data.image.includes('💪') ||
+                                           data.image.includes('🥗') ||
+                                           data.image.includes('🧠') ||
+                                           data.image.includes('🌟');
+                
+                if (isTextPlaceholder) {
+                    previewDiv.style.display = 'block';
+                    previewDiv.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                    previewDiv.style.color = 'white';
+                    previewDiv.style.alignItems = 'center';
+                    previewDiv.style.justifyContent = 'center';
+                    previewDiv.style.fontSize = '24px';
+                    previewDiv.style.fontWeight = 'bold';
+                    previewDiv.style.textAlign = 'center';
+                    previewDiv.style.padding = '20px';
+                    previewDiv.innerHTML = data.image;
+                    urlField.value = ''; 
+                } else {
+                    // Handle both Unsplash URLs and AI-generated base64 images
+                    if (data.image.startsWith('http')) {
+                        urlField.value = data.image;
+                        previewImg.src = data.image;
+                        previewDiv.style.display = 'block';
+                        previewDiv.style.background = '';
+                    } else {
+                        const base64String = 'data:image/png;base64,' + data.image;
+                        urlField.value = base64String;
+                        previewImg.src = base64String;
+                        previewDiv.style.display = 'block';
+                        previewDiv.style.background = '';
+                    }
+                }
+                loader.style.display = 'none';
+                this.innerText = "🎨 Générer Image IA";
+            } else {
+                throw new Error(data.error || 'Échec de la génération');
+            }
+        } catch (e) {
+            alert('Erreur: ' + e.message + '\nConseil: Essayez avec une autre thématique ou réessayez plus tard.');
+        } finally {
+            this.disabled = false;
+            if (loader.style.display !== 'none') {
+                loader.style.display = 'none';
+                this.innerText = "🎨 Générer Image IA";
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

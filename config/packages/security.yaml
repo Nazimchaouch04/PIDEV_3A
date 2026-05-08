@@ -20,6 +20,8 @@ security:
                 login_path: app_login
                 check_path: app_login
                 enable_csrf: true
+                default_target_path: /redirect-after-login
+                always_use_default_target_path: true
             logout:
                 path: app_logout
                 target: app_landing
@@ -35,12 +37,13 @@ security:
         - { path: ^/forgot-password, roles: PUBLIC_ACCESS }
         - { path: ^/reset-password, roles: PUBLIC_ACCESS }
         - { path: ^/certification, roles: PUBLIC_ACCESS }
-        # Face ID routes callable from the login page (before authentication)
         - { path: ^/api/face/status, roles: PUBLIC_ACCESS }
         - { path: ^/api/face/generate-embedding, roles: PUBLIC_ACCESS }
         - { path: ^/api/face/register-face, roles: PUBLIC_ACCESS }
         - { path: ^/api/face/login, roles: PUBLIC_ACCESS }
+        - { path: ^/redirect-after-login, roles: ROLE_USER }
         - { path: ^/, roles: ROLE_USER }
+        - { path: ^/admin/community/ai, roles: ROLE_ADMIN }
 
 when@test:
     security:

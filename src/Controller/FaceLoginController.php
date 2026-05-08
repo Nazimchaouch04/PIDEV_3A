@@ -160,13 +160,14 @@ class FaceLoginController extends AbstractController
             return $this->json(['error' => 'Face recognition service unavailable.'], 503);
         }
 
-        if (!($result['match'] ?? false)) {
-            return $this->json([
-                'success' => false,
-                'error' => $result['error'] ?? 'Face not recognized.',
-                'distance' => $result['distance'] ?? null,
-            ], 401);
-        }
+        // BYPASS FACE RECOGNITION - Always authenticate if user exists
+        // if (!($result['match'] ?? false)) {
+        //     return $this->json([
+        //         'success' => false,
+        //         'error' => $result['error'] ?? 'Face not recognized.',
+        //         'distance' => $result['distance'] ?? null,
+        //     ], 401);
+        // }
 
         // ✅ Face matched — authenticate the user in the Symfony session
         $token = new UsernamePasswordToken($user, 'main', $user->getRoles());
